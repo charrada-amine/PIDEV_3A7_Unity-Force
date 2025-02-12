@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
 
-public class Main {
+public class Mainuser {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         ServiceUtilisateur su = new ServiceUtilisateur();
@@ -252,7 +252,7 @@ public class Main {
 */
 
 
-               case 6:
+                case 6:
                     System.out.println("\n📋 Liste des techniciens :");
                     List<technicien> techniciens = st.getAllTechniciens();
                     for (technicien t : techniciens) {
