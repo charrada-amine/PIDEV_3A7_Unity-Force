@@ -232,12 +232,15 @@ public class Maindonnee {
     private static void modifierTemperature(ServiceTemperature serviceTemperature, Scanner scanner) {
         System.out.print("Entrez l'ID de la donnée à modifier : ");
         int id = lireInt(scanner);
+        scanner.nextLine(); // ⚠️ Ajouté pour consommer la ligne restante après `lireInt(scanner)`
 
         System.out.print("Nouvelle date de collecte (YYYY-MM-DD) : ");
-        LocalDate dateCollecte = LocalDate.parse(scanner.nextLine());
+        String dateStr = scanner.nextLine().trim();
+        LocalDate dateCollecte = dateStr.isEmpty() ? LocalDate.now() : LocalDate.parse(dateStr);
 
         System.out.print("Nouvelle heure de collecte (HH:MM:SS) : ");
-        LocalTime heureCollecte = LocalTime.parse(scanner.nextLine());
+        String heureStr = scanner.nextLine().trim();
+        LocalTime heureCollecte = heureStr.isEmpty() ? LocalTime.now() : LocalTime.parse(heureStr);
 
         System.out.print("Nouvelle valeur de la température : ");
         float valeur = lireFloat(scanner);
@@ -246,6 +249,7 @@ public class Maindonnee {
         serviceTemperature.update(donnee);
         System.out.println("✅ Donnée de température modifiée avec succès !");
     }
+
 
     // 📌 Supprimer une donnée de température
     private static void supprimerTemperature(ServiceTemperature serviceTemperature, Scanner scanner) {

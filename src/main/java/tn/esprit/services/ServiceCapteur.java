@@ -49,7 +49,7 @@ public class ServiceCapteur {
 
             while (resultSet.next()) {
                 Capteur capteur = new Capteur(
-                        resultSet.getInt("id"),
+                        resultSet.getInt("id_capteur"),
                         TypeCapteur.valueOf(resultSet.getString("type")), // Utiliser valueOf pour convertir la chaîne en énumération
                         // Conversion de java.sql.Date en LocalDate
                         resultSet.getDate("dateinstallation").toLocalDate(),
@@ -66,7 +66,7 @@ public class ServiceCapteur {
 
     // 🔹 Supprimer un capteur par son ID
     public void delete(int id) {
-        String query = "DELETE FROM capteur WHERE id = ?";
+        String query = "DELETE FROM capteur WHERE id_capteur = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, id);  // On définit l'ID à supprimer dans la requête
@@ -84,7 +84,7 @@ public class ServiceCapteur {
 
     // 🔹 Mettre à jour un capteur par son ID
     public void update(Capteur capteur) {
-        String query = "UPDATE capteur SET type = ?, etat = ?, dateinstallation = ?, lampadaireid = ? WHERE id = ?";
+        String query = "UPDATE capteur SET type = ?, etat = ?, dateinstallation = ?, lampadaireid = ? WHERE id_capteur = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, capteur.getType().name()); // Utiliser name() pour obtenir la chaîne de caractères de l'énumération

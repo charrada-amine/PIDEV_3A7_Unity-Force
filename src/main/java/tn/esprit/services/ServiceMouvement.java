@@ -41,7 +41,7 @@ public class ServiceMouvement {
 
             while (resultSet.next()) {
                 DonneeMouvement donnee = new DonneeMouvement(
-                        resultSet.getInt("id"),
+                        resultSet.getInt("id_mouvement"),
                         resultSet.getDate("datecollecte").toLocalDate(),
                         resultSet.getTime("heurecollecte").toLocalTime(),
                         resultSet.getInt("capteurid"),
@@ -56,7 +56,7 @@ public class ServiceMouvement {
     }
     // ✅ Supprimer une donnée par ID
     public void delete(int id) {
-        String query = "DELETE FROM donneemouvement WHERE id = ?";
+        String query = "DELETE FROM donneemouvement WHERE id_mouvement = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, id);
@@ -74,7 +74,7 @@ public class ServiceMouvement {
 
     // ✅ Mettre à jour une donnée par ID
     public void update(DonneeMouvement donnee) {
-        String query = "UPDATE donneemouvement SET datecollecte = ?, heurecollecte = ?, capteurid = ?, valeur = ? WHERE id = ?";
+        String query = "UPDATE donneemouvement SET datecollecte = ?, heurecollecte = ?, capteurid = ?, valeur = ? WHERE id_mouvement = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setDate(1, Date.valueOf(donnee.getDateCollecte()));

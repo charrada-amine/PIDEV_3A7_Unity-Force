@@ -3,7 +3,7 @@ package tn.esprit.models;
 import java.time.LocalDate;
 
 public class Capteur {
-    private int id;
+    private int id_capteur;
     private TypeCapteur type;  // Utilisation de l'énumération TypeCapteur
     private LocalDate dateinstallation;
     private EtatCapteur etat;  // Utilisation de l'énumération EtatCapteur
@@ -11,7 +11,7 @@ public class Capteur {
 
     // Constructeur
     public Capteur(int id, TypeCapteur type, LocalDate dateinstallation, EtatCapteur etat, int lampadaireId) {
-        this.id = id;
+        this.id_capteur = id;
         this.type = type;
         this.dateinstallation = dateinstallation;
         this.etat = etat;
@@ -20,11 +20,11 @@ public class Capteur {
 
     // Getters et Setters
     public int getId() {
-        return id;
+        return id_capteur;
     }
 
     public void setId(int id) {
-        this.id = id;
+        this.id_capteur = id;
     }
 
     public TypeCapteur getType() {

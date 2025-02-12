@@ -41,7 +41,7 @@ public class ServiceTemperature {
 
             while (resultSet.next()) {
                 DonneeTemperature donnee = new DonneeTemperature(
-                        resultSet.getInt("id"),
+                        resultSet.getInt("id_temperature"),
                         resultSet.getDate("datecollecte").toLocalDate(),
                         resultSet.getTime("heurecollecte").toLocalTime(),
                         resultSet.getInt("capteurid"),
@@ -55,7 +55,7 @@ public class ServiceTemperature {
         return donnees;
     }
     public void delete(int id) {
-        String query = "DELETE FROM donneetempérature WHERE id = ?";
+        String query = "DELETE FROM donneetemperature WHERE id_temperature = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, id);
             int rowsAffected = statement.executeUpdate();
@@ -69,7 +69,7 @@ public class ServiceTemperature {
         }
     }
     public void update(DonneeTemperature donnee) {
-        String query = "UPDATE donneetempérature SET datecollecte = ?, heurecollecte = ?, capteurid = ?, temperature = ? WHERE id = ?";
+        String query = "UPDATE donneetemperature SET datecollecte = ?, heurecollecte = ?, capteurid = ?, valeur = ? WHERE id_temperature = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setDate(1, Date.valueOf(donnee.getDateCollecte()));
             statement.setTime(2, Time.valueOf(donnee.getHeureCollecte()));

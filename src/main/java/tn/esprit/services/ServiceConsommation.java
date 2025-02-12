@@ -43,7 +43,7 @@ public class ServiceConsommation {
 
             while (resultSet.next()) {
                 DonneeConsommation donnee = new DonneeConsommation(
-                        resultSet.getInt("id"),
+                        resultSet.getInt("id_consommation"),
                         resultSet.getDate("datecollecte").toLocalDate(), // Conversion en LocalDate
                         resultSet.getTime("heurecollecte").toLocalTime(), // Conversion en LocalTime
                         resultSet.getInt("capteurid"),
@@ -59,7 +59,7 @@ public class ServiceConsommation {
 
     // 🔹 Supprimer une donnée par son ID
     public void delete(int id) {
-        String query = "DELETE FROM donneeconsommation WHERE id = ?";
+        String query = "DELETE FROM donneeconsommation WHERE id_consommation = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, id);
@@ -77,7 +77,7 @@ public class ServiceConsommation {
 
     // 🔹 Mettre à jour une donnée de consommation
     public void update(DonneeConsommation donnee) {
-        String query = "UPDATE donneeconsommation SET datecollecte = ?, heurecollecte = ?, capteurid = ?, valeur = ? WHERE id = ?";
+        String query = "UPDATE donneeconsommation SET datecollecte = ?, heurecollecte = ?, capteurid = ?, valeur = ? WHERE id_consommation = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setDate(1, Date.valueOf(donnee.getDateCollecte()));

@@ -41,7 +41,7 @@ public class ServiceLuminosite {
 
             while (resultSet.next()) {
                 DonneeLuminosite donnee = new DonneeLuminosite(
-                        resultSet.getInt("id"),
+                        resultSet.getInt("id_luminosite"),
                         resultSet.getDate("datecollecte").toLocalDate(),
                         resultSet.getTime("heurecollecte").toLocalTime(),
                         resultSet.getInt("capteurid"),
@@ -56,7 +56,7 @@ public class ServiceLuminosite {
     }
 
     public void delete(int id) {
-        String query = "DELETE FROM donneeluminosite WHERE id = ?";
+        String query = "DELETE FROM donneeluminosite WHERE id_luminosite = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, id);
@@ -73,7 +73,7 @@ public class ServiceLuminosite {
     }
 
     public void update(DonneeLuminosite donnee) {
-        String query = "UPDATE donneeluminosite SET datecollecte = ?, heurecollecte = ?, capteurid = ?, valeur = ? WHERE id = ?";
+        String query = "UPDATE donneeluminosite SET datecollecte = ?, heurecollecte = ?, capteurid = ?, valeur = ? WHERE id_luminosite = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setDate(1, Date.valueOf(donnee.getDateCollecte()));
