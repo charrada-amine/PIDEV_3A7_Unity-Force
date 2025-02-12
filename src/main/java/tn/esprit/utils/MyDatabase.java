@@ -6,6 +6,7 @@ import java.sql.SQLException;
 
 public class MyDatabase {
     private static MyDatabase instance;
+<<<<<<< HEAD
     private Connection cnx;
 
     private final String URL = "jdbc:mysql://localhost:3306/projetpi_3a";
@@ -25,12 +26,33 @@ public class MyDatabase {
         if (instance == null) {
             instance = new MyDatabase();
         }
+=======
+    private final String URL ="jdbc:mysql://127.0.0.1:3306/noorcity";
+    private final String USERNAME ="root";
+    private final String PASSWORD = "";
+    private Connection  cnx ;
+
+    public MyDatabase() {
+        try {
+            cnx = DriverManager.getConnection(URL,USERNAME,PASSWORD);
+            System.out.println("connected ...");
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+
+    public static MyDatabase getInstance() {
+        if (instance == null)
+            instance = new MyDatabase();
+>>>>>>> a3c932b0e96e26782012e7d55e0b3688bdf4452d
         return instance;
     }
 
     public Connection getCnx() {
         return cnx;
     }
+<<<<<<< HEAD
 
     public void closeConnection() {
         try {
@@ -44,3 +66,6 @@ public class MyDatabase {
     }
 }
 
+=======
+}
+>>>>>>> a3c932b0e96e26782012e7d55e0b3688bdf4452d

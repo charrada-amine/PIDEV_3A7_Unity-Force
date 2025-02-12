@@ -1,19 +1,15 @@
 package tn.esprit.test;
 
 import tn.esprit.models.Capteur;
-<<<<<<< HEAD
-=======
 import tn.esprit.models.Capteur.TypeCapteur; // Importer les énumérations
 import tn.esprit.models.Capteur.EtatCapteur; // Importer les énumérations
->>>>>>> a3c932b0e96e26782012e7d55e0b3688bdf4452d
 import tn.esprit.services.ServiceCapteur;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Scanner;
 
-public class Maincapteur {
-
+public class Main {
     public static void main(String[] args) {
         ServiceCapteur serviceCapteur = new ServiceCapteur();
         Scanner scanner = new Scanner(System.in);
@@ -66,8 +62,8 @@ public class Maincapteur {
         LocalDate dateinstallation = LocalDate.now(); // Date d'installation par défaut
 
         try {
-            Capteur.TypeCapteur type = Capteur.TypeCapteur.valueOf(typeInput); // Conversion en énumération
-            Capteur.EtatCapteur etat = Capteur.EtatCapteur.valueOf(etatInput); // Conversion en énumération
+            TypeCapteur type = TypeCapteur.valueOf(typeInput); // Conversion en énumération
+            EtatCapteur etat = EtatCapteur.valueOf(etatInput); // Conversion en énumération
             Capteur capteur = new Capteur(0, type, dateinstallation, etat, lampadaireId);
             serviceCapteur.add(capteur);
             System.out.println("✅ Capteur ajouté avec succès !");
@@ -112,8 +108,8 @@ public class Maincapteur {
         LocalDate dateinstallation = LocalDate.now(); // Date d'installation par défaut
 
         try {
-            Capteur.TypeCapteur type = Capteur.TypeCapteur.valueOf(typeInput);
-            Capteur.EtatCapteur etat = Capteur.EtatCapteur.valueOf(etatInput);
+            TypeCapteur type = TypeCapteur.valueOf(typeInput);
+            EtatCapteur etat = EtatCapteur.valueOf(etatInput);
             Capteur capteur = new Capteur(id, type, dateinstallation, etat, lampadaireId);
             serviceCapteur.update(capteur);
             System.out.println("✅ Capteur mis à jour avec succès !");

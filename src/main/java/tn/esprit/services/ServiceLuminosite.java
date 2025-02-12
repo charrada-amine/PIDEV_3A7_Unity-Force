@@ -1,8 +1,13 @@
 package tn.esprit.services;
 
+<<<<<<< HEAD
 import tn.esprit.utils.MyDatabase2;
 import tn.esprit.models.DonneeLuminosite;
 import tn.esprit.utils.MyDatabase2;
+=======
+import tn.esprit.utils.MyDatabase;
+import tn.esprit.models.DonneeLuminosite;
+>>>>>>> a3c932b0e96e26782012e7d55e0b3688bdf4452d
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -14,7 +19,11 @@ public class ServiceLuminosite {
     private Connection connection;
 
     public ServiceLuminosite() {
+<<<<<<< HEAD
         this.connection = new MyDatabase2().getCnx();
+=======
+        this.connection = new MyDatabase().getCnx();
+>>>>>>> a3c932b0e96e26782012e7d55e0b3688bdf4452d
     }
 
     public void add(DonneeLuminosite donnee) {
