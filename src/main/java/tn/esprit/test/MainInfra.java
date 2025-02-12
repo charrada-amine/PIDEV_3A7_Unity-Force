@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 
-public class Main1 {
+public class MainInfra {
 
     public static void main(String[] args) {
         ServiceLampadaire serviceLamp = new ServiceLampadaire();
