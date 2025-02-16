@@ -23,6 +23,9 @@ public class Lampadaire {
         this.idZone.set(id_zone);
     }
 
+    public Lampadaire(String text, float v, EtatLampadaire value, LocalDate value1, int i) {
+    }
+
     // Enum avec gestion des anciennes valeurs
     public enum EtatLampadaire {
         ACTIF("actif", "allume"),

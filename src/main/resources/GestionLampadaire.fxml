@@ -5,58 +5,58 @@
 <?import javafx.scene.text.*?>
 <?import javafx.geometry.Insets?>
 
-<BorderPane xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.GestionLampadaireController">
+<BorderPane xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.esprit.controllers.GestionLampadaireController">
     <padding>
         <Insets top="10" right="10" bottom="10" left="10"/>
     </padding>
 
     <top>
-        <GridPane vgap="10" hgap="10">
-            <padding><Insets bottom="10"/></padding>
+        <VBox spacing="20">
+            <Label text="Gestion des Lampadaires" style="-fx-font-size: 24; -fx-font-weight: bold;"/>
 
-            <Label text="Gestion des Lampadaires" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="3">
-                <font>
-                    <Font size="18"/>
-                </font>
-            </Label>
+            <GridPane vgap="10" hgap="15" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8;">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="100" prefWidth="120"/>
+                    <ColumnConstraints minWidth="200" prefWidth="250"/>
+                </columnConstraints>
 
+                <Label text="Type:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                <TextField fx:id="tfType" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
 
-            <!-- Input Fields -->
-            <Label text="Type:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-            <TextField fx:id="tfType" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                <Label text="Puissance:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                <TextField fx:id="tfPuissance" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
 
-            <Label text="Puissance:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-            <TextField fx:id="tfPuissance" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                <Label text="État:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                <ComboBox fx:id="cbEtat" GridPane.columnIndex="1" GridPane.rowIndex="2" maxWidth="Infinity"/>
 
-            <Label text="État:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-            <ComboBox fx:id="cbEtat" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                <Label text="Date Installation:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                <DatePicker fx:id="dpDateInstallation" GridPane.columnIndex="1" GridPane.rowIndex="3" maxWidth="Infinity"/>
 
-            <Label text="Date Installation:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
-            <DatePicker fx:id="dpDateInstallation" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                <Label text="ID Zone:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                <TextField fx:id="tfIdZone" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
 
-            <Label text="ID Zone:" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
-            <TextField fx:id="tfIdZone" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
-
-            <!-- Buttons -->
-            <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="6">
-                <Button text="Ajouter" onAction="#handleAdd" style="-fx-base: #4CAF50;"/>
-                <Button text="Modifier" onAction="#handleUpdate" style="-fx-base: #2196F3;"/>
-                <Button text="Supprimer" onAction="#handleDelete" style="-fx-base: #f44336;"/>
-                <Button text="Vider" onAction="#handleClear"/>
-            </HBox>
-        </GridPane>
+                <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                    <Button text="Ajouter" onAction="#handleAdd"
+                            style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
+                    <Button text="Modifier" onAction="#handleUpdate"
+                            style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>
+                    <Button text="Supprimer" onAction="#handleDelete"
+                            style="-fx-background-color: #f44336; -fx-text-fill: white;"/>
+                    <Button text="Vider" onAction="#handleClear"
+                            style="-fx-background-color: #9e9e9e; -fx-text-fill: white;"/>
+                </HBox>
+            </GridPane>
+        </VBox>
     </top>
 
     <center>
-        <TableView fx:id="tableView" BorderPane.alignment="CENTER">
-            <columns>
-                <TableColumn text="ID" prefWidth="50" fx:id="colId"/>
-                <TableColumn text="Type" prefWidth="150" fx:id="colType"/>
-                <TableColumn text="Puissance" prefWidth="100" fx:id="colPuissance"/>
-                <TableColumn text="État" prefWidth="100" fx:id="colEtat"/>
-                <TableColumn text="Date Installation" prefWidth="150" fx:id="colDate"/>
-                <TableColumn text="ID Zone" prefWidth="80" fx:id="colZone"/>
-            </columns>
-        </TableView>
+        <ScrollPane fx:id="scrollPane" fitToWidth="true" style="-fx-background: transparent;">
+            <FlowPane fx:id="cardContainer" hgap="20" vgap="20">
+                <padding>
+                    <Insets top="20" right="20" bottom="20" left="20"/>
+                </padding>
+            </FlowPane>
+        </ScrollPane>
     </center>
 </BorderPane>
