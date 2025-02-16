@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.esprit.controllers.GestionReclamationController">
+
+    <padding>
+        <Insets top="10" right="10" bottom="10" left="10"/>
+    </padding>
+
+    <top>
+        <VBox spacing="20">
+            <Label text="Gestion des Réclamations" style="-fx-font-size: 24; -fx-font-weight: bold;"/>
+
+            <GridPane vgap="10" hgap="15" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8;">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="100" prefWidth="120"/>
+                    <ColumnConstraints minWidth="200" prefWidth="250"/>
+                </columnConstraints>
+
+                <!-- Formulaire Réclamation -->
+                <Label text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                <TextField fx:id="descriptionField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                <Label text="Date Réclamation:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                <DatePicker fx:id="datePicker" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                <Label text="Heure:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                <TextField fx:id="heureField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                <Label text="Statut:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                <ComboBox fx:id="cbStatut" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+                <Label text="Lampadaire ID:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                <TextField fx:id="lampadaireIdField" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+
+                <Label text="Citoyen ID:" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+                <TextField fx:id="citoyenIdField" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+
+                <!-- Boutons d'action -->
+                <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                    <Button text="Ajouter" onAction="#handleAdd"
+                            style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
+                    <Button text="Modifier" onAction="#handleUpdate"
+                            style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>
+                    <Button text="Supprimer" onAction="#handleDelete"
+                            style="-fx-background-color: #f44336; -fx-text-fill: white;"/>
+                    <Button text="Vider" onAction="#handleClear"
+                            style="-fx-background-color: #9e9e9e; -fx-text-fill: white;"/>
+                    <Button text="Actualiser" onAction="#handleRefresh"
+                            style="-fx-background-color: #FF9800; -fx-text-fill: white;"/>
+                </HBox>
+            </GridPane>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fx:id="scrollPane" fitToWidth="true" style="-fx-background: transparent;">
+            <FlowPane fx:id="cardContainer" hgap="20" vgap="20">
+                <padding>
+                    <Insets top="20" right="20" bottom="20" left="20"/>
+                </padding>
+            </FlowPane>
+        </ScrollPane>
+    </center>
+</BorderPane>
