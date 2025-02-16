@@ -16,20 +16,18 @@ public class MainFx extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        // Charger l'interface utilisateur (FXML) pour la gestion des utilisateurs
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/GestionUtilisateur.fxml"));
+        FXMLLoader loader= new FXMLLoader(getClass().getResource("/GestionPersonne.fxml"));
         try {
-            // Charger le fichier FXML pour la gestion des utilisateurs
-            Parent root = loader.load();
-
-            // Créer la scène et afficher la fenêtre principale
+            Parent root =loader.load();
             Scene scene = new Scene(root);
             primaryStage.setScene(scene);
-            primaryStage.setTitle("Gestion des Utilisateurs");
+            primaryStage.setTitle("hello from the other side ");
             primaryStage.show();
 
         } catch (IOException e) {
-            System.out.println("Erreur de chargement du fichier FXML : " + e.getMessage());
+            System.out.println(e.getMessage());
         }
+
+
     }
 }
