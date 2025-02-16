@@ -5,7 +5,10 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.*;
+import javafx.geometry.Insets;
+import javafx.scene.text.Text;
+import javafx.scene.text.Font;
 import tn.esprit.models.Zone;
 import tn.esprit.services.ServiceZone;
 
@@ -19,116 +22,136 @@ public class GestionZoneController implements Initializable {
     @FXML private TextField tfSurface;
     @FXML private TextField tfNombreLampadaires;
     @FXML private TextField tfNombreCitoyens;
+    @FXML private FlowPane cardContainer;
 
-    @FXML private TableView<Zone> tableView;
-    @FXML private TableColumn<Zone, Integer> colId;
-    @FXML private TableColumn<Zone, String> colNom;
-    @FXML private TableColumn<Zone, String> colDescription;
-    @FXML private TableColumn<Zone, Float> colSurface;
-    @FXML private TableColumn<Zone, Integer> colLampadaires;
-    @FXML private TableColumn<Zone, Integer> colCitoyens;
-
+    private Zone selectedZone;
     private final ServiceZone serviceZone = new ServiceZone();
     private final ObservableList<Zone> zones = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        configureTableColumns();
-        loadData();
-        setupSelectionListener();
+        cardContainer.setHgap(20);
+        cardContainer.setVgap(20);
+        cardContainer.setPadding(new Insets(20));
+        chargerZones();
     }
 
-    private void configureTableColumns() {
-        colId.setCellValueFactory(new PropertyValueFactory<>("idZone"));
-        colNom.setCellValueFactory(new PropertyValueFactory<>("nom"));
-        colDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
-        colSurface.setCellValueFactory(new PropertyValueFactory<>("surface"));
-        colLampadaires.setCellValueFactory(new PropertyValueFactory<>("nombreLampadaires"));
-        colCitoyens.setCellValueFactory(new PropertyValueFactory<>("nombreCitoyens"));
-    }
-
-    private void loadData() {
+    private void chargerZones() {
+        cardContainer.getChildren().clear();
         zones.setAll(serviceZone.getAll());
-        tableView.setItems(zones);
+
+        for (Zone zone : zones) {
+            cardContainer.getChildren().add(creerCarteZone(zone));
+        }
     }
 
-    private void setupSelectionListener() {
-        tableView.getSelectionModel().selectedItemProperty().addListener(
-                (obs, oldSelection, newSelection) -> {
-                    if (newSelection != null) {
-                        fillForm(newSelection);
-                    }
-                });
+    private VBox creerCarteZone(Zone zone) {
+        VBox card = new VBox(10);
+        card.setPrefWidth(300);
+        card.setPadding(new Insets(15));
+        card.setStyle("-fx-background-color: white; " +
+                "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0); " +
+                "-fx-background-radius: 8; " +
+                "-fx-border-radius: 8;");
+
+        // En-tête
+        Text title = new Text("Zone #" + zone.getIdZone());
+        title.setFont(Font.font("System", 16));
+
+        // Contenu
+        VBox content = new VBox(8);
+        content.getChildren().addAll(
+                creerTexte("Nom", zone.getNom()),
+                creerTexte("Description", zone.getDescription()),
+                creerTexte("Surface", zone.getSurface() + " m²"),
+                creerTexte("Lampadaires", String.valueOf(zone.getNombreLampadaires())),
+                creerTexte("Citoyens", String.valueOf(zone.getNombreCitoyens()))
+        );
+
+        // Boutons
+        HBox buttonBox = new HBox(10);
+        Button editBtn = createStyledButton("Modifier", "#2196F3");
+        Button deleteBtn = createStyledButton("Supprimer", "#f44336");
+
+        editBtn.setOnAction(e -> {
+            selectedZone = zone;
+            remplirFormulaire(zone);
+        });
+
+        deleteBtn.setOnAction(e -> {
+            if (showConfirmation("Confirmation de suppression", "Voulez-vous vraiment supprimer cette zone ?")) {
+                serviceZone.delete(zone);
+                rafraichirInterface();
+            }
+        });
+
+        buttonBox.getChildren().addAll(editBtn, deleteBtn);
+        card.getChildren().addAll(title, new Separator(), content, buttonBox);
+
+        return card;
     }
 
-    private void fillForm(Zone zone) {
-        tfNom.setText(zone.getNom());
-        tfDescription.setText(zone.getDescription());
-        tfSurface.setText(String.valueOf(zone.getSurface()));
-        tfNombreLampadaires.setText(String.valueOf(zone.getNombreLampadaires()));
-        tfNombreCitoyens.setText(String.valueOf(zone.getNombreCitoyens()));
+    private Text creerTexte(String label, String value) {
+        return new Text(label + ": " + value);
     }
 
-    private void clearForm() {
-        tfNom.clear();
-        tfDescription.clear();
-        tfSurface.clear();
-        tfNombreLampadaires.clear();
-        tfNombreCitoyens.clear();
+    private Button createStyledButton(String text, String color) {
+        Button btn = new Button(text);
+        btn.setStyle("-fx-background-color: " + color + ";" +
+                "-fx-text-fill: white;" +
+                "-fx-background-radius: 4;");
+        return btn;
     }
 
+    // Les méthodes restantes restent identiques...
     @FXML
     private void handleAdd() {
         try {
-            Zone zone = new Zone();
-            populateZoneFromFields(zone);
-            serviceZone.add(zone);
-            loadData();
-            clearForm();
+            Zone nouvelleZone = new Zone();
+            peuplerZoneDepuisFormulaire(nouvelleZone);
+            serviceZone.add(nouvelleZone);
+            rafraichirInterface();
         } catch (Exception e) {
-            showAlert("Erreur d'ajout", e.getMessage());
+            afficherErreur("Erreur d'ajout", e.getMessage());
         }
     }
 
     @FXML
     private void handleUpdate() {
-        Zone selected = tableView.getSelectionModel().getSelectedItem();
-        if (selected != null) {
+        if (selectedZone != null) {
             try {
-                populateZoneFromFields(selected);
-                serviceZone.update(selected);
-                loadData();
+                peuplerZoneDepuisFormulaire(selectedZone);
+                serviceZone.update(selectedZone);
+                rafraichirInterface();
             } catch (Exception e) {
-                showAlert("Erreur de modification", e.getMessage());
+                afficherErreur("Erreur de modification", e.getMessage());
             }
         } else {
-            showAlert("Aucune sélection", "Veuillez sélectionner une zone");
+            afficherErreur("Aucune sélection", "Veuillez sélectionner une zone");
         }
     }
 
     @FXML
     private void handleDelete() {
-        Zone selected = tableView.getSelectionModel().getSelectedItem();
-        if (selected != null) {
+        if (selectedZone != null) {
             try {
-                serviceZone.delete(selected);
-                zones.remove(selected);
-                clearForm();
+                serviceZone.delete(selectedZone);
+                rafraichirInterface();
             } catch (Exception e) {
-                showAlert("Erreur de suppression", e.getMessage());
+                afficherErreur("Erreur de suppression", e.getMessage());
             }
         } else {
-            showAlert("Aucune sélection", "Veuillez sélectionner une zone");
+            afficherErreur("Aucune sélection", "Veuillez sélectionner une zone");
         }
     }
 
     @FXML
     private void handleClear() {
-        clearForm();
-        tableView.getSelectionModel().clearSelection();
+        viderFormulaire();
+        selectedZone = null;
     }
 
-    private void populateZoneFromFields(Zone zone) throws NumberFormatException {
+    private void peuplerZoneDepuisFormulaire(Zone zone) {
         zone.setNom(tfNom.getText());
         zone.setDescription(tfDescription.getText());
         zone.setSurface(Float.parseFloat(tfSurface.getText()));
@@ -136,9 +159,39 @@ public class GestionZoneController implements Initializable {
         zone.setNombreCitoyens(Integer.parseInt(tfNombreCitoyens.getText()));
     }
 
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
+    private void remplirFormulaire(Zone zone) {
+        tfNom.setText(zone.getNom());
+        tfDescription.setText(zone.getDescription());
+        tfSurface.setText(String.valueOf(zone.getSurface()));
+        tfNombreLampadaires.setText(String.valueOf(zone.getNombreLampadaires()));
+        tfNombreCitoyens.setText(String.valueOf(zone.getNombreCitoyens()));
+    }
+
+    private void viderFormulaire() {
+        tfNom.clear();
+        tfDescription.clear();
+        tfSurface.clear();
+        tfNombreLampadaires.clear();
+        tfNombreCitoyens.clear();
+    }
+
+    private void rafraichirInterface() {
+        chargerZones();
+        viderFormulaire();
+        selectedZone = null;
+    }
+
+    private boolean showConfirmation(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        return alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK;
+    }
+
+    private void afficherErreur(String titre, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(titre);
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();

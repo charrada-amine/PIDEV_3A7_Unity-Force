@@ -18,6 +18,7 @@ public class MainFX extends Application {
     public void start(Stage primaryStage) {
         try {
             FXMLLoader loader = new FXMLLoader(MainFX.class.getResource("/GestionLampadaire.fxml"));
+
             Parent root = loader.load();
             Scene scene = new Scene(root);
             primaryStage.setScene(scene);

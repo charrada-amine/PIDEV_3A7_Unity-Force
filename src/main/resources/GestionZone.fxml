@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.esprit.controllers.GestionZoneController" style="-fx-background-color: #F5F7FA;">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <top>
+        <VBox spacing="25">
+            <Label text="Gestion des Zones" style="-fx-font-size: 28; -fx-font-weight: 800; -fx-text-fill: #2A7FFF; -fx-font-family: 'Segoe UI';"/>
+
+            <GridPane vgap="15" hgap="20" style="-fx-background-color: white; -fx-padding: 25; -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 15, 0, 0, 5);">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="120" prefWidth="140"/>
+                    <ColumnConstraints minWidth="250" prefWidth="300"/>
+                </columnConstraints>
+
+                <!-- Champs formulaire -->
+                <Label text="Nom:" style="-fx-text-fill: #6B7280; -fx-font-weight: 600;" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                <TextField fx:id="tfNom" style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 10; -fx-font-size: 14;" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                <Label text="Description:" style="-fx-text-fill: #6B7280; -fx-font-weight: 600;" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                <TextField fx:id="tfDescription" style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 10; -fx-font-size: 14;" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                <Label text="Surface (m²):" style="-fx-text-fill: #6B7280; -fx-font-weight: 600;" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                <TextField fx:id="tfSurface" style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 10; -fx-font-size: 14;" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                <Label text="Lampadaires:" style="-fx-text-fill: #6B7280; -fx-font-weight: 600;" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                <TextField fx:id="tfNombreLampadaires" style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 10; -fx-font-size: 14;" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+                <Label text="Citoyens:" style="-fx-text-fill: #6B7280; -fx-font-weight: 600;" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                <TextField fx:id="tfNombreCitoyens" style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 10; -fx-font-size: 14;" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+
+                <!-- Boutons avec style moderne -->
+                <HBox spacing="15" GridPane.columnIndex="1" GridPane.rowIndex="5" alignment="CENTER_RIGHT">
+                    <Button text="Ajouter" onAction="#handleAdd"
+                            style="-fx-background-color: linear-gradient(to bottom right, #00C853, #00B34A);
+                                   -fx-text-fill: white;
+                                   -fx-font-weight: 700;
+                                   -fx-font-size: 14;
+                                   -fx-padding: 12 25;
+                                   -fx-background-radius: 10;
+                                   -fx-cursor: hand;
+                                   -fx-effect: dropshadow(gaussian, rgba(0,200,83,0.2), 0, 0, 2, 4);"/>
+
+                    <Button text="Modifier" onAction="#handleUpdate"
+                            style="-fx-background-color: linear-gradient(to bottom right, #2A7FFF, #1A5FCF);
+                                   -fx-text-fill: white;
+                                   -fx-font-weight: 700;
+                                   -fx-font-size: 14;
+                                   -fx-padding: 12 25;
+                                   -fx-background-radius: 10;
+                                   -fx-cursor: hand;
+                                   -fx-effect: dropshadow(gaussian, rgba(42,127,255,0.2), 0, 0, 2, 4);"/>
+
+                    <Button text="Supprimer" onAction="#handleDelete"
+                            style="-fx-background-color: linear-gradient(to bottom right, #FF5252, #FF3545);
+                                   -fx-text-fill: white;
+                                   -fx-font-weight: 700;
+                                   -fx-font-size: 14;
+                                   -fx-padding: 12 25;
+                                   -fx-background-radius: 10;
+                                   -fx-cursor: hand;
+                                   -fx-effect: dropshadow(gaussian, rgba(255,82,82,0.2), 0, 0, 2, 4);"/>
+                </HBox>
+            </GridPane>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background: transparent; -fx-border-width: 0;">
+            <FlowPane fx:id="cardContainer" hgap="25" vgap="25" style="-fx-padding: 20;">
+                <!-- Cartes dynamiques ici -->
+            </FlowPane>
+        </ScrollPane>
+    </center>
+</BorderPane>
