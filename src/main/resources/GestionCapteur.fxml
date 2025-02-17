@@ -5,6 +5,7 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -46,8 +47,12 @@
         <Button text="Modifier" onAction="#handleUpdateCapteur"/>
         <Button text="Supprimer" onAction="#handleDeleteCapteur"/>
         <Button text="Rafraîchir" onAction="#handleRefresh"/>
+        <!-- Bouton pour rediriger vers GestionCapteur.fxml -->
+        <Button text="Aller à GestionDonnee" onAction="#handleGoToGestionDonnee"/>
     </HBox>
 
-    <!-- VBox pour afficher les capteurs sous forme de cartes -->
-    <VBox fx:id="capteurCardContainer" spacing="10" alignment="TOP_CENTER"/>
+    <!-- ScrollPane pour permettre le défilement des cartes de capteurs -->
+    <ScrollPane fitToWidth="true" fitToHeight="true">
+        <VBox fx:id="capteurCardContainer" spacing="10" alignment="TOP_CENTER"/>
+    </ScrollPane>
 </VBox>

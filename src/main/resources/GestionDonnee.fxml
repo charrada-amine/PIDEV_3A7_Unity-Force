@@ -39,9 +39,12 @@
 
                 <Label text="Heure de collecte:"/>
                 <TextField fx:id="heureCollecteField" promptText="HH:MM:SS"/>
+            </HBox>
 
+            <!-- Nouveau ComboBox pour afficher les ID des capteurs -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
                 <Label text="ID du capteur:"/>
-                <TextField fx:id="capteurIdField" promptText="ID du capteur"/>
+                <ComboBox fx:id="capteurIdComboBox" promptText="Sélectionnez un ID"/>
             </HBox>
 
             <!-- Valeur avec indication dynamique -->
@@ -57,6 +60,7 @@
                 <Button text="Modifier" onAction="#handleUpdateDonnee"/>
                 <Button text="Supprimer" onAction="#handleDeleteDonnee"/>
                 <Button text="Rafraîchir" onAction="#handleRefresh"/>
+                <Button text="Aller à GestionCapteur" onAction="#handleGoToGestionCapteur"/>
             </HBox>
 
             <!-- VBox pour afficher les données sous forme de cartes -->

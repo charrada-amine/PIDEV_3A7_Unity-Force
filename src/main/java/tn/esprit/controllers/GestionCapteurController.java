@@ -4,6 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.geometry.Insets;
@@ -12,8 +13,16 @@ import tn.esprit.models.Capteur.EtatCapteur;
 import tn.esprit.models.Capteur.TypeCapteur;
 import tn.esprit.services.ServiceCapteur;
 
+import java.awt.event.ActionEvent;
 import java.net.URL;
 import java.util.ResourceBundle;
+
+
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import java.io.IOException;
 
 public class GestionCapteurController implements Initializable {
 
@@ -172,5 +181,22 @@ public class GestionCapteurController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+    public void handleGoToGestionDonnee(javafx.event.ActionEvent actionEvent) {
+        try {
+            // Charger le fichier FXML de la page GestionDonnee
+            Parent gestionDonneeParent = FXMLLoader.load(getClass().getResource("/GestionDonnee.fxml"));
+            Scene gestionDonneeScene = new Scene(gestionDonneeParent);
+
+            // Obtenir la scène actuelle et la fenêtre
+            Stage window = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+
+            // Changer la scène
+            window.setScene(gestionDonneeScene);
+            window.show();
+        } catch (IOException e) {
+            e.printStackTrace(); // Afficher l'erreur en cas de problème
+            System.err.println("Erreur lors du chargement de GestionDonnee.fxml : " + e.getMessage());
+        }
     }
 }

@@ -13,7 +13,17 @@ import tn.esprit.services.*;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
+
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import java.io.IOException;
 
 public class GestionDonneesController implements Initializable {
 
@@ -27,7 +37,7 @@ public class GestionDonneesController implements Initializable {
     private TextField heureCollecteField;
 
     @FXML
-    private TextField capteurIdField;
+    private ComboBox<Integer> capteurIdComboBox; // Nouveau ComboBox pour les ID des capteurs
 
     @FXML
     private TextField valeurField;
@@ -42,15 +52,52 @@ public class GestionDonneesController implements Initializable {
     private final ServiceTemperature serviceTemperature = new ServiceTemperature();
     private final ServiceConsommation serviceConsommation = new ServiceConsommation();
     private final ServiceLuminosite serviceLuminosite = new ServiceLuminosite();
+    private final ServiceCapteur serviceCapteur = new ServiceCapteur(); // Service pour les capteurs
+
     private final ObservableList<Donnee> donneeList = FXCollections.observableArrayList();
 
     private Donnee selectedDonnee; // Variable pour stocker la donnée sélectionnée
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        typeCapteurComboBox.getItems().addAll("Mouvement", "Température", "Consommation", "Luminosité");
+        // Ajouter les types de capteurs correspondant à l'énumération
+        typeCapteurComboBox.getItems().addAll("MOUVEMENT", "TEMPERATURE", "LUMINOSITE", "CONSOMMATION_ENERGIE");
         updateValeurIndication(); // Mise à jour initiale
         handleRefresh();
+
+        // Ajouter un écouteur pour mettre à jour les ID des capteurs lorsque le type change
+        typeCapteurComboBox.setOnAction(event -> {
+            updateValeurIndication();
+            updateCapteurIds(); // Mettre à jour les ID des capteurs
+        });
+    }
+
+    private void updateCapteurIds() {
+        String selectedType = typeCapteurComboBox.getValue();
+        if (selectedType != null) {
+            // Récupérer tous les capteurs de la base de données
+            List<Capteur> capteurs = serviceCapteur.getAll();
+
+            // Filtrer les capteurs pour ne garder que ceux du type sélectionné
+            List<Capteur> filteredCapteurs = capteurs.stream()
+                    .filter(capteur -> capteur.getType().name().equals(selectedType)) // Comparer avec le type sélectionné
+                    .collect(Collectors.toList());
+
+            // Effacer les anciens ID du ComboBox
+            capteurIdComboBox.getItems().clear();
+
+            // Ajouter les ID des capteurs filtrés au ComboBox
+            for (Capteur capteur : filteredCapteurs) {
+                capteurIdComboBox.getItems().add(capteur.getId());
+            }
+
+            // Si aucun capteur n'est trouvé, afficher un message dans le ComboBox
+            if (filteredCapteurs.isEmpty()) {
+                capteurIdComboBox.setPromptText("Aucun capteur trouvé pour ce type");
+            } else {
+                capteurIdComboBox.setPromptText("Sélectionnez un ID");
+            }
+        }
     }
 
     @FXML
@@ -58,21 +105,21 @@ public class GestionDonneesController implements Initializable {
         String type = typeCapteurComboBox.getValue();
         LocalDate date = dateCollectePicker.getValue();
         LocalTime heure = LocalTime.parse(heureCollecteField.getText());
-        int capteurId = Integer.parseInt(capteurIdField.getText());
+        int capteurId = capteurIdComboBox.getValue(); // Récupérer l'ID sélectionné dans le ComboBox
         String valeurStr = valeurField.getText();
 
         if (type != null && date != null && heure != null && !valeurStr.isEmpty()) {
             switch (type) {
-                case "Mouvement":
+                case "MOUVEMENT":
                     serviceMouvement.add(new DonneeMouvement(0, date, heure, capteurId, Boolean.parseBoolean(valeurStr)));
                     break;
-                case "Température":
+                case "TEMPERATURE":
                     serviceTemperature.add(new DonneeTemperature(0, date, heure, capteurId, Float.parseFloat(valeurStr)));
                     break;
-                case "Consommation":
+                case "CONSOMMATION_ENERGIE":
                     serviceConsommation.add(new DonneeConsommation(0, date, heure, capteurId, Float.parseFloat(valeurStr)));
                     break;
-                case "Luminosité":
+                case "LUMINOSITE":
                     serviceLuminosite.add(new DonneeLuminosite(0, date, heure, capteurId, Integer.parseInt(valeurStr)));
                     break;
             }
@@ -86,7 +133,7 @@ public class GestionDonneesController implements Initializable {
         if (selectedDonnee != null) {
             LocalDate date = dateCollectePicker.getValue();
             LocalTime heure = LocalTime.parse(heureCollecteField.getText());
-            int capteurId = Integer.parseInt(capteurIdField.getText());
+            int capteurId = capteurIdComboBox.getValue(); // Récupérer l'ID sélectionné dans le ComboBox
             String valeurStr = valeurField.getText();
 
             if (selectedDonnee instanceof DonneeMouvement) {
@@ -161,10 +208,10 @@ public class GestionDonneesController implements Initializable {
     }
 
     private String getTypeString(Donnee donnee) {
-        if (donnee instanceof DonneeMouvement) return "Mouvement";
-        if (donnee instanceof DonneeTemperature) return "Température";
-        if (donnee instanceof DonneeConsommation) return "Consommation";
-        if (donnee instanceof DonneeLuminosite) return "Luminosité";
+        if (donnee instanceof DonneeMouvement) return "MOUVEMENT";
+        if (donnee instanceof DonneeTemperature) return "TEMPERATURE";
+        if (donnee instanceof DonneeConsommation) return "CONSOMMATION_ENERGIE";
+        if (donnee instanceof DonneeLuminosite) return "LUMINOSITE";
         return "Inconnu";
     }
 
@@ -172,14 +219,14 @@ public class GestionDonneesController implements Initializable {
         this.selectedDonnee = donnee; // Mettre à jour la donnée sélectionnée
         dateCollectePicker.setValue(donnee.getDateCollecte());
         heureCollecteField.setText(donnee.getHeureCollecte().toString());
-        capteurIdField.setText(String.valueOf(donnee.getCapteurId()));
+        capteurIdComboBox.setValue(donnee.getCapteurId()); // Mettre à jour le ComboBox des ID
         valeurField.setText(getValeurString(donnee));
     }
 
     private void clearFields() {
         dateCollectePicker.setValue(null);
         heureCollecteField.clear();
-        capteurIdField.clear();
+        capteurIdComboBox.getSelectionModel().clearSelection();
         valeurField.clear();
     }
 
@@ -192,20 +239,37 @@ public class GestionDonneesController implements Initializable {
         }
 
         switch (type) {
-            case "Mouvement":
+            case "MOUVEMENT":
                 valeurIndicationLabel.setText("Valeur booléenne (true/false)");
                 break;
-            case "Température":
+            case "TEMPERATURE":
                 valeurIndicationLabel.setText("Valeur en °C (Degrés Celsius)");
                 break;
-            case "Consommation":
+            case "CONSOMMATION_ENERGIE":
                 valeurIndicationLabel.setText("Valeur en W (Watts)");
                 break;
-            case "Luminosité":
+            case "LUMINOSITE":
                 valeurIndicationLabel.setText("Valeur en Lux");
                 break;
             default:
                 valeurIndicationLabel.setText("Valeur invalide");
+        }
+    }
+    public void handleGoToGestionCapteur(javafx.event.ActionEvent actionEvent) {
+        try {
+            // Charger le fichier FXML de la page GestionCapteur
+            Parent gestionCapteurParent = FXMLLoader.load(getClass().getResource("/GestionCapteur.fxml"));
+            Scene gestionCapteurScene = new Scene(gestionCapteurParent);
+
+            // Obtenir la scène actuelle et la fenêtre
+            Stage window = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+
+            // Changer la scène
+            window.setScene(gestionCapteurScene);
+            window.show();
+        } catch (IOException e) {
+            e.printStackTrace(); // Afficher l'erreur en cas de problème
+            System.err.println("Erreur lors du chargement de GestionCapteur.fxml : " + e.getMessage());
         }
     }
 }
