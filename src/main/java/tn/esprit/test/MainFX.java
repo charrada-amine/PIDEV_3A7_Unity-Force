@@ -5,7 +5,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-
 import java.io.IOException;
 
 public class MainFX extends Application {
@@ -17,15 +16,16 @@ public class MainFX extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            // Charger MainView.fxml depuis la racine des resources
-            Parent root = FXMLLoader.load(getClass().getResource("/MainView.fxml"));
+            // Chemin corrigé pour MainMenu.fxml
+            Parent root = FXMLLoader.load(getClass().getResource("/MainMenu.fxml"));
 
             Scene scene = new Scene(root, 1200, 800);
 
-            // Charger le CSS depuis le dossier styles
+            // Chemin CSS corrigé (si nécessaire)
             scene.getStylesheets().add(getClass().getResource("/styles/style.css").toExternalForm());
 
-            primaryStage.setTitle("Gestion des Lampadaires");
+            // Titre mis à jour
+            primaryStage.setTitle("Smart City Lighting Management");
             primaryStage.setScene(scene);
             primaryStage.show();
 

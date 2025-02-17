@@ -5,33 +5,47 @@
 <?import javafx.scene.text.*?>
 <?import javafx.geometry.Insets?>
 
-<BorderPane xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="tn.esprit.controllers.GestionLampadaireController">
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.GestionLampadaireController" style="-fx-background-color: #f8f9fa;">
+
+    <top>
+        <VBox spacing="10" style="-fx-padding: 0 25 20 25;">
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Button text="Retour" onAction="#handleBack"
+                        style="-fx-background-color: transparent; -fx-text-fill: #4361ee; -fx-underline: true;"/>
+
+                <Button text="Zones" onAction="#handleNavigateToZones"
+                        style="-fx-background-color: #06d6a0; -fx-text-fill: white; -fx-padding: 8 16;"/>
+
+                <Label text="Gestion des Lampadaires"
+                       style="-fx-font-size: 28px; -fx-text-fill: #4361ee; -fx-font-weight: 800;"/>
+            </HBox>
+            <Separator style="-fx-border-color: #e9ecef;"/>
+        </VBox>
+    </top>
+
 
     <left>
-        <VBox spacing="20" style="-fx-background-color: white; -fx-padding: 25;" prefWidth="350">
-            <Label text="Formulaire Lampadaire" styleClass="form-title"/>
-
-            <VBox spacing="15">
+        <VBox spacing="20" style="-fx-background-color: white; -fx-padding: 25; -fx-background-radius: 16; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 12, 0, 0, 4);" prefWidth="380">
+            <Label text="Formulaire" style="-fx-font-size: 20px; -fx-text-fill: #212529; -fx-font-weight: 700; -fx-padding: 0 0 10 0;"/>
+            <VBox spacing="15" style="-fx-padding: 0 0 15 0;">
                 <TextField fx:id="tfType" promptText="Type" styleClass="modern-input"/>
                 <TextField fx:id="tfPuissance" promptText="Puissance (W)" styleClass="modern-input"/>
-                <ComboBox fx:id="cbEtat" promptText="État" styleClass="modern-combo"/>
-                <DatePicker fx:id="dpDateInstallation" promptText="Date Installation" styleClass="modern-datepicker"/>
+                <ComboBox fx:id="cbEtat" promptText="État" styleClass="modern-input"/>
+                <DatePicker fx:id="dpDateInstallation" promptText="Date Installation" styleClass="modern-input"/>
                 <TextField fx:id="tfIdZone" promptText="ID Zone" styleClass="modern-input"/>
-
-                <HBox spacing="10" style="-fx-padding: 15 0 0 0;">
-                    <Button text="Ajouter" onAction="#handleAdd" styleClass="success-button"/>
-                    <Button text="Modifier" onAction="#handleUpdate" styleClass="primary-button"/>
-                    <Button text="Supprimer" onAction="#handleDelete" styleClass="danger-button"/>
-                    <Button text="Vider" onAction="#handleClear" styleClass="neutral-button"/>
+                <HBox spacing="12" style="-fx-padding: 20 0 0 0;">
+                    <Button text="Ajouter" onAction="#handleAdd" styleClass="btn btn-primary"/>
+                    <Button text="Modifier" onAction="#handleUpdate" styleClass="btn btn-primary"/>
+                    <Button text="Supprimer" onAction="#handleDelete" styleClass="btn btn-danger"/>
+                    <Button text="Réinitialiser" onAction="#handleClear" styleClass="btn"/>
                 </HBox>
             </VBox>
         </VBox>
     </left>
 
     <center>
-        <ScrollPane fx:id="scrollPane" fitToWidth="true" style="-fx-background: transparent;">
-            <FlowPane fx:id="cardContainer" hgap="20" vgap="20" style="-fx-padding: 20;"/>
+        <ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER" style="-fx-background: transparent; -fx-border-width: 0;">
+            <FlowPane fx:id="cardContainer" hgap="25" vgap="25" style="-fx-padding: 20;"/>
         </ScrollPane>
     </center>
 </BorderPane>
