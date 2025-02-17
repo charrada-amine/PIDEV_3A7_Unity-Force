@@ -1,0 +1,57 @@
+/* Couleurs */
+.root {
+    -primary-color: #2A7FFF;
+    -secondary-color: #4CAF50;
+    -background-light: #F8F9FA;
+}
+
+/* Cartes */
+.card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 8, 0, 0, 2);
+    -fx-padding: 20;
+}
+
+.card-title {
+    -fx-font-size: 16;
+    -fx-font-weight: 700;
+    -fx-fill: -primary-color;
+}
+
+/* Boutons */
+.success-button {
+    -fx-background-color: -secondary-color;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+}
+
+.primary-button {
+    -fx-background-color: -primary-color;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+}
+
+/* Inputs */
+.modern-input {
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 12;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1;
+    -fx-font-size: 14;
+}
+
+.modern-input:focused {
+    -fx-border-color: -primary-color;
+}
+
+.form-title {
+    -fx-font-size: 20;
+    -fx-font-weight: bold;
+    -fx-text-fill: -primary-color;
+}

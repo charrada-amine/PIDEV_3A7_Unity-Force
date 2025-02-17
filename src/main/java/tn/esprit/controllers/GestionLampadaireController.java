@@ -4,12 +4,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.geometry.Insets;
 import javafx.scene.text.Text;
 import javafx.scene.text.Font;
-import javafx.scene.paint.Color;
 import tn.esprit.models.Lampadaire;
 import tn.esprit.models.Lampadaire.EtatLampadaire;
 import tn.esprit.services.ServiceLampadaire;
@@ -36,14 +36,11 @@ public class GestionLampadaireController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         cbEtat.setItems(FXCollections.observableArrayList(EtatLampadaire.values()));
 
-        // Style du FlowPane
+        // Configuration UI
+        scrollPane.setFitToWidth(true);
         cardContainer.setHgap(20);
         cardContainer.setVgap(20);
         cardContainer.setPadding(new Insets(20));
-
-        // Style du ScrollPane
-        scrollPane.setFitToWidth(true);
-        scrollPane.setStyle("-fx-background: #f4f4f4; -fx-background-color: transparent;");
 
         loadData();
     }
@@ -51,82 +48,72 @@ public class GestionLampadaireController implements Initializable {
     private void loadData() {
         lampadaires.setAll(serviceLampadaire.getAll());
         cardContainer.getChildren().clear();
-
-        for (Lampadaire lampadaire : lampadaires) {
-            cardContainer.getChildren().add(createLampadaireCard(lampadaire));
-        }
+        lampadaires.forEach(lampadaire ->
+                cardContainer.getChildren().add(createLampadaireCard(lampadaire))
+        );
     }
 
     private VBox createLampadaireCard(Lampadaire lampadaire) {
         VBox card = new VBox(10);
+        card.getStyleClass().add("card");
         card.setPrefWidth(300);
         card.setPadding(new Insets(15));
-        card.setStyle("-fx-background-color: white; " +
-                "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0); " +
-                "-fx-background-radius: 8; " +
-                "-fx-border-radius: 8;");
 
-        // En-tête de la carte
+        // En-tête
         Text titleText = new Text("Lampadaire #" + lampadaire.getIdLamp());
         titleText.setFont(Font.font("System", 16));
 
-        // Informations principales
-        VBox infoBox = new VBox(8);
-        Text typeText = createInfoText("Type", lampadaire.getTypeLampadaire());
-        Text puissanceText = createInfoText("Puissance", lampadaire.getPuissance() + " W");
-        Text etatText = createInfoText("État", lampadaire.getEtat().toString());
-        Text dateText = createInfoText("Installation",
-                lampadaire.getDateInstallation() != null ?
-                        lampadaire.getDateInstallation().format(DateTimeFormatter.ISO_LOCAL_DATE) : "N/A");
-        Text zoneText = createInfoText("Zone", String.valueOf(lampadaire.getIdZone()));
+        // Formatage date
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String dateInstallation = (lampadaire.getDateInstallation() != null) ?
+                lampadaire.getDateInstallation().format(formatter) : "N/A";
 
-        infoBox.getChildren().addAll(typeText, puissanceText, etatText, dateText, zoneText);
+        // Contenu
+        VBox content = new VBox(8);
+        content.getChildren().addAll(
+                createInfoText("Type", lampadaire.getTypeLampadaire()),
+                createInfoText("Puissance", lampadaire.getPuissance() + " W"),
+                createInfoText("État", lampadaire.getEtat().toString()),
+                createInfoText("Installation", dateInstallation),
+                createInfoText("Zone", String.valueOf(lampadaire.getIdZone()))
+        );
 
-        // Boutons d'action
+        // Boutons
         HBox buttonBox = new HBox(10);
-        buttonBox.setPadding(new Insets(10, 0, 0, 0));
-
         Button editButton = createStyledButton("Modifier", "#2196F3");
         Button deleteButton = createStyledButton("Supprimer", "#f44336");
 
-        editButton.setOnAction(e -> {
-            selectedLampadaire = lampadaire;
-            fillForm(lampadaire);
-        });
-
-        deleteButton.setOnAction(e -> {
-            if (showConfirmation("Confirmation de suppression",
-                    "Voulez-vous vraiment supprimer ce lampadaire ?")) {
-                try {
-                    serviceLampadaire.delete(lampadaire);
-                    loadData();
-                    clearForm();
-                } catch (Exception ex) {
-                    showAlert("Erreur de suppression", ex.getMessage());
-                }
-            }
-        });
+        editButton.setOnAction(e -> fillForm(lampadaire));
+        deleteButton.setOnAction(e -> handleDeleteLampadaire(lampadaire));
 
         buttonBox.getChildren().addAll(editButton, deleteButton);
-
-        // Assemblage de la carte
-        card.getChildren().addAll(titleText, new Separator(), infoBox, buttonBox);
+        card.getChildren().addAll(titleText, new Separator(), content, buttonBox);
 
         return card;
     }
 
-    private Text createInfoText(String label, String value) {
-        return new Text(label + ": " + value);
-    }
-
     private Button createStyledButton(String text, String color) {
         Button button = new Button(text);
-        button.setStyle("-fx-background-color: " + color + ";" +
-                "-fx-text-fill: white;" +
-                "-fx-background-radius: 4;");
-        return button;
+        button.setStyle("-fx-background-color: " + color + ";"
+                + "-fx-text-fill: white;"
+                + "-fx-background-radius: 4;");
+        return button; // Return statement ajouté
     }
 
+    private Text createInfoText(String label, String value) {
+        return new Text(label + ": " + value); // Return statement ajouté
+    }
+
+    private void handleDeleteLampadaire(Lampadaire lampadaire) {
+        if (showConfirmation("Confirmation", "Supprimer ce lampadaire ?")) {
+            try {
+                serviceLampadaire.delete(lampadaire);
+                loadData();
+            } catch (Exception e) {
+                showAlert("Erreur", "Échec de la suppression : " + e.getMessage());
+            }
+        }
+    }
     private void fillForm(Lampadaire lampadaire) {
         tfType.setText(lampadaire.getTypeLampadaire());
         tfPuissance.setText(String.valueOf(lampadaire.getPuissance()));

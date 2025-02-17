@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+
+<TabPane xmlns="http://javafx.com/javafx/11"
+         xmlns:fx="http://javafx.com/fxml/1"
+         tabClosingPolicy="UNAVAILABLE">
+
+    <!-- Onglet Lampadaires -->
+    <Tab text="Lampadaires">
+        <content>
+            <fx:include source="GestionLampadaire.fxml"/>
+        </content>
+    </Tab>
+
+    <!-- Onglet Zones -->
+    <Tab text="Zones">
+        <content>
+            <fx:include source="GestionZone.fxml"/>
+        </content>
+    </Tab>
+
+    <stylesheets>
+        <URL value="@styles/style.css"/>
+    </stylesheets>
+</TabPane>

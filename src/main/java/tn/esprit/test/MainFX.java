@@ -17,16 +17,21 @@ public class MainFX extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            FXMLLoader loader = new FXMLLoader(MainFX.class.getResource("/GestionLampadaire.fxml"));
+            // Charger MainView.fxml depuis la racine des resources
+            Parent root = FXMLLoader.load(getClass().getResource("/MainView.fxml"));
 
-            Parent root = loader.load();
-            Scene scene = new Scene(root);
+            Scene scene = new Scene(root, 1200, 800);
+
+            // Charger le CSS depuis le dossier styles
+            scene.getStylesheets().add(getClass().getResource("/styles/style.css").toExternalForm());
+
+            primaryStage.setTitle("Gestion des Lampadaires");
             primaryStage.setScene(scene);
-            primaryStage.setTitle("hello from the other side");
             primaryStage.show();
+
         } catch (IOException e) {
+            System.err.println("Erreur de chargement : " + e.getMessage());
             e.printStackTrace();
-            System.exit(1);
         }
     }
 }

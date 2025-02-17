@@ -7,56 +7,31 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="tn.esprit.controllers.GestionLampadaireController">
-    <padding>
-        <Insets top="10" right="10" bottom="10" left="10"/>
-    </padding>
 
-    <top>
-        <VBox spacing="20">
-            <Label text="Gestion des Lampadaires" style="-fx-font-size: 24; -fx-font-weight: bold;"/>
+    <left>
+        <VBox spacing="20" style="-fx-background-color: white; -fx-padding: 25;" prefWidth="350">
+            <Label text="Formulaire Lampadaire" styleClass="form-title"/>
 
-            <GridPane vgap="10" hgap="15" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8;">
-                <columnConstraints>
-                    <ColumnConstraints minWidth="100" prefWidth="120"/>
-                    <ColumnConstraints minWidth="200" prefWidth="250"/>
-                </columnConstraints>
+            <VBox spacing="15">
+                <TextField fx:id="tfType" promptText="Type" styleClass="modern-input"/>
+                <TextField fx:id="tfPuissance" promptText="Puissance (W)" styleClass="modern-input"/>
+                <ComboBox fx:id="cbEtat" promptText="État" styleClass="modern-combo"/>
+                <DatePicker fx:id="dpDateInstallation" promptText="Date Installation" styleClass="modern-datepicker"/>
+                <TextField fx:id="tfIdZone" promptText="ID Zone" styleClass="modern-input"/>
 
-                <Label text="Type:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                <TextField fx:id="tfType" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-
-                <Label text="Puissance:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                <TextField fx:id="tfPuissance" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-
-                <Label text="État:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                <ComboBox fx:id="cbEtat" GridPane.columnIndex="1" GridPane.rowIndex="2" maxWidth="Infinity"/>
-
-                <Label text="Date Installation:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-                <DatePicker fx:id="dpDateInstallation" GridPane.columnIndex="1" GridPane.rowIndex="3" maxWidth="Infinity"/>
-
-                <Label text="ID Zone:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
-                <TextField fx:id="tfIdZone" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
-
-                <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="5">
-                    <Button text="Ajouter" onAction="#handleAdd"
-                            style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
-                    <Button text="Modifier" onAction="#handleUpdate"
-                            style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>
-                    <Button text="Supprimer" onAction="#handleDelete"
-                            style="-fx-background-color: #f44336; -fx-text-fill: white;"/>
-                    <Button text="Vider" onAction="#handleClear"
-                            style="-fx-background-color: #9e9e9e; -fx-text-fill: white;"/>
+                <HBox spacing="10" style="-fx-padding: 15 0 0 0;">
+                    <Button text="Ajouter" onAction="#handleAdd" styleClass="success-button"/>
+                    <Button text="Modifier" onAction="#handleUpdate" styleClass="primary-button"/>
+                    <Button text="Supprimer" onAction="#handleDelete" styleClass="danger-button"/>
+                    <Button text="Vider" onAction="#handleClear" styleClass="neutral-button"/>
                 </HBox>
-            </GridPane>
+            </VBox>
         </VBox>
-    </top>
+    </left>
 
     <center>
         <ScrollPane fx:id="scrollPane" fitToWidth="true" style="-fx-background: transparent;">
-            <FlowPane fx:id="cardContainer" hgap="20" vgap="20">
-                <padding>
-                    <Insets top="20" right="20" bottom="20" left="20"/>
-                </padding>
-            </FlowPane>
+            <FlowPane fx:id="cardContainer" hgap="20" vgap="20" style="-fx-padding: 20;"/>
         </ScrollPane>
     </center>
 </BorderPane>
