@@ -246,29 +246,41 @@ public class ServiceUtilisateur {
 
 
     public void updateField(int id, String fieldName, String newValue) {
-        // Vérifier que la nouvelle valeur n'est pas vide
-        if (newValue == null || newValue.trim().isEmpty()) {
-            System.out.println("❌ La nouvelle valeur pour le champ " + fieldName + " ne peut pas être vide !");
-            return;
-        }
+        String qry;
+        boolean isZoneField = fieldName.equalsIgnoreCase("zoneId"); // Vérifier si le champ à modifier est `zoneId`
 
-        // Construction de la requête dynamique en fonction du champ choisi
-        String qry = "UPDATE utilisateur SET " + fieldName + " = ? WHERE id_utilisateur = ?";
+        if (isZoneField) {
+            // Mise à jour de la zone dans la table `citoyen`
+            qry = "UPDATE citoyen SET zoneId = ? WHERE id_citoyen = ?";
+        } else {
+            // Mise à jour des autres informations dans la table `utilisateur`
+            qry = "UPDATE utilisateur SET " + fieldName + " = ? WHERE id_utilisateur = ?";
+        }
 
         try {
             PreparedStatement pstm = cnx.prepareStatement(qry);
-            pstm.setString(1, newValue);  // On met à jour la nouvelle valeur pour le champ choisi
-            pstm.setInt(2, id);  // L'ID de l'utilisateur à mettre à jour
+
+            // Vérifier si la valeur à modifier est un entier (zoneId)
+            if (isZoneField) {
+                pstm.setInt(1, Integer.parseInt(newValue)); // Convertir en entier pour zoneId
+            } else {
+                pstm.setString(1, newValue); // Insérer en tant que String pour les autres champs
+            }
+
+            pstm.setInt(2, id); // ID du citoyen/utilisateur
 
             int affectedRows = pstm.executeUpdate();
 
             if (affectedRows > 0) {
-                System.out.println("✅ " + fieldName + " mis à jour avec succès pour l'utilisateur ID " + id);
+                System.out.println("✅ " + fieldName + " mis à jour avec succès pour l'utilisateur/citoyen ID " + id);
             } else {
-                System.out.println("❌ Aucun utilisateur trouvé avec l'ID " + id);
+                System.out.println("❌ Aucun enregistrement trouvé avec l'ID " + id);
             }
+
         } catch (SQLException e) {
-            System.out.println("❌ Erreur SQL : " + e.getMessage());
+            System.out.println("❌ Erreur SQL lors de la mise à jour : " + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.out.println("❌ Erreur : La valeur pour zoneId doit être un nombre valide.");
         }
     }
 

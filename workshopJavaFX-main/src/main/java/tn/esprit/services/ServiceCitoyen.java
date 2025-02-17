@@ -38,12 +38,13 @@ public class ServiceCitoyen {
         }
     }
 */
-    // Récupérer un citoyen par son ID
     public citoyen getCitoyenById(int idCitoyen) {
         citoyen citoyen = null;
-        String qry = "SELECT u.nom, u.prenom, u.email, u.motdepasse, u.dateInscription, c.zoneId " +
+
+        // Correction de la requête SQL
+        String qry = "SELECT c.id_citoyen, u.nom, u.prenom, u.email, u.motdepasse, u.dateInscription, c.zoneId " +
                 "FROM utilisateur u " +
-                "JOIN citoyen c ON u.id_utilisateur = c.id_utilisateur " +
+                "JOIN citoyen c ON u.id_utilisateur = c.id_citoyen " + // Corrigé : Relation correcte
                 "WHERE c.id_citoyen = ?";
 
         try {
@@ -52,17 +53,27 @@ public class ServiceCitoyen {
             ResultSet rs = pstm.executeQuery();
 
             if (rs.next()) {
-                // Récupérer les données de l'utilisateur et de citoyen
-                citoyen = new citoyen(rs.getString("nom"), rs.getString("prenom"), rs.getString("email"),
-                        rs.getString("motdepasse"), rs.getDate("dateInscription"), rs.getInt("zoneId"));
-                citoyen.setId_utilisateur(idCitoyen); // Assurez-vous que l'ID utilisateur est correctement mis à jour
+                // Construction de l'objet citoyen avec les données récupérées
+                citoyen = new citoyen(
+                        rs.getString("nom"),
+                        rs.getString("prenom"),
+                        rs.getString("email"),
+                        rs.getString("motdepasse"),
+                        rs.getDate("dateInscription"),
+                        rs.getInt("zoneId")
+                );
+            } else {
+                System.out.println("⚠️ Citoyen avec l'ID " + idCitoyen + " introuvable.");
             }
         } catch (SQLException e) {
-            System.out.println("❌ Erreur SQL : " + e.getMessage());
+            System.out.println("❌ Erreur SQL lors de la récupération du citoyen : " + e.getMessage());
         }
 
         return citoyen;
     }
+
+
+
     public List<citoyen> getAllCitoyens() {
         List<citoyen> citoyens = new ArrayList<>();
         String qry = "SELECT * FROM citoyen JOIN utilisateur ON citoyen.id_citoyen = utilisateur.id_utilisateur";  // Jointure avec la table utilisateur
@@ -150,28 +161,45 @@ public class ServiceCitoyen {
 
 
     public void deleteById(int id) {
-        // Suppression dans la table `citoyen` en utilisant l'ID
+        // Requête pour récupérer l'ID de l'utilisateur associé au citoyen
+        String getIdUtilisateurQry = "SELECT id_citoyen FROM citoyen WHERE id_citoyen = ?";
+
+        // Requête pour supprimer le citoyen
         String qryCitoyen = "DELETE FROM citoyen WHERE id_citoyen = ?";
 
+        // Requête pour supprimer l'utilisateur
+        String qryUtilisateur = "DELETE FROM utilisateur WHERE id_utilisateur = ?";
+
         try {
-            // Suppression dans la table citoyen
-            PreparedStatement pstmCitoyen = cnx.prepareStatement(qryCitoyen);
-            pstmCitoyen.setInt(1, id);
-            int affectedRowsCitoyen = pstmCitoyen.executeUpdate();
+            // Étape 1 : Récupérer l'id_utilisateur du citoyen
+            PreparedStatement getIdUtilisateurStmt = cnx.prepareStatement(getIdUtilisateurQry);
+            getIdUtilisateurStmt.setInt(1, id);
+            ResultSet rs = getIdUtilisateurStmt.executeQuery();
 
-            if (affectedRowsCitoyen > 0) {
-                System.out.println("✅ Citoyen avec l'ID " + id + " supprimé de la table 'citoyen'.");
+            if (rs.next()) {
+                int idUtilisateur = rs.getInt("id_citoyen");
+                System.out.println("🔍 ID utilisateur associé au citoyen : " + idUtilisateur);
 
-                // Si le citoyen est supprimé, supprimer aussi l'utilisateur de la table `utilisateur`
-                String qryUtilisateur = "DELETE FROM utilisateur WHERE id_utilisateur = ?";
-                PreparedStatement pstmUtilisateur = cnx.prepareStatement(qryUtilisateur);
-                pstmUtilisateur.setInt(1, id);
-                int affectedRowsUtilisateur = pstmUtilisateur.executeUpdate();
+                // Étape 2 : Supprimer le citoyen
+                PreparedStatement pstmCitoyen = cnx.prepareStatement(qryCitoyen);
+                pstmCitoyen.setInt(1, id);
+                int affectedRowsCitoyen = pstmCitoyen.executeUpdate();
 
-                if (affectedRowsUtilisateur > 0) {
-                    System.out.println("✅ Utilisateur avec l'ID " + id + " supprimé de la table 'utilisateur' !");
+                if (affectedRowsCitoyen > 0) {
+                    System.out.println("✅ Citoyen avec l'ID " + id + " supprimé de la table 'citoyen'.");
+
+                    // Étape 3 : Supprimer l'utilisateur associé au citoyen
+                    PreparedStatement pstmUtilisateur = cnx.prepareStatement(qryUtilisateur);
+                    pstmUtilisateur.setInt(1, idUtilisateur);
+                    int affectedRowsUtilisateur = pstmUtilisateur.executeUpdate();
+
+                    if (affectedRowsUtilisateur > 0) {
+                        System.out.println("✅ Utilisateur avec l'ID " + idUtilisateur + " supprimé de la table 'utilisateur'.");
+                    } else {
+                        System.out.println("⚠️ Aucun utilisateur trouvé avec l'ID " + idUtilisateur + " dans la table 'utilisateur'.");
+                    }
                 } else {
-                    System.out.println("⚠️ Aucun utilisateur trouvé avec l'ID " + id + " dans la table 'utilisateur'.");
+                    System.out.println("⚠️ Aucun citoyen trouvé avec l'ID " + id + " dans la table 'citoyen'.");
                 }
             } else {
                 System.out.println("⚠️ Aucun citoyen trouvé avec l'ID " + id + " dans la table 'citoyen'.");
@@ -180,5 +208,7 @@ public class ServiceCitoyen {
             System.out.println("❌ Erreur SQL lors de la suppression : " + e.getMessage());
         }
     }
+
+
 
 }

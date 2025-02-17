@@ -10,50 +10,67 @@ import java.io.IOException;
 
 public class AccueilController {
 
-    // Méthode générique pour ouvrir l'interface basée sur le rôle
-    private void ouvrirInterface(String role) {
+    // Méthode pour ouvrir l'interface de gestion des utilisateurs
+    @FXML
+    private void ouvrirInterfaceTous() {
         try {
-            // Charger dynamiquement le fichier FXML en fonction du rôle
-            String fxmlPath = "/GestionUtilisateur.fxml";
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/GestionUtilisateur.fxml"));
             Parent root = loader.load();
 
-            // Récupérer le contrôleur de l'interface ouverte
-            Object controller = loader.getController();
-
-            // Si le contrôleur dispose d'une méthode pour accepter un rôle, on la passe
-            if (controller instanceof GestionUtilisateurController) {
-                ((GestionUtilisateurController) controller).setRoleSelectionne(role);
-            }
-
-            // Créer et afficher le stage (fenêtre)
             Stage stage = new Stage();
-            stage.setTitle("Gestion des " + role);
             stage.setScene(new Scene(root));
+            stage.setTitle("Gestion des Utilisateurs");
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    // Méthodes d'ouverture des différentes interfaces
-    @FXML
-    private void ouvrirInterfaceTous() {
-        ouvrirInterface("Utilisateur"); // On suppose que "Tous" pourrait être représenté par "Utilisateur"
-    }
-
+    // Méthode pour ouvrir l'interface de gestion des citoyens
     @FXML
     private void ouvrirInterfaceCitoyens() {
-        ouvrirInterface("Citoyen");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/GestionCitoyen.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Gestion des Citoyens");
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
+    // Méthode pour ouvrir l'interface de gestion des techniciens
     @FXML
     private void ouvrirInterfaceTechniciens() {
-        ouvrirInterface("Technicien");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/GestionTechnicien.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Gestion des Techniciens");
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
+    // Méthode pour ouvrir l'interface de gestion des responsables
     @FXML
     private void ouvrirInterfaceResponsables() {
-        ouvrirInterface("Responsable");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/GestionResponsable.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Gestion des Responsables");
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
