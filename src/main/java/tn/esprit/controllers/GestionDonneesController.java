@@ -5,7 +5,8 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.VBox;
+import javafx.geometry.Insets;
 import tn.esprit.models.*;
 import tn.esprit.services.*;
 
@@ -18,28 +19,22 @@ public class GestionDonneesController implements Initializable {
 
     @FXML
     private ComboBox<String> typeCapteurComboBox;
+
     @FXML
     private DatePicker dateCollectePicker;
+
     @FXML
     private TextField heureCollecteField;
+
     @FXML
     private TextField capteurIdField;
+
     @FXML
     private TextField valeurField;
+
     @FXML
-    private TableView<Donnee> donneeTable;
-    @FXML
-    private TableColumn<Donnee, Integer> idColumn;
-    @FXML
-    private TableColumn<Donnee, LocalDate> dateCollecteColumn;
-    @FXML
-    private TableColumn<Donnee, LocalTime> heureCollecteColumn;
-    @FXML
-    private TableColumn<Donnee, Integer> capteurIdColumn;
-    @FXML
-    private TableColumn<Donnee, String> valeurColumn;
-    @FXML
-    private TableColumn<Donnee, String> typeDonneeColumn;
+    private VBox donneeCardContainer;
+
     @FXML
     private Label valeurIndicationLabel;
 
@@ -49,35 +44,12 @@ public class GestionDonneesController implements Initializable {
     private final ServiceLuminosite serviceLuminosite = new ServiceLuminosite();
     private final ObservableList<Donnee> donneeList = FXCollections.observableArrayList();
 
+    private Donnee selectedDonnee; // Variable pour stocker la donnée sélectionnée
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         typeCapteurComboBox.getItems().addAll("Mouvement", "Température", "Consommation", "Luminosité");
         updateValeurIndication(); // Mise à jour initiale
-
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-        dateCollecteColumn.setCellValueFactory(new PropertyValueFactory<>("dateCollecte"));
-        heureCollecteColumn.setCellValueFactory(new PropertyValueFactory<>("heureCollecte"));
-        capteurIdColumn.setCellValueFactory(new PropertyValueFactory<>("capteurId"));
-
-        valeurColumn.setCellValueFactory(data -> {
-            Donnee d = data.getValue();
-            if (d instanceof DonneeMouvement) return javafx.beans.binding.Bindings.createObjectBinding(() -> String.valueOf(((DonneeMouvement) d).getValeur()));
-            if (d instanceof DonneeTemperature) return javafx.beans.binding.Bindings.createObjectBinding(() -> String.valueOf(((DonneeTemperature) d).getValeur()));
-            if (d instanceof DonneeConsommation) return javafx.beans.binding.Bindings.createObjectBinding(() -> String.valueOf(((DonneeConsommation) d).getValeur()));
-            if (d instanceof DonneeLuminosite) return javafx.beans.binding.Bindings.createObjectBinding(() -> String.valueOf(((DonneeLuminosite) d).getValeur()));
-            return javafx.beans.binding.Bindings.createObjectBinding(() -> "N/A");
-        });
-
-        typeDonneeColumn.setCellValueFactory(data -> {
-            Donnee d = data.getValue();
-            if (d instanceof DonneeMouvement) return javafx.beans.binding.Bindings.createObjectBinding(() -> "Mouvement");
-            if (d instanceof DonneeTemperature) return javafx.beans.binding.Bindings.createObjectBinding(() -> "Température");
-            if (d instanceof DonneeConsommation) return javafx.beans.binding.Bindings.createObjectBinding(() -> "Consommation");
-            if (d instanceof DonneeLuminosite) return javafx.beans.binding.Bindings.createObjectBinding(() -> "Luminosité");
-            return javafx.beans.binding.Bindings.createObjectBinding(() -> "Inconnu");
-        });
-
-        donneeTable.setItems(donneeList);
         handleRefresh();
     }
 
@@ -111,21 +83,20 @@ public class GestionDonneesController implements Initializable {
 
     @FXML
     public void handleUpdateDonnee() {
-        Donnee selectedItem = donneeTable.getSelectionModel().getSelectedItem();
-        if (selectedItem != null) {
+        if (selectedDonnee != null) {
             LocalDate date = dateCollectePicker.getValue();
             LocalTime heure = LocalTime.parse(heureCollecteField.getText());
             int capteurId = Integer.parseInt(capteurIdField.getText());
             String valeurStr = valeurField.getText();
 
-            if (selectedItem instanceof DonneeMouvement) {
-                serviceMouvement.update(new DonneeMouvement(selectedItem.getId(), date, heure, capteurId, Boolean.parseBoolean(valeurStr)));
-            } else if (selectedItem instanceof DonneeTemperature) {
-                serviceTemperature.update(new DonneeTemperature(selectedItem.getId(), date, heure, capteurId, Float.parseFloat(valeurStr)));
-            } else if (selectedItem instanceof DonneeConsommation) {
-                serviceConsommation.update(new DonneeConsommation(selectedItem.getId(), date, heure, capteurId, Float.parseFloat(valeurStr)));
-            } else if (selectedItem instanceof DonneeLuminosite) {
-                serviceLuminosite.update(new DonneeLuminosite(selectedItem.getId(), date, heure, capteurId, Integer.parseInt(valeurStr)));
+            if (selectedDonnee instanceof DonneeMouvement) {
+                serviceMouvement.update(new DonneeMouvement(selectedDonnee.getId(), date, heure, capteurId, Boolean.parseBoolean(valeurStr)));
+            } else if (selectedDonnee instanceof DonneeTemperature) {
+                serviceTemperature.update(new DonneeTemperature(selectedDonnee.getId(), date, heure, capteurId, Float.parseFloat(valeurStr)));
+            } else if (selectedDonnee instanceof DonneeConsommation) {
+                serviceConsommation.update(new DonneeConsommation(selectedDonnee.getId(), date, heure, capteurId, Float.parseFloat(valeurStr)));
+            } else if (selectedDonnee instanceof DonneeLuminosite) {
+                serviceLuminosite.update(new DonneeLuminosite(selectedDonnee.getId(), date, heure, capteurId, Integer.parseInt(valeurStr)));
             }
             handleRefresh();
         }
@@ -133,12 +104,11 @@ public class GestionDonneesController implements Initializable {
 
     @FXML
     public void handleDeleteDonnee() {
-        Donnee selectedItem = donneeTable.getSelectionModel().getSelectedItem();
-        if (selectedItem != null) {
-            if (selectedItem instanceof DonneeMouvement) serviceMouvement.delete(selectedItem.getId());
-            else if (selectedItem instanceof DonneeTemperature) serviceTemperature.delete(selectedItem.getId());
-            else if (selectedItem instanceof DonneeConsommation) serviceConsommation.delete(selectedItem.getId());
-            else if (selectedItem instanceof DonneeLuminosite) serviceLuminosite.delete(selectedItem.getId());
+        if (selectedDonnee != null) {
+            if (selectedDonnee instanceof DonneeMouvement) serviceMouvement.delete(selectedDonnee.getId());
+            else if (selectedDonnee instanceof DonneeTemperature) serviceTemperature.delete(selectedDonnee.getId());
+            else if (selectedDonnee instanceof DonneeConsommation) serviceConsommation.delete(selectedDonnee.getId());
+            else if (selectedDonnee instanceof DonneeLuminosite) serviceLuminosite.delete(selectedDonnee.getId());
 
             handleRefresh();
         }
@@ -146,25 +116,64 @@ public class GestionDonneesController implements Initializable {
 
     @FXML
     public void handleRefresh() {
+        donneeCardContainer.getChildren().clear(); // Effacer les anciennes cartes
         donneeList.clear();
         donneeList.addAll(serviceMouvement.getAll());
         donneeList.addAll(serviceTemperature.getAll());
         donneeList.addAll(serviceConsommation.getAll());
         donneeList.addAll(serviceLuminosite.getAll());
+
+        for (Donnee donnee : donneeList) {
+            VBox card = createDonneeCard(donnee);
+            donneeCardContainer.getChildren().add(card);
+        }
     }
 
-    @FXML
-    public void handleTableClick() {
-        Donnee selectedItem = donneeTable.getSelectionModel().getSelectedItem();
-        if (selectedItem != null) {
-            dateCollectePicker.setValue(selectedItem.getDateCollecte());
-            heureCollecteField.setText(selectedItem.getHeureCollecte().toString());
-            capteurIdField.setText(String.valueOf(selectedItem.getCapteurId()));
-            valeurField.setText(selectedItem instanceof DonneeMouvement ? String.valueOf(((DonneeMouvement) selectedItem).getValeur()) :
-                    selectedItem instanceof DonneeTemperature ? String.valueOf(((DonneeTemperature) selectedItem).getValeur()) :
-                            selectedItem instanceof DonneeConsommation ? String.valueOf(((DonneeConsommation) selectedItem).getValeur()) :
-                                    String.valueOf(((DonneeLuminosite) selectedItem).getValeur()));
-        }
+    private VBox createDonneeCard(Donnee donnee) {
+        VBox card = new VBox();
+        card.setSpacing(5);
+        card.setPadding(new Insets(10));
+        card.setStyle("-fx-border-color: gray; -fx-background-color: white; -fx-background-radius: 5; -fx-border-radius: 5;");
+
+        Label idLabel = new Label("ID: " + donnee.getId());
+        Label dateLabel = new Label("Date: " + donnee.getDateCollecte());
+        Label heureLabel = new Label("Heure: " + donnee.getHeureCollecte());
+        Label capteurIdLabel = new Label("Capteur ID: " + donnee.getCapteurId());
+        Label valeurLabel = new Label("Valeur: " + getValeurString(donnee));
+        Label typeLabel = new Label("Type: " + getTypeString(donnee));
+
+        // Ajouter un gestionnaire d'événements pour la sélection de la carte
+        card.setOnMouseClicked(event -> {
+            selectDonnee(donnee); // Sélectionner la donnée
+        });
+
+        card.getChildren().addAll(idLabel, dateLabel, heureLabel, capteurIdLabel, valeurLabel, typeLabel);
+        card.setUserData(donnee); // Associer la donnée à la carte
+        return card;
+    }
+
+    private String getValeurString(Donnee donnee) {
+        if (donnee instanceof DonneeMouvement) return String.valueOf(((DonneeMouvement) donnee).getValeur());
+        if (donnee instanceof DonneeTemperature) return String.valueOf(((DonneeTemperature) donnee).getValeur());
+        if (donnee instanceof DonneeConsommation) return String.valueOf(((DonneeConsommation) donnee).getValeur());
+        if (donnee instanceof DonneeLuminosite) return String.valueOf(((DonneeLuminosite) donnee).getValeur());
+        return "N/A";
+    }
+
+    private String getTypeString(Donnee donnee) {
+        if (donnee instanceof DonneeMouvement) return "Mouvement";
+        if (donnee instanceof DonneeTemperature) return "Température";
+        if (donnee instanceof DonneeConsommation) return "Consommation";
+        if (donnee instanceof DonneeLuminosite) return "Luminosité";
+        return "Inconnu";
+    }
+
+    private void selectDonnee(Donnee donnee) {
+        this.selectedDonnee = donnee; // Mettre à jour la donnée sélectionnée
+        dateCollectePicker.setValue(donnee.getDateCollecte());
+        heureCollecteField.setText(donnee.getHeureCollecte().toString());
+        capteurIdField.setText(String.valueOf(donnee.getCapteurId()));
+        valeurField.setText(getValeurString(donnee));
     }
 
     private void clearFields() {
