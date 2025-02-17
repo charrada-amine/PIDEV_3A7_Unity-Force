@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.GestionUtilisateurController">
+    <top>
+        <HBox spacing="8" style="-fx-background-color: #f0f0f0; -fx-padding: 8;">
+            <Button text="Ajouter" onAction="#handleAddUser" style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
+            <Button text="Modifier" onAction="#handleUpdateUser" style="-fx-background-color: #FFC107; -fx-text-fill: black;"/>
+            <Button text="Supprimer" onAction="#handleDeleteUser" style="-fx-background-color: #F44336; -fx-text-fill: white;"/>
+            <Button text="Actualiser" onAction="#handleRefresh" style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <ScrollPane fx:id="scrollPane" fitToWidth="true" style="-fx-background: transparent;">
+            <FlowPane fx:id="userFlowPane"
+                      orientation="VERTICAL"
+                      hgap="15"
+                      vgap="15"
+                      alignment="CENTER">
+                <padding>
+                    <Insets top="15.0" right="15.0" bottom="15.0" left="15.0"/>
+                </padding>
+
+                <!-- Champ ID -->
+                <Label text="ID" style="-fx-font-size: 12px;"/>
+                <TextField fx:id="idField" promptText="ID" style="-fx-background-color: #FFFFFF; -fx-border-color: #cccccc; -fx-padding: 4;" editable="false"/>
+
+                <!-- Champ Nom -->
+                <Label text="Nom" style="-fx-font-size: 12px;"/>
+                <TextField fx:id="nameField" promptText="Nom" style="-fx-background-color: #FFFFFF; -fx-border-color: #cccccc; -fx-padding: 4;"/>
+
+                <!-- Champ Prénom -->
+                <Label text="Prénom" style="-fx-font-size: 12px;"/>
+                <TextField fx:id="prenomField" promptText="Prénom" style="-fx-background-color: #FFFFFF; -fx-border-color: #cccccc; -fx-padding: 4;"/>
+
+                <!-- Champ Email -->
+                <Label text="Email" style="-fx-font-size: 12px;"/>
+                <TextField fx:id="emailField" promptText="Email" style="-fx-background-color: #FFFFFF; -fx-border-color: #cccccc; -fx-padding: 4;"/>
+
+                <!-- Champ Mot de passe -->
+                <Label text="Mot de passe" style="-fx-font-size: 12px;"/>
+                <PasswordField fx:id="passwordField" promptText="Mot de passe" style="-fx-background-color: #FFFFFF; -fx-border-color: #cccccc; -fx-padding: 4;"/>
+
+                <!-- Champ Rôle -->
+                <Label text="Rôle" style="-fx-font-size: 12px;"/>
+                <TextField fx:id="roleField" promptText="Rôle" style="-fx-background-color: #FFFFFF; -fx-border-color: #cccccc; -fx-padding: 4;" editable="false"/>
+
+                <!-- Champ Date d'inscription -->
+                <Label text="Date d'inscription" style="-fx-font-size: 12px;"/>
+                <TextField fx:id="dateInscriptionField" promptText="Date d'inscription" style="-fx-background-color: #FFFFFF; -fx-border-color: #cccccc; -fx-padding: 4;" editable="false"/>
+
+                <!-- Détails de l'utilisateur -->
+                <Label text="Détails de l'utilisateur" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
+            </FlowPane>
+        </ScrollPane>
+
+    </center>
+</BorderPane>

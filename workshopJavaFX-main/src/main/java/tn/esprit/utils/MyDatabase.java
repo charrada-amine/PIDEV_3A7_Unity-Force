@@ -1,4 +1,7 @@
 package tn.esprit.utils;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -8,9 +11,10 @@ public class MyDatabase {
     private static MyDatabase instance;
     private Connection cnx;
 
-    private final String URL = "jdbc:mysql://localhost:3306/pi3a7";
-    private final String USER = "root";
-    private final String PASSWORD = "";
+    // Rendre les variables statiques
+    private static final String URL = "jdbc:mysql://localhost:3306/pi3a7";
+    private static final String USER = "root";
+    private static final String PASSWORD = "";
 
     private MyDatabase() {
         try {
@@ -28,6 +32,17 @@ public class MyDatabase {
         return instance;
     }
 
+    // Méthode statique pour obtenir la connexion
+    public static Connection getConnection() throws SQLException {
+        try {
+            // Utiliser les variables statiques
+            return DriverManager.getConnection(URL, USER, PASSWORD);
+        } catch (SQLException e) {
+            System.out.println("Erreur de connexion à la base de données : " + e.getMessage());
+            throw e;
+        }
+    }
+
     public Connection getCnx() {
         return cnx;
     }
@@ -43,4 +58,3 @@ public class MyDatabase {
         }
     }
 }
-

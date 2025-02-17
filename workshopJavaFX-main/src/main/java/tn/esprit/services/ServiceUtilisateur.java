@@ -273,4 +273,36 @@ public class ServiceUtilisateur {
     }
 
 
-}
+
+
+        // Méthode pour récupérer un utilisateur par son ID
+        public utilisateur getUtilisateurById(int userId) {
+            utilisateur user = null;
+
+            String query = "SELECT * FROM utilisateur WHERE id_utilisateur = ?";
+
+            try (Connection connection = MyDatabase.getConnection();
+                 PreparedStatement stmt = connection.prepareStatement(query)) {
+
+                stmt.setInt(1, userId); // Set l'ID dans la requête
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        // Si un utilisateur est trouvé
+                        user = new utilisateur();
+                        user.setId_utilisateur(rs.getInt("id_utilisateur"));
+                        user.setNom(rs.getString("nom"));
+                        user.setEmail(rs.getString("email"));
+                        // Ajouter d'autres champs si nécessaire
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                // Gérer les exceptions ici (par exemple, afficher un message d'erreur)
+            }
+
+            return user; // Retourner l'utilisateur trouvé ou null s'il n'existe pas
+        }
+    }
+
+
