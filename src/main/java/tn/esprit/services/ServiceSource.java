@@ -110,5 +110,26 @@ public class ServiceSource {
         } catch (SQLException e) {
             System.out.println("❌ Erreur lors de la mise à jour de la source : " + e.getMessage());
         }
+
     }
+
+    public List<Integer> getAllSourceIds() {
+        List<Integer> sourceIds = new ArrayList<>();
+        String query = "SELECT idSource FROM source"; // Requête pour récupérer les idsSource
+
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+
+            while (resultSet.next()) {
+                sourceIds.add(resultSet.getInt("idSource")); // Ajouter les ids dans la liste
+            }
+            System.out.println("✅ Récupération des idsSource réussie !");
+        } catch (SQLException e) {
+            System.out.println("❌ Erreur lors de la récupération des idsSource : " + e.getMessage());
+        }
+        return sourceIds;
+    }
+
 }
+
+

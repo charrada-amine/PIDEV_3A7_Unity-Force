@@ -20,6 +20,17 @@ public class profile {
         this.lampadaireId = lampadaireId;
     }
 
+    // Constructeur
+    public profile( String consommationJour, String consommationMois, String coutEstime, String dureeActivite, int sourceId, int lampadaireId) {
+
+        this.consommationJour = consommationJour;
+        this.consommationMois = consommationMois;
+        this.coutEstime = coutEstime;
+        this.dureeActivite = dureeActivite;
+        this.sourceId = sourceId;
+        this.lampadaireId = lampadaireId;
+    }
+
     // Getters et Setters
     public int getIdprofile() { return idprofile; }
     public void setIdprofile(int idprofile) { this.idprofile = idprofile; }

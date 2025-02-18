@@ -24,6 +24,15 @@ public class Source {
         this.etat = etat;
         this.dateInstallation = dateInstallation;
     }
+    // Constructeur sans ID (utilisé pour les nouvelles sources)
+    public Source(EnumType type, float capacite, float rendement, EnumEtat etat, LocalDate dateInstallation) {
+        this.type = type;
+        this.capacite = capacite;
+        this.rendement = rendement;
+        this.etat = etat;
+        this.dateInstallation = dateInstallation;
+    }
+
 
     // Getters et Setters
     public int getIdSource() { return idSource; }

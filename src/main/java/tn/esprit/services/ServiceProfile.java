@@ -2,13 +2,15 @@ package tn.esprit.services;
 
 import tn.esprit.utils.MyDatabase2;
 import tn.esprit.models.profile;
-
+import tn.esprit.models.Source;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ServiceProfile {
     private Connection connection;
+
+    private final ServiceSource serviceSource = new ServiceSource(); // Ajout de l'objet ServiceSource
 
     // 🔹 Initialisation de la connexion à la base de données
     public ServiceProfile() {
@@ -110,4 +112,7 @@ public class ServiceProfile {
             System.out.println("❌ Erreur lors de la mise à jour du profil : " + e.getMessage());
         }
     }
+
+    // 🔹 Récupérer les IDs des sources
+
 }

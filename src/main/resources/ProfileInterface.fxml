@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.GridPane?>
+
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.esprit.controller.ProfileController"
+      spacing="10" alignment="CENTER"
+      style="-fx-background-color: linear-gradient(to bottom, #e3f2fd, #bbdefb);
+             -fx-padding: 20; -fx-alignment: center;">
+
+    <!-- Titre principal -->
+    <Label text="Gestion des Profils"
+           style="-fx-font-size: 24px; -fx-font-weight: bold;
+                  -fx-text-fill: #004d99; -fx-padding: 10;"/>
+
+    <!-- Section d'ajout/modification de profil (en haut) -->
+    <VBox spacing="10" alignment="CENTER"
+          style="-fx-background-color: white; -fx-padding: 20px;
+                 -fx-border-color: #2980b9; -fx-border-radius: 15;
+                 -fx-background-radius: 15;
+                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0.5, 0, 8);">
+
+        <Label text="Ajouter/Modifier un Profil"
+               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+        <!-- Formulaire d'ajout/modification (disposition deux par deux) -->
+        <GridPane hgap="10" vgap="10" alignment="CENTER" style="-fx-padding: 10;">
+            <!-- Consommation Jour -->
+            <Label text="Consommation Jour (kWh) :" style="-fx-font-size: 14px; -fx-text-fill: #34495e; -fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtConsommationJour" prefWidth="200" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+            <!-- Consommation Mois -->
+            <Label text="Consommation Mois (kWh) :" style="-fx-font-size: 14px; -fx-text-fill: #34495e; -fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtConsommationMois" prefWidth="200" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+            <!-- Coût Estimé -->
+            <Label text="Coût Estimé (DT) :" style="-fx-font-size: 14px; -fx-text-fill: #34495e; -fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+            <TextField fx:id="txtCoutEstime" prefWidth="200" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+            <!-- Durée Activité -->
+            <Label text="Durée Activité (h) :" style="-fx-font-size: 14px; -fx-text-fill: #34495e; -fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+            <TextField fx:id="txtDureeActivite" prefWidth="200" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+
+            <!-- Lampadaire ID -->
+            <Label text="Lampadaire ID :" style="-fx-font-size: 14px; -fx-text-fill: #34495e; -fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtLampadaireId" prefWidth="200" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+            <!-- Source ID -->
+            <Label text="Source ID :" style="-fx-font-size: 14px; -fx-text-fill: #34495e; -fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+            <ComboBox fx:id="comboBoxSourceId" prefWidth="200" GridPane.rowIndex="2" GridPane.columnIndex="3"/>
+        </GridPane>
+
+        <!-- Boutons Ajouter/Modifier, Annuler et Retour -->
+        <HBox spacing="15" alignment="CENTER" style="-fx-padding: 10;">
+            <Button fx:id="btnAdd" text="Ajouter" onAction="#handleAdd"
+                    style="-fx-background-color: #27ae60; -fx-text-fill: white;
+                           -fx-font-weight: bold; -fx-padding: 8px 15px; -fx-background-radius: 8; -fx-font-size: 14px;"/>
+            <Button fx:id="btnCancel" text="Annuler" onAction="#handleCancel"
+                    style="-fx-background-color: #e74c3c; -fx-text-fill: white;
+                           -fx-font-weight: bold; -fx-padding: 8px 15px; -fx-background-radius: 8; -fx-font-size: 14px;"/>
+            <Button fx:id="btnBack" text="Retour" onAction="#handleBack"
+                    style="-fx-background-color: #ff4d4d; -fx-text-fill: white;
+                           -fx-font-weight: bold; -fx-padding: 8px 15px; -fx-background-radius: 8; -fx-font-size: 14px;"/>
+        </HBox>
+    </VBox>
+
+    <!-- Section d'affichage des profils (en bas) -->
+    <VBox spacing="12" alignment="CENTER" style="-fx-padding: 8; -fx-max-height: 700px; -fx-flex-grow: 1;">
+        <Label text="Liste des Profils"
+               style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+        <!-- Zone de défilement pour afficher les profils -->
+        <ScrollPane fitToWidth="true" style="-fx-border-color: transparent; -fx-max-height: 650px;">
+            <FlowPane fx:id="flowPaneProfiles" hgap="12" vgap="12"
+                      style="-fx-padding: 10; -fx-alignment: center;"/>
+        </ScrollPane>
+    </VBox>
+</VBox>
