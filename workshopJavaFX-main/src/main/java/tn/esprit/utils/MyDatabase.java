@@ -44,8 +44,17 @@ public class MyDatabase {
     }
 
     public Connection getCnx() {
+        try {
+            if (cnx == null || cnx.isClosed()) {
+                cnx = DriverManager.getConnection(URL, USER, PASSWORD);
+                System.out.println("✅ Nouvelle connexion établie !");
+            }
+        } catch (SQLException e) {
+            System.out.println("❌ Erreur lors de la réouverture de la connexion : " + e.getMessage());
+        }
         return cnx;
     }
+
 
     public void closeConnection() {
         try {

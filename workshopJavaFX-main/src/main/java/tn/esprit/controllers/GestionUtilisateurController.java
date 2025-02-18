@@ -1,6 +1,19 @@
 package tn.esprit.controllers;
 import java.time.format.DateTimeFormatter;
 import java.text.SimpleDateFormat;
+import tn.esprit.utils.MyDatabase;
+import tn.esprit.models.utilisateur;
+
+import tn.esprit.models.Role;
+import tn.esprit.models.Specialite;
+import java.util.Scanner;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import java.util.List;
+import java.text.SimpleDateFormat;
 
 import java.util.Date;
 import javafx.collections.FXCollections;
@@ -149,130 +162,161 @@ public class GestionUtilisateurController {
                 return "Rôle inconnu";
         }
     }
+    public boolean emailExists(String email) {
+        String query = "SELECT COUNT(*) FROM utilisateur WHERE email = ?";
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        try {
+            Connection connection = MyDatabase.getInstance().getCnx(); // Connexion partagée
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, email);
+            resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de la vérification de l'email : " + e.getMessage());
+        } finally {
+            try {
+                if (resultSet != null) resultSet.close();
+                if (preparedStatement != null) preparedStatement.close();
+            } catch (SQLException e) {
+                System.out.println("Erreur lors de la fermeture des ressources : " + e.getMessage());
+            }
+        }
+        return false;
+    }
+
 
     @FXML
     private void handleAddUser() {
-        Dialog<utilisateur> dialog = new Dialog<>();
-        dialog.setTitle("Nouvel Utilisateur");
+        try {
+            Dialog<utilisateur> dialog = new Dialog<>();
+            dialog.setTitle("Nouvel Utilisateur");
 
-        // Set up form components
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
+            // Configuration du formulaire
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
 
-        TextField nomField = new TextField();
-        TextField prenomField = new TextField();
-        TextField emailField = new TextField();
-        TextField passwordField = new TextField();
-        ComboBox<Role> roleCombo = new ComboBox<>();
-        roleCombo.getItems().addAll(Role.values());
+            TextField nomField = new TextField();
+            TextField prenomField = new TextField();
+            TextField emailField = new TextField();
+            TextField passwordField = new TextField();
+            ComboBox<Role> roleCombo = new ComboBox<>();
+            roleCombo.getItems().addAll(Role.values());
 
-        TextField zoneField = new TextField();
-        ComboBox<Specialite> specialiteCombo = new ComboBox<>();
-        specialiteCombo.getItems().addAll(Specialite.values());
-        TextField modulesField = new TextField();
+            TextField zoneField = new TextField();
+            ComboBox<Specialite> specialiteCombo = new ComboBox<>();
+            specialiteCombo.getItems().addAll(Specialite.values());
+            TextField modulesField = new TextField();
 
-        grid.addRow(0, new Label("Nom:"), nomField);
-        grid.addRow(1, new Label("Prénom:"), prenomField);
-        grid.addRow(2, new Label("Email:"), emailField);
-        grid.addRow(3, new Label("Mot de passe:"), passwordField);
-        grid.addRow(4, new Label("Rôle:"), roleCombo);
+            grid.addRow(0, new Label("Nom:"), nomField);
+            grid.addRow(1, new Label("Prénom:"), prenomField);
+            grid.addRow(2, new Label("Email:"), emailField);
+            grid.addRow(3, new Label("Mot de passe:"), passwordField);
+            grid.addRow(4, new Label("Rôle:"), roleCombo);
 
-        roleCombo.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            grid.getChildren().removeIf(node -> GridPane.getRowIndex(node) != null && GridPane.getRowIndex(node) >= 5);
-            if (newVal == Role.citoyen) {
-                grid.addRow(5, new Label("Zone ID:"), zoneField);
-            } else if (newVal == Role.technicien) {
-                grid.addRow(5, new Label("Spécialité:"), specialiteCombo);
-            } else if (newVal == Role.responsable) {
-                grid.addRow(5, new Label("Modules (csv):"), modulesField);
-            }
-        });
-
-        dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-        dialog.setResultConverter(buttonType -> {
-            if (buttonType == ButtonType.OK) {
-                // Validation des champs
-                if (nomField.getText().isEmpty()) {
-                    showAlert("Erreur de saisie", "Le nom ne peut pas être vide.");
-                    return null;
+            roleCombo.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+                grid.getChildren().removeIf(node -> GridPane.getRowIndex(node) != null && GridPane.getRowIndex(node) >= 5);
+                if (newVal == Role.citoyen) {
+                    grid.addRow(5, new Label("Zone ID:"), zoneField);
+                } else if (newVal == Role.technicien) {
+                    grid.addRow(5, new Label("Spécialité:"), specialiteCombo);
+                } else if (newVal == Role.responsable) {
+                    grid.addRow(5, new Label("Modules (csv):"), modulesField);
                 }
-                if (prenomField.getText().isEmpty()) {
-                    showAlert("Erreur de saisie", "Le prénom ne peut pas être vide.");
-                    return null;
-                }
-                if (emailField.getText().isEmpty() || !emailField.getText().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-                    showAlert("Erreur de saisie", "Veuillez entrer un email valide.");
-                    return null;
-                }
+            });
 
-// Vérification de l'unicité de l'email
-                if (serviceUtilisateur.isEmailExists(emailField.getText())) {
-                    showAlert("Erreur de saisie", "L'email est déjà utilisé.");
-                    return null;
-                }
+            dialog.getDialogPane().setContent(grid);
+            dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-                if (passwordField.getText().isEmpty() || passwordField.getText().length() < 8 || !passwordField.getText().matches(".*[A-Z].*") || !passwordField.getText().matches(".*\\d.*")) {
-                    showAlert("Erreur de saisie", "Le mot de passe doit comporter au moins 8 caractères, avec une majuscule et un chiffre.");
-                    return null;
-                }
-
-
-                if (roleCombo.getValue() == null) {
-                    showAlert("Erreur de saisie", "Veuillez sélectionner un rôle.");
-                    return null;
-                }
-
-                // Création d'un nouvel utilisateur avec les valeurs du formulaire
-                utilisateur user = new utilisateur(
-                        nomField.getText(),
-                        prenomField.getText(),
-                        emailField.getText(),
-                        passwordField.getText(),
-                        roleCombo.getValue(), // Rôle sélectionné
-                        new Date() // Date actuelle
-                );
-
-                // Gestion des cas en fonction du rôle sélectionné
-                switch (user.getRole()) {
-                    case citoyen:
-                        if (zoneField.getText().isEmpty() || !zoneField.getText().matches("\\d+")) {
-                            showAlert("Erreur de saisie", "La zone ID doit être un nombre entier.");
-                            return null;
-                        }
-                        int zoneId = Integer.parseInt(zoneField.getText());
-                        serviceUtilisateur.add(user, null, new ArrayList<>(), zoneId);
-                        break;
-                    case technicien:
-                        if (specialiteCombo.getValue() == null) {
-                            showAlert("Erreur de saisie", "Veuillez sélectionner une spécialité.");
-                            return null;
-                        }
-                        serviceUtilisateur.add(user, specialiteCombo.getValue(), new ArrayList<>(), 0);
-                        break;
-                    case responsable:
-                        if (modulesField.getText().isEmpty()) {
-                            showAlert("Erreur de saisie", "Veuillez entrer des modules.");
-                            return null;
-                        }
-                        List<String> modules = Arrays.asList(modulesField.getText().split("\\s*,\\s*"));
-                        serviceUtilisateur.add(user, null, modules, 0);
-                        break;
-                    default:
-                        showAlert("Erreur de rôle", "Rôle non reconnu.");
+            dialog.setResultConverter(buttonType -> {
+                if (buttonType == ButtonType.OK) {
+                    // Validation des champs
+                    if (nomField.getText().isEmpty()) {
+                        showAlert("Erreur de saisie", "Le nom ne peut pas être vide.");
                         return null;
+                    }
+                    if (prenomField.getText().isEmpty()) {
+                        showAlert("Erreur de saisie", "Le prénom ne peut pas être vide.");
+                        return null;
+                    }
+                    if (emailField.getText().isEmpty() || !emailField.getText().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                        showAlert("Erreur de saisie", "Veuillez entrer un email valide.");
+                        return null;
+                    }
+                    if (emailExists(emailField.getText())) {
+                        showAlert("Erreur de saisie", "L'email est déjà utilisé.");
+                        return null;
+                    }
+                    if (passwordField.getText().isEmpty() || passwordField.getText().length() < 8 ||
+                            !passwordField.getText().matches(".*[A-Z].*") || !passwordField.getText().matches(".*\\d.*")) {
+                        showAlert("Erreur de saisie", "Le mot de passe doit comporter au moins 8 caractères, avec une majuscule et un chiffre.");
+                        return null;
+                    }
+                    if (roleCombo.getValue() == null) {
+                        showAlert("Erreur de saisie", "Veuillez sélectionner un rôle.");
+                        return null;
+                    }
+
+                    utilisateur user = new utilisateur(
+                            nomField.getText(),
+                            prenomField.getText(),
+                            emailField.getText(),
+                            passwordField.getText(),
+                            roleCombo.getValue(),
+                            new Date()
+                    );
+
+                    try {
+                        switch (user.getRole()) {
+                            case citoyen:
+                                if (zoneField.getText().isEmpty() || !zoneField.getText().matches("\\d+")) {
+                                    showAlert("Erreur de saisie", "La zone ID doit être un nombre entier.");
+                                    return null;
+                                }
+                                int zoneId = Integer.parseInt(zoneField.getText());
+                                serviceUtilisateur.add(user, null, new ArrayList<>(), zoneId);
+                                break;
+                            case technicien:
+                                if (specialiteCombo.getValue() == null) {
+                                    showAlert("Erreur de saisie", "Veuillez sélectionner une spécialité.");
+                                    return null;
+                                }
+                                serviceUtilisateur.add(user, specialiteCombo.getValue(), new ArrayList<>(), 0);
+                                break;
+                            case responsable:
+                                if (modulesField.getText().isEmpty()) {
+                                    showAlert("Erreur de saisie", "Veuillez entrer des modules.");
+                                    return null;
+                                }
+                                List<String> modules = Arrays.asList(modulesField.getText().split("\\s*,\\s*"));
+                                serviceUtilisateur.add(user, null, modules, 0);
+                                break;
+                        }
+                    } catch (Exception e) {
+                        showAlert("Erreur", "Erreur lors de l'enregistrement : " + e.getMessage());
+                        return null;
+                    }
+
+                    return user;
                 }
+                return null;
+            });
 
-                return user;
-            }
-            return null;
-        });
-
-        dialog.showAndWait();
-        loadUsers();
+            dialog.showAndWait().ifPresent(user -> {
+                System.out.println("Utilisateur ajouté : " + user);
+                loadUsers(); // Recharge la liste des utilisateurs après l'ajout
+            });
+        } catch (Exception e) {
+            System.err.println("Erreur : " + e.getMessage());
+            e.printStackTrace();
+        }
     }
+
 
     @FXML
     private void handleUpdateUser() {

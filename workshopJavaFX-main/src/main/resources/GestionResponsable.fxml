@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.GestionResponsableController">
+    <!-- Barre d'outils supérieure -->
+    <top>
+        <HBox spacing="8" style="-fx-background-color: #f0f0f0; -fx-padding: 8;">
+            <Label text="Gestion des responsables" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+            <Region HBox.hgrow="ALWAYS" /> <!-- Espacement flexible pour aligner les boutons à droite -->
+            <Button text="Modifier" onAction="#handleUpdateResponsable" style="-fx-background-color: #FFC107; -fx-text-fill: black;" />
+            <Button text="Supprimer" onAction="#handleDeleteResponsable" style="-fx-background-color: #F44336; -fx-text-fill: white;" />
+        </HBox>
+    </top>
+
+    <!-- Zone centrale avec les responsables -->
+    <center>
+        <ScrollPane fx:id="scrollPane" fitToWidth="true" style="-fx-background: transparent;">
+            <FlowPane fx:id="responsableFlowPane"
+                      orientation="VERTICAL"
+                      hgap="15"
+                      vgap="15"
+                      alignment="CENTER">
+                <padding>
+                    <Insets top="15.0" right="15.0" bottom="15.0" left="15.0"/>
+                </padding>
+            </FlowPane>
+        </ScrollPane>
+    </center>
+
+    <!-- Footer -->
+    <bottom>
+        <Label text="Gestion des responsables - Application" style="-fx-font-size: 12px; -fx-text-fill: #555555;" alignment="CENTER">
+            <padding>
+                <Insets top="10" bottom="10"/>
+            </padding>
+        </Label>
+    </bottom>
+</BorderPane>

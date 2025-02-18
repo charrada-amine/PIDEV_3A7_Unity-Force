@@ -284,29 +284,15 @@ public class GestionTechnicienController {
                         serviceUtilisateur.updateField(selectedUser.getId_utilisateur(), "motdepasse", mdpField.getText());
                         break;
                     case "Spécialité":
-                        try {
-                            // Récupérer la spécialité sélectionnée dans le ComboBox
-                            String selectedSpecialiteString = specialiteCombo.getValue();
-                            if (selectedSpecialiteString != null && !selectedSpecialiteString.trim().isEmpty()) {
-                                // Convertir le String en Specialite (Enum)
-                                Specialite selectedSpecialite = Specialite.valueOf(selectedSpecialiteString);
-
-                                // Mettre à jour la base de données avec la spécialité sous forme de String
-                                serviceUtilisateur.updateField(
-                                        selectedUser.getId_utilisateur(),
-                                        "specialite",
-                                        selectedSpecialite.name()  // Convertir l'Enum en String pour la base de données
-                                );
-
-
+                        String selectedSpecialiteString = specialiteCombo.getValue();
+                        if (selectedSpecialiteString != null && !selectedSpecialiteString.trim().isEmpty()) {
+                            serviceUtilisateur.updateFieldTechnicien(
+                                    selectedUser.getId_utilisateur(),
+                                    "specialite",
+                                    selectedSpecialiteString
+                            );
                         } else {
-                                showAlert("Erreur", "Veuillez sélectionner une spécialité valide.");
-                            }
-
-                            System.out.println("✅ Spécialité mise à jour avec succès pour l'utilisateur ID : " + selectedUser.getId_utilisateur());
-                        } catch (Exception e) {
-                            showAlert("Erreur", "La mise à jour de la spécialité a échoué.");
-                            e.printStackTrace();
+                            showAlert("Erreur", "Veuillez sélectionner une spécialité valide.");
                         }
                         break;
 

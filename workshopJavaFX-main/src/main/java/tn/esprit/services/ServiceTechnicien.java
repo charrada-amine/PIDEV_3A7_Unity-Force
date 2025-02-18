@@ -203,25 +203,27 @@ public class ServiceTechnicien {
 
 
 
-    public void updateSpecialite(int idTechnicien, Specialite nouvelleSpecialite) {
-        // Mise à jour dans la table "technicien"
-        String query = "UPDATE technicien SET specialite = ? WHERE id_technicien = ?"; // Utiliser id_technicien dans "technicien"
+    public boolean isEmailExists(String email) {
+        String url = "jdbc:mysql://localhost:3306/pi3a7";
+        String username = "root"; // Remplacez par votre nom d'utilisateur
+        String password = ""; // Remplacez par votre mot de passe
 
-        try {
-            // Préparer la requête pour la mise à jour
-            PreparedStatement pstm = cnx.prepareStatement(query);
-            pstm.setString(1, nouvelleSpecialite.name()); // Convertir l'énumération en String pour le stockage
-            pstm.setInt(2, idTechnicien); // Passer l'ID du technicien
+        String query = "SELECT COUNT(*) FROM utilisateur WHERE email = ?";
 
-            int affectedRows = pstm.executeUpdate();
-            if (affectedRows > 0) {
-                System.out.println("✅ Spécialité mise à jour avec succès pour le technicien ID : " + idTechnicien);
-            } else {
-                System.out.println("❌ Aucun technicien trouvé avec l'ID : " + idTechnicien);
+        try (Connection connection = DriverManager.getConnection(url, username, password);
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setString(1, email);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1) > 0;
+                }
             }
         } catch (SQLException e) {
-            System.out.println("❌ Erreur SQL lors de la mise à jour de la spécialité : " + e.getMessage());
+            System.err.println("Erreur lors de la vérification de l'email : " + e.getMessage());
         }
+        return false;
     }
 
 

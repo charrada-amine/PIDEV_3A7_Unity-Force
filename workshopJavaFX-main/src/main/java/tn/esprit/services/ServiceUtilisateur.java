@@ -283,11 +283,61 @@ public class ServiceUtilisateur {
             System.out.println("❌ Erreur : La valeur pour zoneId doit être un nombre valide.");
         }
     }
+    public void updateFieldResponsable(int idResponsable, String fieldName, String newValue) {
+        String qry = "UPDATE responsable SET " + fieldName + " = ? WHERE id_responsable = ?";
+
+        try (PreparedStatement pstm = cnx.prepareStatement(qry)) {
+            // Préparer et exécuter la requête
+            pstm.setString(1, newValue);
+            pstm.setInt(2, idResponsable);
+
+            int affectedRows = pstm.executeUpdate();
+
+            if (affectedRows > 0) {
+                System.out.println("✅ " + fieldName + " mis à jour avec succès pour le responsable ID " + idResponsable);
+            } else {
+                System.out.println("❌ Aucun responsable trouvé avec l'ID " + idResponsable);
+            }
+        } catch (SQLException e) {
+            System.out.println("❌ Erreur SQL lors de la mise à jour : " + e.getMessage());
+        }
+    }
+
+    public void updateFieldTechnicien(int idTechnicien, String fieldName, String newValue) {
+
+        String qry = "UPDATE technicien SET " + fieldName + " = ? WHERE id_technicien = ?";
+
+        try (PreparedStatement pstm = cnx.prepareStatement(qry)) {
+            // Conversion spéciale pour le champ "specialite"
+            if (fieldName.equalsIgnoreCase("specialite")) {
+                try {
+                    Specialite selectedSpecialite = Specialite.valueOf(newValue); // Valider et convertir en Enum
+                    pstm.setString(1, selectedSpecialite.name()); // Utiliser le nom Enum en base de données
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException("Spécialité invalide : " + newValue);
+                }
+            } else {
+                pstm.setString(1, newValue); // Autres champs comme String
+            }
+
+            pstm.setInt(2, idTechnicien); // ID du technicien
+            int affectedRows = pstm.executeUpdate();
+
+            if (affectedRows > 0) {
+                System.out.println("✅ " + fieldName + " mis à jour avec succès pour le technicien ID " + idTechnicien);
+            } else {
+                System.out.println("❌ Aucun technicien trouvé avec l'ID " + idTechnicien);
+            }
+        } catch (SQLException e) {
+            System.out.println("❌ Erreur SQL lors de la mise à jour : " + e.getMessage());
+        }
+    }
 
 
 
 
-        // Méthode pour récupérer un utilisateur par son ID
+
+    // Méthode pour récupérer un utilisateur par son ID
         public utilisateur getUtilisateurById(int userId) {
             utilisateur user = null;
 
@@ -314,12 +364,12 @@ public class ServiceUtilisateur {
             }
 
             return user; // Retourner l'utilisateur trouvé ou null s'il n'existe pas
-        }
+        }/*
     public boolean isEmailExists(String email) {
         // Connexion à la base de données
         try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/pi3a7")) {
             // Requête SQL pour vérifier si l'email existe
-            String query = "SELECT COUNT(*) FROM utilisateurs WHERE email = ?";
+            String query = "SELECT COUNT(*) FROM utilisateur WHERE email = ?";
             try (PreparedStatement statement = connection.prepareStatement(query)) {
                 statement.setString(1, email);
 
@@ -337,10 +387,11 @@ public class ServiceUtilisateur {
         }
 
         return false; // Si une erreur se produit, supposez que l'email n'existe pas
-    }
+    }*/
 
     public void updateSpecialite(int idUtilisateur, Specialite selectedSpecialite) {
     }
+
 }
 
 
