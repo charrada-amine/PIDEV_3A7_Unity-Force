@@ -3,6 +3,7 @@ package tn.esprit.controllers;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import tn.esprit.models.responsable;
@@ -10,8 +11,13 @@ import tn.esprit.models.utilisateur;
 import tn.esprit.services.ServiceCitoyen;
 import tn.esprit.services.ServiceResponsable;
 import tn.esprit.services.ServiceUtilisateur;
+import tn.esprit.utils.MyDatabase;
 
 import javax.swing.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +49,8 @@ public class GestionResponsableController {
         TextField idField = new TextField(String.valueOf(responsable.getId_utilisateur()));
         idField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         idField.setEditable(false);
+        HBox idBox = new HBox(10, idLabel, idField); // Aligner le label et le champ ID
+        idBox.setAlignment(Pos.CENTER_LEFT); // Aligner à gauche
 
         // Champ Nom (non modifiable)
         Label nameLabel = new Label("Nom:");
@@ -50,6 +58,8 @@ public class GestionResponsableController {
         TextField nameField = new TextField(responsable.getNom());
         nameField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         nameField.setEditable(false);
+        HBox nameBox = new HBox(10, nameLabel, nameField); // Aligner le label et le champ Nom
+        nameBox.setAlignment(Pos.CENTER_LEFT);
 
         // Champ Prénom (non modifiable)
         Label prenomLabel = new Label("Prénom:");
@@ -57,6 +67,8 @@ public class GestionResponsableController {
         TextField prenomField = new TextField(responsable.getPrenom());
         prenomField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         prenomField.setEditable(false);
+        HBox prenomBox = new HBox(10, prenomLabel, prenomField); // Aligner le label et le champ Prénom
+        prenomBox.setAlignment(Pos.CENTER_LEFT);
 
         // Champ Email (non modifiable)
         Label emailLabel = new Label("Email:");
@@ -64,12 +76,17 @@ public class GestionResponsableController {
         TextField emailField = new TextField(responsable.getEmail());
         emailField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         emailField.setEditable(false);
+        HBox emailBox = new HBox(10, emailLabel, emailField); // Aligner le label et le champ Email
+        emailBox.setAlignment(Pos.CENTER_LEFT);
+
         // Champ Mot de passe (non modifiable)
         Label passwordLabel = new Label("Mot de passe:");
         passwordLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
         TextField passwordField = new TextField(responsable.getMotdepasse());
         passwordField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
-        passwordField.setEditable(false); // Non modifiable
+        passwordField.setEditable(false);
+        HBox passwordBox = new HBox(10, passwordLabel, passwordField); // Aligner le label et le champ Mot de passe
+        passwordBox.setAlignment(Pos.CENTER_LEFT);
 
         // Champ Date d'inscription (non modifiable)
         Label dateInscriptionLabel = new Label("Date d'inscription:");
@@ -78,6 +95,8 @@ public class GestionResponsableController {
         TextField dateField = new TextField(sdf.format(responsable.getDateinscription()));
         dateField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         dateField.setEditable(false);
+        HBox dateInscriptionBox = new HBox(10, dateInscriptionLabel, dateField); // Aligner le label et le champ Date d'inscription
+        dateInscriptionBox.setAlignment(Pos.CENTER_LEFT);
 
         // Champ Modules (non modifiable)
         Label modulesLabel = new Label("Modules:");
@@ -85,16 +104,20 @@ public class GestionResponsableController {
         TextArea modulesField = new TextArea(String.join(", ", responsable.getModules()));
         modulesField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         modulesField.setEditable(false);
+        modulesField.setPrefHeight(50); // Ajuster la hauteur pour afficher plusieurs modules
+        modulesField.setMaxWidth(150); // Réduire la largeur du champ Modules
+        HBox modulesBox = new HBox(10, modulesLabel, modulesField); // Aligner le label et le champ Modules
+        modulesBox.setAlignment(Pos.CENTER_LEFT);
 
-        // Ajouter les éléments à la carte
+        // Ajouter les HBoxes à la carte
         card.getChildren().addAll(
-                idLabel, idField,
-                nameLabel, nameField,
-                prenomLabel, prenomField,
-                emailLabel, emailField,
-                passwordLabel, passwordField,
-                dateInscriptionLabel, dateField,
-                modulesLabel, modulesField
+                idBox,
+                nameBox,
+                prenomBox,
+                emailBox,
+                passwordBox,
+                dateInscriptionBox,
+                modulesBox
         );
 
         return card;
@@ -134,7 +157,32 @@ public class GestionResponsableController {
         responsableFlowPane.getChildren().clear();
         responsableFlowPane.getChildren().addAll(responsableCards);
     }
+    public boolean emailExistsResponsable(String email) {
+        String query = "SELECT COUNT(*) FROM utilisateur WHERE email = ?";
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
 
+        try {
+            Connection connection = MyDatabase.getInstance().getCnx(); // Connexion partagée
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, email);
+            resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0; // Si le résultat est supérieur à 0, l'email existe
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de la vérification de l'email : " + e.getMessage());
+        } finally {
+            try {
+                if (resultSet != null) resultSet.close();
+                if (preparedStatement != null) preparedStatement.close();
+            } catch (SQLException e) {
+                System.out.println("Erreur lors de la fermeture des ressources : " + e.getMessage());
+            }
+        }
+        return false;
+    }
     @FXML
     private void handleUpdateResponsable() {
         // Créer un nouveau GridPane chaque fois que cette méthode est appelée
@@ -240,29 +288,57 @@ public class GestionResponsableController {
                     return null;
                 }
 
+                // Vérification de l'email (si le champ est modifié)
+                if ("Email".equals(fieldSelectionCombo.getValue()) && !emailField.getText().isEmpty()) {
+                    String email = emailField.getText();
+                    if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+                        showAlert("Erreur", "L'email doit être valide.");
+                        return null;
+                    }
+
+                    // Vérifier si l'email existe déjà
+                    if (emailExistsResponsable(email)) {
+                        showAlert("Erreur", "L'email est déjà utilisé.");
+                        return null;
+                    }
+                }
+
                 // Mettre à jour le champ sélectionné
                 switch (fieldSelectionCombo.getValue()) {
                     case "Nom":
+                        if (nomField.getText().isEmpty()) {
+                            showAlert("Erreur", "Le nom ne peut pas être vide.");
+                            return null;
+                        }
                         serviceUtilisateur.updateField(selectedResponsable.getId_utilisateur(), "nom", nomField.getText());
                         break;
                     case "Prénom":
+                        if (prenomField.getText().isEmpty()) {
+                            showAlert("Erreur", "Le prénom ne peut pas être vide.");
+                            return null;
+                        }
                         serviceUtilisateur.updateField(selectedResponsable.getId_utilisateur(), "prenom", prenomField.getText());
                         break;
                     case "Email":
                         serviceUtilisateur.updateField(selectedResponsable.getId_utilisateur(), "email", emailField.getText());
                         break;
                     case "Mot de passe":
+                        if (passwordField.getText().isEmpty() || passwordField.getText().length() < 8 ||
+                                !passwordField.getText().matches(".*[A-Z].*") || !passwordField.getText().matches(".*\\d.*")) {
+                            showAlert("Erreur de saisie", "Le mot de passe doit comporter au moins 8 caractères, avec une majuscule et un chiffre.");
+                            return null;
+                        }
                         serviceUtilisateur.updateField(selectedResponsable.getId_utilisateur(), "motdepasse", passwordField.getText());
                         break;
                     case "Modules":
-                        String modulesText = modulesField.getText(); // Récupérer le texte des modules
+                        String modulesText = modulesField.getText();
                         if (modulesText.isEmpty()) {
                             showAlert("Erreur", "Les modules ne peuvent pas être vides.");
                             return null;
                         }
 
                         // Valider le format des modules
-                        String[] modulesArray = modulesText.split(","); // Séparer par des virgules
+                        String[] modulesArray = modulesText.split(",");
                         for (String module : modulesArray) {
                             if (module.trim().isEmpty()) {
                                 showAlert("Erreur", "Chaque module doit être un texte non vide.");
@@ -275,7 +351,6 @@ public class GestionResponsableController {
 
                         try {
                             serviceUtilisateur.updateFieldResponsable(selectedResponsable.getId_utilisateur(), "modules", formattedModules);
-                            System.out.println("Modules mis à jour avec succès : " + formattedModules);
                         } catch (Exception e) {
                             e.printStackTrace();
                             showAlert("Erreur", "Échec de la mise à jour des modules : " + e.getMessage());
@@ -295,6 +370,7 @@ public class GestionResponsableController {
 
         dialog.showAndWait();
     }
+
 
     @FXML
     private void handleDeleteResponsable() {

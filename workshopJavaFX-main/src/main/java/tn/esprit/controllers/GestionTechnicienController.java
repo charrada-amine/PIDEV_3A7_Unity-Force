@@ -9,11 +9,17 @@ import tn.esprit.models.citoyen;
 import tn.esprit.models.technicien;
 import tn.esprit.models.Specialite;
 import tn.esprit.models.Specialite;
+import javafx.geometry.Pos;
 
 import tn.esprit.models.utilisateur;
 import tn.esprit.services.ServiceTechnicien;
 import tn.esprit.services.ServiceUtilisateur;
+import tn.esprit.utils.MyDatabase;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
@@ -60,9 +66,11 @@ public class GestionTechnicienController {
         // Champ ID (non modifiable)
         Label idLabel = new Label("ID:");
         idLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: black;");
-        TextField idField = new TextField(String.valueOf(technicien.getId_utilisateur())); // ID converti en texte
+        TextField idField = new TextField(String.valueOf(technicien.getId_utilisateur()));
         idField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
-        idField.setEditable(false); // ID ne doit pas être modifiable
+        idField.setEditable(false); // Non modifiable
+        HBox idBox = new HBox(10, idLabel, idField); // Aligner le label et le champ ID
+        idBox.setAlignment(Pos.CENTER_LEFT); // Aligner à gauche
 
         // Champ Nom (non modifiable)
         Label nameLabel = new Label("Nom:");
@@ -70,6 +78,8 @@ public class GestionTechnicienController {
         TextField nameField = new TextField(technicien.getNom());
         nameField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         nameField.setEditable(false); // Non modifiable
+        HBox nameBox = new HBox(10, nameLabel, nameField); // Aligner le label et le champ Nom
+        nameBox.setAlignment(Pos.CENTER_LEFT);
 
         // Champ Prénom (non modifiable)
         Label prenomLabel = new Label("Prénom:");
@@ -77,6 +87,8 @@ public class GestionTechnicienController {
         TextField prenomField = new TextField(technicien.getPrenom());
         prenomField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         prenomField.setEditable(false); // Non modifiable
+        HBox prenomBox = new HBox(10, prenomLabel, prenomField); // Aligner le label et le champ Prénom
+        prenomBox.setAlignment(Pos.CENTER_LEFT);
 
         // Champ Email (non modifiable)
         Label emailLabel = new Label("Email:");
@@ -84,6 +96,8 @@ public class GestionTechnicienController {
         TextField emailField = new TextField(technicien.getEmail());
         emailField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         emailField.setEditable(false); // Non modifiable
+        HBox emailBox = new HBox(10, emailLabel, emailField); // Aligner le label et le champ Email
+        emailBox.setAlignment(Pos.CENTER_LEFT);
 
         // Champ Mot de passe (non modifiable)
         Label passwordLabel = new Label("Mot de passe:");
@@ -91,13 +105,10 @@ public class GestionTechnicienController {
         TextField passwordField = new TextField(technicien.getMotdepasse());
         passwordField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         passwordField.setEditable(false); // Non modifiable
+        HBox passwordBox = new HBox(10, passwordLabel, passwordField); // Aligner le label et le champ Mot de passe
+        passwordBox.setAlignment(Pos.CENTER_LEFT);
 
-        // Champ Spécialité (non modifiable)
-        Label specialiteLabel = new Label("Spécialité:");
-        specialiteLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
-        TextField specialiteField = new TextField(technicien.getSpecialite().name());
-        specialiteField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
-        specialiteField.setEditable(false); // Non modifiable
+
 
         // Champ Date d'inscription (non modifiable)
         Label dateInscriptionLabel = new Label("Date d'inscription:");
@@ -106,21 +117,57 @@ public class GestionTechnicienController {
         TextField dateField = new TextField(sdf.format(technicien.getDateinscription()));
         dateField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         dateField.setEditable(false); // Non modifiable
+        HBox dateInscriptionBox = new HBox(10, dateInscriptionLabel, dateField); // Aligner le label et le champ Date d'inscription
+        dateInscriptionBox.setAlignment(Pos.CENTER_LEFT);
 
-        // Ajouter les éléments à la carte
+        // Champ Spécialité (non modifiable)
+        Label specialiteLabel = new Label("Spécialité:");
+        specialiteLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
+        TextField specialiteField = new TextField(technicien.getSpecialite().name());
+        specialiteField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
+        specialiteField.setEditable(false); // Non modifiable
+        HBox specialiteBox = new HBox(10, specialiteLabel, specialiteField); // Aligner le label et le champ Spécialité
+        specialiteBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Ajouter les HBoxes à la carte
         card.getChildren().addAll(
-                idLabel, idField,
-                nameLabel, nameField,
-                prenomLabel, prenomField,
-                emailLabel, emailField,
-                passwordLabel, passwordField,
-                specialiteLabel, specialiteField,
-                dateInscriptionLabel, dateField
+                idBox,
+                nameBox,
+                prenomBox,
+                emailBox,
+                passwordBox,
+                dateInscriptionBox,
+                specialiteBox
         );
 
         return card;
     }
+    public boolean emailExistsTechnicien(String email) {
+        String query = "SELECT COUNT(*) FROM utilisateur WHERE email = ?";
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
 
+        try {
+            Connection connection = MyDatabase.getInstance().getCnx(); // Connexion partagée
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, email);
+            resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0; // Si le résultat est supérieur à 0, l'email existe
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de la vérification de l'email : " + e.getMessage());
+        } finally {
+            try {
+                if (resultSet != null) resultSet.close();
+                if (preparedStatement != null) preparedStatement.close();
+            } catch (SQLException e) {
+                System.out.println("Erreur lors de la fermeture des ressources : " + e.getMessage());
+            }
+        }
+        return false;
+    }
 
     @FXML
     private void loadUsers() {
@@ -269,6 +316,50 @@ public class GestionTechnicienController {
                     return null;
                 }
 
+                // Vérifier que le champ de modification est sélectionné
+                if (fieldSelectionCombo.getValue().isEmpty()) {
+                    showAlert("Erreur", "Veuillez sélectionner un champ à modifier.");
+                    return null;
+                }
+
+                // Vérification des champs avant modification
+                if (fieldSelectionCombo.getValue().equals("Nom") && nomField.getText().isEmpty()) {
+                    showAlert("Erreur", "Le nom ne peut pas être vide.");
+                    return null;
+                }
+                if (fieldSelectionCombo.getValue().equals("Prénom") && prenomField.getText().isEmpty()) {
+                    showAlert("Erreur", "Le prénom ne peut pas être vide.");
+                    return null;
+                }
+                if (fieldSelectionCombo.getValue().equals("Email")) {
+                    String email = emailField.getText();
+
+                    // Vérification si l'email est vide ou invalide
+                    if (email.isEmpty() || !email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                        showAlert("Erreur", "L'email est invalide ou vide.");
+                        return null;
+                    }
+
+                    // Vérifier si l'email existe déjà pour un autre technicien
+                    if (emailExistsTechnicien(email)) {
+                        showAlert("Erreur de saisie", "L'email est déjà utilisé.");
+                        return null;
+                    }
+                }
+
+                // Vérification du mot de passe
+                if (fieldSelectionCombo.getValue().equals("Mot de passe") &&
+                        (mdpField.getText().isEmpty() || mdpField.getText().length() < 8 ||
+                                !mdpField.getText().matches(".*[A-Z].*") || !mdpField.getText().matches(".*\\d.*"))) {
+                    showAlert("Erreur de saisie", "Le mot de passe doit comporter au moins 8 caractères, avec une majuscule et un chiffre.");
+                    return null;
+                }
+
+                // Mettre à jour le mot de passe si tout est valide
+                if (fieldSelectionCombo.getValue().equals("Mot de passe")) {
+                    serviceUtilisateur.updateField(selectedUser.getId_utilisateur(), "motdepasse", mdpField.getText());
+                }
+
                 // Mettre à jour le champ sélectionné
                 switch (fieldSelectionCombo.getValue()) {
                     case "Nom":
@@ -293,12 +384,9 @@ public class GestionTechnicienController {
                             );
                         } else {
                             showAlert("Erreur", "Veuillez sélectionner une spécialité valide.");
+                            return null;
                         }
                         break;
-
-
-
-
                     default:
                         showAlert("Erreur", "Aucun champ sélectionné pour la modification.");
                         return null;

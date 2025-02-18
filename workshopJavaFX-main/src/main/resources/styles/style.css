@@ -1,0 +1,112 @@
+/* Nouvelle palette de couleurs */
+.root {
+    -primary: #4361ee;
+    -secondary: #3f37c9;
+    -success: #06d6a0;
+    -danger: #ef476f;
+    -light: #f8f9fa;
+    -dark: #212529;
+    -card-bg: #ffffff;
+}
+
+/* Fond général */
+.tab-pane, .border-pane {
+    -fx-background-color: -light;
+}
+
+/* Cartes modernisées */
+.card {
+    -fx-background-color: -card-bg;
+    -fx-background-radius: 16;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 16, 0, 4, 4);
+    -fx-padding: 24;
+    -fx-border-color: #e9ecef;
+    -fx-border-radius: 16;
+    -fx-border-width: 1;
+    -fx-transition: all 0.3s;
+}
+
+.card:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(67,97,238,0.15), 24, 0, 8, 8);
+}
+
+/* Typographie moderne */
+.text {
+    -fx-font-family: 'Segoe UI';
+}
+
+.card-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+    -fx-fill: -dark;
+}
+
+/* Boutons redessinés */
+.btn {
+    -fx-font-weight: 600;
+    -fx-background-radius: 8;
+    -fx-padding: 12 24;
+    -fx-cursor: hand;
+    -fx-border-width: 0;
+    -fx-font-size: 14px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 0, 0, 2, 2);
+}
+
+.btn-primary {
+    -fx-background-color: -primary;
+    -fx-text-fill: white;
+}
+
+.btn-primary:hover {
+    -fx-background-color: #3f37c9;
+}
+
+.btn-danger {
+    -fx-background-color: -danger;
+    -fx-text-fill: white;
+}
+
+.btn-danger:hover {
+    -fx-background-color: #d90429;
+}
+
+/* Champs de formulaire modernes */
+.modern-input {
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 14;
+    -fx-font-size: 14px;
+    -fx-background-color: -light;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1;
+    -fx-prompt-text-fill: #adb5bd;
+}
+
+.modern-input:focused {
+    -fx-border-color: -primary;
+    -fx-effect: dropshadow(three-pass-box, rgba(67,97,238,0.15), 0, 0, 0, 4);
+}
+
+/* Onglets modernes */
+.tab-pane .tab-header-area .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.tab {
+    -fx-background-color: transparent;
+    -fx-padding: 16 32;
+}
+
+.tab:selected {
+    -fx-border-color: -primary;
+    -fx-border-width: 0 0 3 0;
+}
+
+.tab-label {
+    -fx-font-weight: 600;
+    -fx-text-fill: #495057;
+}
+
+.tab:selected .tab-label {
+    -fx-text-fill: -primary;
+}

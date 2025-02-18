@@ -1,6 +1,8 @@
 package tn.esprit.controllers;
 import java.time.format.DateTimeFormatter;
 import java.text.SimpleDateFormat;
+
+import javafx.geometry.Pos;
 import tn.esprit.utils.MyDatabase;
 import tn.esprit.models.utilisateur;
 
@@ -88,6 +90,8 @@ public class GestionUtilisateurController {
         TextField idField = new TextField(String.valueOf(user.getId_utilisateur()));
         idField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         idField.setEditable(false); // Non modifiable
+        HBox idBox = new HBox(10, idLabel, idField); // Aligner le label et le champ ID
+        idBox.setAlignment(Pos.CENTER_LEFT); // Aligner à gauche
 
         // Champ Nom
         Label nameLabel = new Label("Nom:");
@@ -95,6 +99,8 @@ public class GestionUtilisateurController {
         TextField nameField = new TextField(user.getNom());
         nameField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         nameField.setEditable(false); // Non modifiable
+        HBox nameBox = new HBox(10, nameLabel, nameField); // Aligner le label et le champ Nom
+        nameBox.setAlignment(Pos.CENTER_LEFT);
 
         // Champ Prénom
         Label prenomLabel = new Label("Prénom:");
@@ -102,6 +108,8 @@ public class GestionUtilisateurController {
         TextField prenomField = new TextField(user.getPrenom());
         prenomField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         prenomField.setEditable(false); // Non modifiable
+        HBox prenomBox = new HBox(10, prenomLabel, prenomField); // Aligner le label et le champ Prénom
+        prenomBox.setAlignment(Pos.CENTER_LEFT);
 
         // Champ Email
         Label emailLabel = new Label("Email:");
@@ -109,6 +117,8 @@ public class GestionUtilisateurController {
         TextField emailField = new TextField(user.getEmail());
         emailField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         emailField.setEditable(false); // Non modifiable
+        HBox emailBox = new HBox(10, emailLabel, emailField); // Aligner le label et le champ Email
+        emailBox.setAlignment(Pos.CENTER_LEFT);
 
         // Champ Mot de passe
         Label passwordLabel = new Label("Mot de passe:");
@@ -116,6 +126,8 @@ public class GestionUtilisateurController {
         TextField mdpfield = new TextField(user.getMotdepasse());
         mdpfield.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         mdpfield.setEditable(false); // Non modifiable
+        HBox mdpBox = new HBox(10, passwordLabel, mdpfield); // Aligner le label et le champ Mot de passe
+        mdpBox.setAlignment(Pos.CENTER_LEFT);
 
         // Champ Rôle
         Label roleLabel = new Label("Rôle:");
@@ -123,6 +135,8 @@ public class GestionUtilisateurController {
         TextField roleField = new TextField(user.getRole().name());
         roleField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         roleField.setEditable(false); // Non modifiable
+        HBox roleBox = new HBox(10, roleLabel, roleField); // Aligner le label et le champ Rôle
+        roleBox.setAlignment(Pos.CENTER_LEFT);
 
         // Champ Date d'inscription
         Label dateInscriptionLabel = new Label("Date d'inscription");
@@ -132,15 +146,14 @@ public class GestionUtilisateurController {
         TextField dateinscription = new TextField(dateInscriptionString);
         dateinscription.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         dateinscription.setEditable(false); // Non modifiable
+        HBox dateInscriptionBox = new HBox(10, dateInscriptionLabel, dateinscription); // Aligner le label et le champ Date d'inscription
+        dateInscriptionBox.setAlignment(Pos.CENTER_LEFT);
 
-        // Ajouter les labels et champs de texte à la carte
-        card.getChildren().addAll(idLabel, idField, nameLabel, nameField, prenomLabel, prenomField,
-                emailLabel, emailField, passwordLabel, mdpfield, roleLabel, roleField,
-                dateInscriptionLabel, dateinscription);
+        // Ajouter les HBoxes à la carte
+        card.getChildren().addAll(idBox, nameBox, prenomBox, emailBox, mdpBox, roleBox, dateInscriptionBox);
 
         return card;
     }
-
 
 
     private String getRoleDetails(utilisateur user) {
@@ -404,6 +417,38 @@ public class GestionUtilisateurController {
                     userId = Integer.parseInt(userIdText);
                 } catch (NumberFormatException e) {
                     showAlert("Erreur", "L'ID de l'utilisateur doit être un nombre entier.");
+                    return null;
+                }
+
+                // Vérifier que le champ de modification est sélectionné
+                if (fieldSelectionCombo.getValue().isEmpty()) {
+                    showAlert("Erreur", "Veuillez sélectionner un champ à modifier.");
+                    return null;
+                }
+
+                // Vérifier que le champ à modifier est rempli si visible
+                if (fieldSelectionCombo.getValue().equals("Nom") && nomField.getText().isEmpty()) {
+                    showAlert("Erreur", "Le nom ne peut pas être vide.");
+                    return null;
+                }
+                if (fieldSelectionCombo.getValue().equals("Prénom") && prenomField.getText().isEmpty()) {
+                    showAlert("Erreur", "Le prénom ne peut pas être vide.");
+                    return null;
+                }
+                if (fieldSelectionCombo.getValue().equals("Email") && emailField.getText().isEmpty() || !emailField.getText().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                    showAlert("Erreur", "L'email ne peut pas être vide.");
+                    return null;
+                }
+                if (emailExists(emailField.getText())) {
+                    showAlert("Erreur de saisie", "L'email est déjà utilisé.");
+                    return null;
+                }
+                if (fieldSelectionCombo.getValue().equals("Mot de passe") && mdpField.getText().isEmpty()) {
+                    showAlert("Erreur", "Le mot de passe ne peut pas être vide.");
+                    return null;
+                }
+                if (fieldSelectionCombo.getValue().equals("Mot de passe") && mdpField.getText().length() < 6) {
+                    showAlert("Erreur", "Le mot de passe doit avoir au moins 6 caractères.");
                     return null;
                 }
 

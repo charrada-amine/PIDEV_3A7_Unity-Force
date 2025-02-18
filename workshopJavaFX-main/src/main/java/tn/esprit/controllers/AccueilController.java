@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public class AccueilController {
 
-    // Méthode pour ouvrir l'interface de gestion des utilisateurs
+    // Méthode pour afficher l'écran d'accueil en plein écran
     @FXML
     private void ouvrirInterfaceTous() {
         try {
@@ -18,15 +18,22 @@ public class AccueilController {
             Parent root = loader.load();
 
             Stage stage = new Stage();
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+
+            stage.setScene(scene);
             stage.setTitle("Gestion des Utilisateurs");
+
+            // Passer la fenêtre en plein écran
+            stage.setMaximized(true); // Maximiser la fenêtre
+            // stage.setFullScreen(true); // (Optionnel) Activer le mode plein écran complet
+
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    // Méthode pour ouvrir l'interface de gestion des citoyens
+    // Autres méthodes pour ouvrir d'autres interfaces
     @FXML
     private void ouvrirInterfaceCitoyens() {
         try {
@@ -34,15 +41,20 @@ public class AccueilController {
             Parent root = loader.load();
 
             Stage stage = new Stage();
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+
+            stage.setScene(scene);
             stage.setTitle("Gestion des Citoyens");
+
+            // Maximiser automatiquement
+            stage.setMaximized(true);
+
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    // Méthode pour ouvrir l'interface de gestion des techniciens
     @FXML
     private void ouvrirInterfaceTechniciens() {
         try {
@@ -50,15 +62,20 @@ public class AccueilController {
             Parent root = loader.load();
 
             Stage stage = new Stage();
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+
+            stage.setScene(scene);
             stage.setTitle("Gestion des Techniciens");
+
+            // Maximiser automatiquement
+            stage.setMaximized(true);
+
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    // Méthode pour ouvrir l'interface de gestion des responsables
     @FXML
     private void ouvrirInterfaceResponsables() {
         try {
@@ -66,11 +83,18 @@ public class AccueilController {
             Parent root = loader.load();
 
             Stage stage = new Stage();
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+
+            stage.setScene(scene);
             stage.setTitle("Gestion des Responsables");
+
+            // Maximiser automatiquement
+            stage.setMaximized(true);
+
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
 }
