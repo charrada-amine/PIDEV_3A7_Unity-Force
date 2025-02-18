@@ -6,91 +6,106 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import tn.esprit.models.citoyen;
-import tn.esprit.models.utilisateur;
-import java.util.Optional;
+import tn.esprit.models.technicien;
+import tn.esprit.models.Specialite;
+import tn.esprit.models.Specialite;
 
-import tn.esprit.services.ServiceCitoyen;
+import tn.esprit.models.utilisateur;
+import tn.esprit.services.ServiceTechnicien;
 import tn.esprit.services.ServiceUtilisateur;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-public class GestionCitoyenController {
+public class GestionTechnicienController {
 
     @FXML
-    private FlowPane citoyenFlowPane; // Correspond à 'fx:id="citoyenFlowPane"' dans le FXML
+    private FlowPane technicienFlowPane; // Correspond à 'fx:id="technicienFlowPane"' dans le FXML
     private final ServiceUtilisateur serviceUtilisateur = new ServiceUtilisateur();
-    private final ServiceCitoyen serviceCitoyen = new ServiceCitoyen();
+    private final ServiceTechnicien serviceTechnicien = new ServiceTechnicien();
+    @FXML
+
+    private ComboBox<String> specialiteCombo = new ComboBox<>();
+
+
     @FXML
     private void initialize() {
-        if (citoyenFlowPane == null) {
-            System.err.println("Erreur : 'citoyenFlowPane' est nul. Vérifiez le fichier FXML.");
+        if (technicienFlowPane == null) {
+            System.err.println("Erreur : 'technicienFlowPane' est nul. Vérifiez le fichier FXML.");
         } else {
-            System.out.println("FlowPane 'citoyenFlowPane' initialisé correctement.");
-            loadUsers(); // Charger les citoyens
+            System.out.println("FlowPane 'technicienFlowPane' initialisé correctement.");
+            loadUsers(); // Charger les techniciens
         }
+            if (specialiteCombo != null) {
+                // Initialiser le ComboBox avec les noms des valeurs de l'énumération Specialite
+                specialiteCombo.setItems(FXCollections.observableArrayList(
+                        Arrays.stream(Specialite.values())
+                                .map(Specialite::name) // Récupérer le nom des spécialités sous forme de String
+                                .collect(Collectors.toList())
+                ));
+            } else {
+                System.err.println("Erreur : 'specialiteCombo' est nul.");
+            }
+
+
     }
 
-    private VBox createUserCard(citoyen citoyen) {
+    private VBox createTechnicienCard(technicien technicien) {
         VBox card = new VBox(10);
         card.setStyle("-fx-border-color: #ddd; -fx-border-width: 1; -fx-padding: 10; -fx-background-color: #f9f9f9; -fx-alignment: center;");
 
         // Champ ID (non modifiable)
         Label idLabel = new Label("ID:");
         idLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: black;");
-        TextField idField = new TextField(String.valueOf(citoyen.getId_utilisateur())); // ID converti en texte
+        TextField idField = new TextField(String.valueOf(technicien.getId_utilisateur())); // ID converti en texte
         idField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
-        idField.setEditable(false); // Non modifiable
+        idField.setEditable(false); // ID ne doit pas être modifiable
 
         // Champ Nom (non modifiable)
         Label nameLabel = new Label("Nom:");
         nameLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
-        TextField nameField = new TextField(citoyen.getNom());
+        TextField nameField = new TextField(technicien.getNom());
         nameField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         nameField.setEditable(false); // Non modifiable
 
         // Champ Prénom (non modifiable)
         Label prenomLabel = new Label("Prénom:");
         prenomLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
-        TextField prenomField = new TextField(citoyen.getPrenom());
+        TextField prenomField = new TextField(technicien.getPrenom());
         prenomField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         prenomField.setEditable(false); // Non modifiable
 
         // Champ Email (non modifiable)
         Label emailLabel = new Label("Email:");
         emailLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
-        TextField emailField = new TextField(citoyen.getEmail());
+        TextField emailField = new TextField(technicien.getEmail());
         emailField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         emailField.setEditable(false); // Non modifiable
 
         // Champ Mot de passe (non modifiable)
         Label passwordLabel = new Label("Mot de passe:");
         passwordLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
-        TextField passwordField = new TextField(citoyen.getMotdepasse());
+        TextField passwordField = new TextField(technicien.getMotdepasse());
         passwordField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         passwordField.setEditable(false); // Non modifiable
 
-        // Champ Rôle (non modifiable)
-        Label roleLabel = new Label("Rôle:");
-        roleLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
-        TextField roleField = new TextField(citoyen.getRole().name()); // Convertir le rôle en texte
-        roleField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
-        roleField.setEditable(false); // Lecture seule
+        // Champ Spécialité (non modifiable)
+        Label specialiteLabel = new Label("Spécialité:");
+        specialiteLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
+        TextField specialiteField = new TextField(technicien.getSpecialite().name());
+        specialiteField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
+        specialiteField.setEditable(false); // Non modifiable
 
         // Champ Date d'inscription (non modifiable)
         Label dateInscriptionLabel = new Label("Date d'inscription:");
         dateInscriptionLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        TextField dateField = new TextField(sdf.format(citoyen.getDateinscription()));
+        TextField dateField = new TextField(sdf.format(technicien.getDateinscription()));
         dateField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         dateField.setEditable(false); // Non modifiable
-
-        // Champ Zone ID (non modifiable)
-        Label zoneIdLabel = new Label("Zone ID:");
-        zoneIdLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
-        TextField zoneIdField = new TextField(String.valueOf(citoyen.getZoneId())); // Convertir l'entier Zone ID en texte
-        zoneIdField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
-        zoneIdField.setEditable(false); // Non modifiable
 
         // Ajouter les éléments à la carte
         card.getChildren().addAll(
@@ -99,9 +114,8 @@ public class GestionCitoyenController {
                 prenomLabel, prenomField,
                 emailLabel, emailField,
                 passwordLabel, passwordField,
-                roleLabel, roleField,
-                dateInscriptionLabel, dateField,
-                zoneIdLabel, zoneIdField
+                specialiteLabel, specialiteField,
+                dateInscriptionLabel, dateField
         );
 
         return card;
@@ -110,58 +124,60 @@ public class GestionCitoyenController {
 
     @FXML
     private void loadUsers() {
-        if (citoyenFlowPane == null) {
-            System.err.println("Erreur : 'citoyenFlowPane' est nul lors de l'appel de 'loadUsers'.");
+        if (technicienFlowPane == null) {
+            System.err.println("Erreur : 'technicienFlowPane' est nul lors de l'appel de 'loadTechniciens'.");
             return;
         }
 
-        ServiceCitoyen serviceCitoyen = new ServiceCitoyen();
-        List<citoyen> citoyens;
+        ServiceTechnicien serviceTechnicien = new ServiceTechnicien();
+        List<technicien> techniciens;
 
         try {
-            citoyens = serviceCitoyen.getAllCitoyens();
+            techniciens = serviceTechnicien.getAllTechniciens();
         } catch (Exception e) {
-            System.err.println("Erreur lors de la récupération des citoyens : " + e.getMessage());
+            System.err.println("Erreur lors de la récupération des techniciens : " + e.getMessage());
             e.printStackTrace();
             return;
         }
 
-        if (citoyens == null || citoyens.isEmpty()) {
-            System.out.println("Aucun citoyen trouvé.");
-            citoyenFlowPane.getChildren().clear();
+        if (techniciens == null || techniciens.isEmpty()) {
+            System.out.println("Aucun technicien trouvé.");
+            technicienFlowPane.getChildren().clear();
             return;
         }
 
-        ObservableList<VBox> citoyenCards = FXCollections.observableArrayList();
+        ObservableList<VBox> technicienCards = FXCollections.observableArrayList();
 
-        for (citoyen c : citoyens) {
-            VBox citoyenCard = createUserCard(c);
-            citoyenCards.add(citoyenCard);
+        for (technicien t : techniciens) {
+            VBox technicienCard = createTechnicienCard(t);
+            technicienCards.add(technicienCard);
         }
 
-        citoyenFlowPane.getChildren().clear();
-        citoyenFlowPane.getChildren().addAll(citoyenCards);
+        technicienFlowPane.getChildren().clear();
+        technicienFlowPane.getChildren().addAll(technicienCards);
     }
-    private citoyen getSelectedCitoyen() {
+
+
+    private technicien getSelectedTechnicien() {
         // TODO: Implémentez la logique pour récupérer l'élément sélectionné.
         // Par exemple, vous pouvez avoir une liste ou une table de citoyens.
         return null; // Remplacez `null` par la sélection réelle.
     }
     @FXML
-    private void handleUpdateCitoyen() {
+    private void handleUpdateTechnicien() {
         // Créer un GridPane pour le formulaire de modification
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
 
-        // Champ pour entrer l'ID de l'utilisateur/citoyen
-        TextField userIdField = new TextField();
-        grid.addRow(0, new Label("Entrez l'ID de l'utilisateur/citoyen:"), userIdField);
+        // Champ pour entrer l'ID du technicien
+        TextField technicienIdField = new TextField();
+        grid.addRow(0, new Label("Entrez l'ID du technicien:"), technicienIdField);
 
         // Champ pour sélectionner quel champ modifier
         ComboBox<String> fieldSelectionCombo = new ComboBox<>();
         fieldSelectionCombo.getItems().add(""); // Option vide par défaut
-        fieldSelectionCombo.getItems().addAll("Nom", "Prénom", "Email", "Mot de passe", "Zone ID");
+        fieldSelectionCombo.getItems().addAll("Nom", "Prénom", "Email", "Mot de passe", "Spécialité");
         fieldSelectionCombo.getSelectionModel().selectFirst(); // Sélectionne l'option vide par défaut
 
         // Champs pour les différentes modifications
@@ -169,7 +185,8 @@ public class GestionCitoyenController {
         TextField prenomField = new TextField();
         TextField emailField = new TextField();
         TextField mdpField = new TextField();
-        TextField zoneIdField = new TextField(); // Nouveau champ pour Zone ID
+        ComboBox<String> specialiteCombo = new ComboBox<>(); // Spécialité sous forme de ComboBox
+        specialiteCombo.getItems().addAll("maintenance", "electricite", "autre");
 
         // Ajout des champs au GridPane
         grid.addRow(1, new Label("Sélectionnez le champ à modifier:"), fieldSelectionCombo);
@@ -177,14 +194,14 @@ public class GestionCitoyenController {
         grid.addRow(3, new Label("Prénom:"), prenomField);
         grid.addRow(4, new Label("Email:"), emailField);
         grid.addRow(5, new Label("Mot de passe:"), mdpField);
-        grid.addRow(6, new Label("Zone ID:"), zoneIdField); // Ajout du champ Zone ID
+        grid.addRow(6, new Label("Spécialité:"), specialiteCombo);
 
         // Masquer tous les champs de modification par défaut
         nomField.setVisible(false);
         prenomField.setVisible(false);
         emailField.setVisible(false);
         mdpField.setVisible(false);
-        zoneIdField.setVisible(false);
+        specialiteCombo.setVisible(false);
 
         // Création des boutons OK et Annuler
         ButtonType okButton = ButtonType.OK;
@@ -192,7 +209,7 @@ public class GestionCitoyenController {
 
         // Création du dialogue
         Dialog<utilisateur> dialog = new Dialog<>();
-        dialog.setTitle("Modifier Utilisateur / Citoyen");
+        dialog.setTitle("Modifier Technicien");
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(okButton, cancelButton);
 
@@ -203,7 +220,7 @@ public class GestionCitoyenController {
             prenomField.setVisible(false);
             emailField.setVisible(false);
             mdpField.setVisible(false);
-            zoneIdField.setVisible(false);
+            specialiteCombo.setVisible(false);
 
             // Afficher uniquement le champ sélectionné
             if (newValue != null && !newValue.isEmpty()) {
@@ -220,8 +237,8 @@ public class GestionCitoyenController {
                     case "Mot de passe":
                         mdpField.setVisible(true);
                         break;
-                    case "Zone ID":
-                        zoneIdField.setVisible(true);
+                    case "Spécialité":
+                        specialiteCombo.setVisible(true);
                         break;
                 }
             }
@@ -230,25 +247,25 @@ public class GestionCitoyenController {
         // Gérer le résultat du dialogue
         dialog.setResultConverter(button -> {
             if (button == okButton) {
-                // Récupérer l'ID utilisateur/citoyen et le valider
-                String userIdText = userIdField.getText();
-                if (userIdText.isEmpty()) {
-                    showAlert("Erreur", "L'ID de l'utilisateur/citoyen ne peut pas être vide.");
+                // Récupérer l'ID du technicien et le valider
+                String technicienIdText = technicienIdField.getText();
+                if (technicienIdText.isEmpty()) {
+                    showAlert("Erreur", "L'ID du technicien ne peut pas être vide.");
                     return null;
                 }
 
-                int userId;
+                int technicienId;
                 try {
-                    userId = Integer.parseInt(userIdText);
+                    technicienId = Integer.parseInt(technicienIdText);
                 } catch (NumberFormatException e) {
                     showAlert("Erreur", "L'ID doit être un nombre entier.");
                     return null;
                 }
 
-                // Vérifier si c'est un utilisateur ou un citoyen
-                utilisateur selectedUser = serviceUtilisateur.getUtilisateurById(userId);
+                // Vérifier si le technicien existe
+                utilisateur selectedUser = serviceUtilisateur.getUtilisateurById(technicienId);
                 if (selectedUser == null) {
-                    showAlert("Erreur", "Aucun utilisateur/citoyen trouvé avec cet ID.");
+                    showAlert("Erreur", "Aucun technicien trouvé avec cet ID.");
                     return null;
                 }
 
@@ -266,21 +283,43 @@ public class GestionCitoyenController {
                     case "Mot de passe":
                         serviceUtilisateur.updateField(selectedUser.getId_utilisateur(), "motdepasse", mdpField.getText());
                         break;
-                    case "Zone ID":
+                    case "Spécialité":
                         try {
-                            int newZoneId = Integer.parseInt(zoneIdField.getText()); // Conversion en entier
-                            serviceUtilisateur.updateField(selectedUser.getId_utilisateur(), "zoneId", String.valueOf(newZoneId));
-                        } catch (NumberFormatException e) {
-                            showAlert("Erreur", "Le Zone ID doit être un nombre entier.");
-                            return null;
+                            // Récupérer la spécialité sélectionnée dans le ComboBox
+                            String selectedSpecialiteString = specialiteCombo.getValue();
+                            if (selectedSpecialiteString != null && !selectedSpecialiteString.trim().isEmpty()) {
+                                // Convertir le String en Specialite (Enum)
+                                Specialite selectedSpecialite = Specialite.valueOf(selectedSpecialiteString);
+
+                                // Mettre à jour la base de données avec la spécialité sous forme de String
+                                serviceUtilisateur.updateField(
+                                        selectedUser.getId_utilisateur(),
+                                        "specialite",
+                                        selectedSpecialite.name()  // Convertir l'Enum en String pour la base de données
+                                );
+
+
+                        } else {
+                                showAlert("Erreur", "Veuillez sélectionner une spécialité valide.");
+                            }
+
+                            System.out.println("✅ Spécialité mise à jour avec succès pour l'utilisateur ID : " + selectedUser.getId_utilisateur());
+                        } catch (Exception e) {
+                            showAlert("Erreur", "La mise à jour de la spécialité a échoué.");
+                            e.printStackTrace();
                         }
                         break;
+
+
+
+
                     default:
                         showAlert("Erreur", "Aucun champ sélectionné pour la modification.");
                         return null;
                 }
 
-                loadUsers(); // Recharger la liste après modification
+                // Recharger la liste après modification
+                loadUsers();
             }
             return null;
         });
@@ -288,26 +327,20 @@ public class GestionCitoyenController {
         dialog.showAndWait();
     }
 
-    private void showAlert(String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
-    }
+
     @FXML
-    private void handleDeleteCitoyen() {
-        // Créer un formulaire pour entrer l'ID du citoyen
+    private void handleDeleteTechnicien() {
+        // Créer un formulaire pour entrer l'ID du technicien
         Dialog<Void> dialog = new Dialog<>();
-        dialog.setTitle("Supprimer Citoyen");
-        dialog.setHeaderText("Supprimer un citoyen par son ID");
+        dialog.setTitle("Supprimer Technicien");
+        dialog.setHeaderText("Supprimer un technicien par son ID");
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
 
-        TextField citoyenIdField = new TextField();
-        grid.addRow(0, new Label("ID Citoyen :"), citoyenIdField);
+        TextField technicienIdField = new TextField();
+        grid.addRow(0, new Label("ID Technicien :"), technicienIdField);
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
@@ -315,24 +348,24 @@ public class GestionCitoyenController {
         dialog.setResultConverter(button -> {
             if (button == ButtonType.OK) {
                 try {
-                    int id = Integer.parseInt(citoyenIdField.getText());
-                    citoyen citizen = serviceCitoyen.getCitoyenById(id);
+                    int id = Integer.parseInt(technicienIdField.getText());
+                    technicien technician = serviceTechnicien.getTechnicienById(id);
 
-                    if (citizen != null) {
+                    if (technician != null) {
                         // Demande de confirmation
                         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
                         confirmation.setTitle("Confirmation");
-                        confirmation.setHeaderText("Voulez-vous vraiment supprimer le citoyen : " +
-                                citizen.getNom() + " " + citizen.getPrenom() + "?");
+                        confirmation.setHeaderText("Voulez-vous vraiment supprimer le technicien : " +
+                                technician.getNom() + " " + technician.getPrenom() + "?");
 
                         Optional<ButtonType> result = confirmation.showAndWait();
                         if (result.isPresent() && result.get() == ButtonType.OK) {
-                            serviceCitoyen.deleteById(id);
-                            showAlert("Succès", "Citoyen supprimé avec succès !");
+                            serviceTechnicien.deleteById(id);
+                            showAlert("Succès", "Technicien supprimé avec succès !");
                             loadUsers(); // Recharger la liste après suppression
                         }
                     } else {
-                        showAlert("Erreur", "Citoyen avec l'ID " + id + " introuvable.");
+                        showAlert("Erreur", "Technicien avec l'ID " + id + " introuvable.");
                     }
                 } catch (NumberFormatException e) {
                     showAlert("Erreur", "Veuillez entrer un ID valide.");
@@ -345,7 +378,11 @@ public class GestionCitoyenController {
     }
 
 
-
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
 }
-
-

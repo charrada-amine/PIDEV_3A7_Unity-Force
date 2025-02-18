@@ -315,6 +315,32 @@ public class ServiceUtilisateur {
 
             return user; // Retourner l'utilisateur trouvé ou null s'il n'existe pas
         }
+    public boolean isEmailExists(String email) {
+        // Connexion à la base de données
+        try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/pi3a7")) {
+            // Requête SQL pour vérifier si l'email existe
+            String query = "SELECT COUNT(*) FROM utilisateurs WHERE email = ?";
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setString(1, email);
+
+                // Exécuter la requête
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (resultSet.next()) {
+                        // Si le résultat est supérieur à 0, l'email existe déjà
+                        return resultSet.getInt(1) > 0;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // Gérer l'exception ou afficher une alerte si nécessaire
+        }
+
+        return false; // Si une erreur se produit, supposez que l'email n'existe pas
     }
+
+    public void updateSpecialite(int idUtilisateur, Specialite selectedSpecialite) {
+    }
+}
 
 

@@ -296,10 +296,11 @@ public class Mainuser {
                             break;
                     }
 
-                    if (newSpecialite != null) {
-                        // Appeler la méthode pour mettre à jour la spécialité du technicien
-                        st.updateSpecialite(idModiftech, newSpecialite);
-                    }
+                    /*if (newSpecialite != null) {
+                        // Convertir l'énumération en chaîne avant de passer à la méthode
+                        st.updateSpecialite(idModiftech, newSpecialite.name());
+                    }*/
+
                     break;
 
                 case 9:

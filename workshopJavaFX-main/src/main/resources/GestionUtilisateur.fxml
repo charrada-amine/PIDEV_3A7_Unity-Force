@@ -11,7 +11,6 @@
             <Button text="Ajouter" onAction="#handleAddUser" style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
             <Button text="Modifier" onAction="#handleUpdateUser" style="-fx-background-color: #FFC107; -fx-text-fill: black;"/>
             <Button text="Supprimer" onAction="#handleDeleteUser" style="-fx-background-color: #F44336; -fx-text-fill: white;"/>
-            <Button text="Actualiser" onAction="#handleRefresh" style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>
         </HBox>
     </top>
 
