@@ -73,29 +73,39 @@ public class GestionInterventionController implements Initializable {
                 createInfoText("Type", intervention.getTypeIntervention().toString()),
                 createInfoText("Description", intervention.getDescription()),
                 createInfoText("État", intervention.getEtat()),
-                createInfoText("Date", intervention.getDateIntervention().toString()),
+                createInfoText("Date", intervention.getDateIntervention().toLocalDate().toString()),
                 createInfoText("Heure", intervention.getHeureIntervention().toString()),
                 createInfoText("Lampadaire", String.valueOf(intervention.getLampadaireId())),
                 createInfoText("Technicien", String.valueOf(intervention.getTechnicienId())),
-                createInfoText("Réclamation", String.valueOf(intervention.getID_reclamation()))
+                createInfoText("Réclamation",
+                        intervention.getID_reclamation() != null ?
+                                String.valueOf(intervention.getID_reclamation()) : "Aucune")
         );
 
         HBox buttons = new HBox(10);
         Button edit = createStyledButton("Modifier", "#2196F3");
         Button delete = createStyledButton("Supprimer", "#f44336");
 
+        // Gestion suppression directe
+        delete.setOnAction(e -> {
+            if (showConfirmation("Confirmation", "Voulez-vous vraiment supprimer cette intervention ?")) {
+                service.delete(intervention);
+                cardContainer.getChildren().remove(card); // Suppression visuelle immédiate
+                interventions.remove(intervention); // Mise à jour de la liste
+            }
+        });
+
+        // Gestion modification avec sélection
         edit.setOnAction(e -> {
             selectedIntervention = intervention;
             fillForm(intervention);
+            scrollPane.setVvalue(0); // Défilement vers le formulaire
         });
-
-        delete.setOnAction(e -> handleDelete());
 
         buttons.getChildren().addAll(edit, delete);
         card.getChildren().addAll(title, new Separator(), info, buttons);
         return card;
     }
-
     private Text createInfoText(String label, String value) {
         Text text = new Text(label + ": " + value);
         text.setFill(javafx.scene.paint.Color.GRAY); // Version sécurisée sans import
@@ -142,30 +152,49 @@ public class GestionInterventionController implements Initializable {
 
     @FXML
     private void handleUpdate() {
-        if (selectedIntervention == null) return;
+        if (selectedIntervention == null) {
+            showAlert("Erreur", "Aucune intervention sélectionnée !");
+            return;
+        }
 
-        selectedIntervention.setTypeIntervention(cbType.getValue());
-        selectedIntervention.setDescription(tfDescription.getText());
-        selectedIntervention.setEtat(cbEtat.getValue());
-        selectedIntervention.setDateIntervention(Date.valueOf(dpDate.getValue()));
-        selectedIntervention.setHeureIntervention(Time.valueOf(tfHeure.getText()));
-        selectedIntervention.setLampadaireId(Integer.parseInt(tfLampadaireId.getText()));
-        selectedIntervention.setTechnicienId(Integer.parseInt(tfTechnicienId.getText()));
-        selectedIntervention.setID_reclamation(Integer.parseInt(tfReclamationId.getText()));
+        try {
+            // Mise à jour de toutes les propriétés
+            selectedIntervention.setTypeIntervention(cbType.getValue());
+            selectedIntervention.setDescription(tfDescription.getText());
+            selectedIntervention.setEtat(cbEtat.getValue());
+            selectedIntervention.setDateIntervention(Date.valueOf(dpDate.getValue()));
+            selectedIntervention.setHeureIntervention(Time.valueOf(tfHeure.getText()));
+            selectedIntervention.setLampadaireId(Integer.parseInt(tfLampadaireId.getText()));
+            selectedIntervention.setTechnicienId(Integer.parseInt(tfTechnicienId.getText()));
 
-        service.update(selectedIntervention);
-        loadData();
-        clearForm();
+            // Gestion de la réclamation nullable
+            if (!tfReclamationId.getText().isEmpty()) {
+                selectedIntervention.setID_reclamation(Integer.parseInt(tfReclamationId.getText()));
+            } else {
+                selectedIntervention.setID_reclamation(null);
+            }
+
+            service.update(selectedIntervention);
+            loadData(); // Rechargement complet des données
+            clearForm();
+            showAlert("Succès", "Intervention mise à jour avec succès !");
+
+        } catch (IllegalArgumentException ex) {
+            showAlert("Erreur de format", ex.getMessage());
+        } catch (Exception ex) {
+            showAlert("Erreur", "Échec de la mise à jour : " + ex.getMessage());
+        }
     }
-
     @FXML
     private void handleDelete() {
-        if (selectedIntervention == null) return;
-
-        if (showConfirmation("Confirmer suppression", "Supprimer cette intervention ?")) {
-            service.delete(selectedIntervention);
-            loadData();
-            clearForm();
+        if (selectedIntervention != null) {
+            if (showConfirmation("Confirmer suppression", "Supprimer cette intervention ?")) {
+                service.delete(selectedIntervention);
+                loadData();
+                clearForm();
+            }
+        } else {
+            showAlert("Erreur", "Aucune intervention sélectionnée !");
         }
     }
 

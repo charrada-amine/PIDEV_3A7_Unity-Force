@@ -10,7 +10,6 @@ import java.io.IOException;
 
 public class MainFx extends Application {
 
-
     public static void main(String[] args) {
         launch(args);
     }
@@ -18,12 +17,12 @@ public class MainFx extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            FXMLLoader loader = new FXMLLoader(MainFx.class.getResource("/GestionIntervention.fxml"));
-
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/MainView.fxml"));
             Parent root = loader.load();
-            Scene scene = new Scene(root);
+
+            Scene scene = new Scene(root, 1200, 800);
+            primaryStage.setTitle("Gestion des interventions et réclamations");
             primaryStage.setScene(scene);
-            primaryStage.setTitle("hello from the other side");
             primaryStage.show();
         } catch (IOException e) {
             e.printStackTrace();

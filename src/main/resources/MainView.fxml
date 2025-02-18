@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.esprit.controllers.MainViewController">
+
+    <top>
+        <MenuBar>
+            <Menu text="Gestion">
+                <MenuItem text="Interventions" onAction="#showInterventions"/>
+                <MenuItem text="Réclamations" onAction="#showReclamations"/>
+            </Menu>
+        </MenuBar>
+    </top>
+
+    <center>
+        <VBox fx:id="contentArea" />
+    </center>
+
+</BorderPane>

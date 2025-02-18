@@ -95,18 +95,30 @@ public class ServiceReclamation implements IService<Reclamation> {
     @Override
     public void delete(Reclamation reclamation) {
         try {
+            // Vérifier les dépendances avant suppression
+            if (hasDependencies(reclamation.getID_reclamation())) {
+                throw new SQLException("Impossible de supprimer : existence d'interventions liées");
+            }
+
             String qry = "DELETE FROM `reclamation` WHERE `ID_reclamation`=?";
             PreparedStatement pstm = cnx.prepareStatement(qry);
-            pstm.setInt(1, reclamation.getID_reclamation()); // Correction ici
+            pstm.setInt(1, reclamation.getID_reclamation());
 
             int rowsDeleted = pstm.executeUpdate();
             if (rowsDeleted > 0) {
-                System.out.println("✅ Reclamation supprimée avec succès !");
-            } else {
-                System.out.println("❌ Aucune reclamation trouvée avec cet ID !");
+                System.out.println("✅ Réclamation supprimée avec succès !");
             }
         } catch (SQLException ex) {
             System.out.println("❌ Erreur lors de la suppression : " + ex.getMessage());
+            throw new RuntimeException(ex.getMessage());
         }
+    }
+
+    private boolean hasDependencies(int idReclamation) throws SQLException {
+        String qry = "SELECT COUNT(*) FROM intervention WHERE ID_reclamation = ?";
+        PreparedStatement pstm = cnx.prepareStatement(qry);
+        pstm.setInt(1, idReclamation);
+        ResultSet rs = pstm.executeQuery();
+        return rs.next() && rs.getInt(1) > 0;
     }
 }

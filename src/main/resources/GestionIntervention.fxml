@@ -56,7 +56,7 @@
 
                 <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="8">
                     <Button onAction="#handleAdd" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Ajouter" />
-                    <Button onAction="#handleUpdate" style="-fx-background-color: #2196F3; -fx-text-fill: white;" text="Modifier" />
+                    <Button onAction="#handleUpdate" style="-fx-background-color: #2196F3; -fx-text-fill: white;" text="enregistrer les modifications" />
                     <Button onAction="#handleDelete" style="-fx-background-color: #f44336; -fx-text-fill: white;" text="Supprimer" />
                     <Button onAction="#handleClear" style="-fx-background-color: #9e9e9e; -fx-text-fill: white;" text="Vider" />
                 </HBox>

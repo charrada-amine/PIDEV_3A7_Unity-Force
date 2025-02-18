@@ -117,19 +117,17 @@ public class ServiceIntervention implements IService<Intervention> {
 
     @Override
     public void delete(Intervention intervention) {
-        try {
-            String qry = "DELETE FROM `intervention` WHERE `ID_intervention`=?";
-            PreparedStatement pstm = cnx.prepareStatement(qry);
-            pstm.setInt(1, intervention.getID_intervention());
+        delete(intervention.getID_intervention());
+    }
 
-            int rowsDeleted = pstm.executeUpdate();
-            if (rowsDeleted > 0) {
-                System.out.println("✅ Intervention supprimée avec succès !");
-            } else {
-                System.out.println("❌ Aucune intervention trouvée avec cet ID !");
-            }
+    private void delete(int id) {
+        try {
+            String qry = "DELETE FROM intervention WHERE ID_intervention=?";
+            PreparedStatement pstm = cnx.prepareStatement(qry);
+            pstm.setInt(1, id);
+            pstm.executeUpdate();
         } catch (SQLException ex) {
-            System.out.println("❌ Erreur lors de la suppression : " + ex.getMessage());
+            System.out.println("Erreur suppression: " + ex.getMessage());
         }
     }
 }

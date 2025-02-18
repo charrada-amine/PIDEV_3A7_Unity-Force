@@ -67,7 +67,7 @@ public class GestionReclamationController implements Initializable {
         VBox info = new VBox(8);
         info.getChildren().addAll(
                 createInfoText("Description", r.getDescription()),
-                createInfoText("Date", r.getDateReclamation().toString()),
+                createInfoText("Date", r.getDateReclamation().toLocalDate().toString()),
                 createInfoText("Heure", r.getHeureReclamation().toString()),
                 createInfoText("Statut", r.getStatut()),
                 createInfoText("Lampadaire", String.valueOf(r.getLampadaireId())),
@@ -78,12 +78,20 @@ public class GestionReclamationController implements Initializable {
         Button edit = createStyledButton("Modifier", "#2196F3");
         Button delete = createStyledButton("Supprimer", "#f44336");
 
+        // Modification ici
+        delete.setOnAction(e -> {
+            if (showConfirmation("Confirmation", "Voulez-vous vraiment supprimer cette réclamation ?")) {
+                service.delete(r); // Suppression directe de la réclamation de la carte
+                cardContainer.getChildren().remove(card); // Retrait visuel immédiat
+                reclamations.remove(r); // Mise à jour de la liste interne
+            }
+        });
+
         edit.setOnAction(e -> {
             selectedReclamation = r;
             fillForm(r);
+            scrollPane.setVvalue(0); // Défilement vers le formulaire
         });
-
-        delete.setOnAction(e -> handleDelete());
 
         buttons.getChildren().addAll(edit, delete);
         card.getChildren().addAll(title, new Separator(), info, buttons);
@@ -148,11 +156,24 @@ public class GestionReclamationController implements Initializable {
 
     @FXML
     private void handleDelete() {
-        if (selectedReclamation == null) return;
+        if (selectedReclamation == null) {
+            showAlert("Erreur", "Aucune réclamation sélectionnée !");
+            return;
+        }
 
-        if (showConfirmation("Confirmer suppression", "Supprimer cette réclamation ?")) {
+        if (showConfirmation("Confirmation", "Voulez-vous vraiment supprimer cette réclamation ?")) {
             service.delete(selectedReclamation);
-            loadData();
+
+            // Mise à jour de l'interface
+            cardContainer.getChildren().removeIf(node -> {
+                if (node instanceof VBox) {
+                    Text title = (Text) ((VBox) node).getChildren().get(0);
+                    return title.getText().contains("#" + selectedReclamation.getID_reclamation());
+                }
+                return false;
+            });
+
+            reclamations.remove(selectedReclamation);
             clearForm();
         }
     }
