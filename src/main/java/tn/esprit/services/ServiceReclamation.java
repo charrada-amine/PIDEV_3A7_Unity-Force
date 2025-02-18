@@ -29,10 +29,10 @@ public class ServiceReclamation implements IService<Reclamation> {
 
             pstm.executeUpdate();
 
-            // Retrieve the generated ID_reclamation
+            // Mise à jour de l'ID généré
             ResultSet generatedKeys = pstm.getGeneratedKeys();
             if (generatedKeys.next()) {
-                reclamation.setId(generatedKeys.getInt(1)); // Set the generated ID
+                reclamation.setID_reclamation(generatedKeys.getInt(1)); // Correction ici
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -50,7 +50,7 @@ public class ServiceReclamation implements IService<Reclamation> {
 
             while (rs.next()) {
                 Reclamation r = new Reclamation();
-                r.setId(rs.getInt("ID_reclamation"));
+                r.setID_reclamation(rs.getInt("ID_reclamation")); // Correction ici
                 r.setDescription(rs.getString("description"));
                 r.setDateReclamation(rs.getDate("dateReclamation"));
                 r.setHeureReclamation(rs.getTime("heureReclamation"));
@@ -79,7 +79,7 @@ public class ServiceReclamation implements IService<Reclamation> {
             pstm.setString(4, reclamation.getStatut());
             pstm.setInt(5, reclamation.getLampadaireId());
             pstm.setInt(6, reclamation.getCitoyenId());
-            pstm.setInt(7, reclamation.getId());
+            pstm.setInt(7, reclamation.getID_reclamation()); // Correction ici
 
             int rowsUpdated = pstm.executeUpdate();
             if (rowsUpdated > 0) {
@@ -97,7 +97,7 @@ public class ServiceReclamation implements IService<Reclamation> {
         try {
             String qry = "DELETE FROM `reclamation` WHERE `ID_reclamation`=?";
             PreparedStatement pstm = cnx.prepareStatement(qry);
-            pstm.setInt(1, reclamation.getId());
+            pstm.setInt(1, reclamation.getID_reclamation()); // Correction ici
 
             int rowsDeleted = pstm.executeUpdate();
             if (rowsDeleted > 0) {

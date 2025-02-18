@@ -16,14 +16,14 @@ import tn.esprit.services.ServiceIntervention;
 import java.net.URL;
 import java.sql.Date;
 import java.sql.Time;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
 import java.util.ResourceBundle;
 
 public class GestionInterventionController implements Initializable {
 
     @FXML private ComboBox<TypeIntervention> cbType;
     @FXML private TextField tfDescription;
-    @FXML private TextField tfEtat;
+    @FXML private ComboBox<String> cbEtat;
     @FXML private DatePicker dpDate;
     @FXML private TextField tfHeure;
     @FXML private TextField tfLampadaireId;
@@ -39,11 +39,13 @@ public class GestionInterventionController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         cbType.setItems(FXCollections.observableArrayList(TypeIntervention.values()));
+        cbEtat.setItems(FXCollections.observableArrayList("En attente", "En cours", "Terminée"));
 
         cardContainer.setHgap(20);
         cardContainer.setVgap(20);
         cardContainer.setPadding(new Insets(20));
         scrollPane.setFitToWidth(true);
+        scrollPane.setStyle("-fx-background: #f4f4f4; -fx-background-color: transparent;");
 
         loadData();
     }
@@ -59,78 +61,78 @@ public class GestionInterventionController implements Initializable {
 
     private VBox createInterventionCard(Intervention intervention) {
         VBox card = new VBox(10);
-        card.setPrefWidth(350);
-        card.setStyle("-fx-background-color: #ffffff; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);");
+        card.setPrefWidth(300);
         card.setPadding(new Insets(15));
+        card.setStyle("-fx-background-color: white; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);");
 
-        Text title = new Text("Intervention #" + intervention.getId());
+        Text title = new Text("Intervention #" + intervention.getID_intervention());
         title.setFont(Font.font(16));
 
-        VBox details = new VBox(5);
-        details.getChildren().addAll(
-                createDetailText("Type: " + intervention.getTypeIntervention()),
-                createDetailText("Description: " + intervention.getDescription()),
-                createDetailText("État: " + intervention.getEtat()),
-                createDetailText("Date: " + intervention.getDateIntervention()),
-                createDetailText("Heure: " + intervention.getHeureIntervention()),
-                createDetailText("Lampadaire: " + intervention.getLampadaireId()),
-                createDetailText("Technicien: " + intervention.getTechnicienId())
+        VBox info = new VBox(8);
+        info.getChildren().addAll(
+                createInfoText("Type", intervention.getTypeIntervention().toString()),
+                createInfoText("Description", intervention.getDescription()),
+                createInfoText("État", intervention.getEtat()),
+                createInfoText("Date", intervention.getDateIntervention().toString()),
+                createInfoText("Heure", intervention.getHeureIntervention().toString()),
+                createInfoText("Lampadaire", String.valueOf(intervention.getLampadaireId())),
+                createInfoText("Technicien", String.valueOf(intervention.getTechnicienId())),
+                createInfoText("Réclamation", String.valueOf(intervention.getID_reclamation()))
         );
 
         HBox buttons = new HBox(10);
-        Button editBtn = createActionButton("Modifier", "#2196F3");
-        Button deleteBtn = createActionButton("Supprimer", "#f44336");
+        Button edit = createStyledButton("Modifier", "#2196F3");
+        Button delete = createStyledButton("Supprimer", "#f44336");
 
-        editBtn.setOnAction(e -> {
+        edit.setOnAction(e -> {
             selectedIntervention = intervention;
             fillForm(intervention);
         });
 
-        deleteBtn.setOnAction(e -> handleDelete());
+        delete.setOnAction(e -> handleDelete());
 
-        buttons.getChildren().addAll(editBtn, deleteBtn);
-        card.getChildren().addAll(title, new Separator(), details, buttons);
+        buttons.getChildren().addAll(edit, delete);
+        card.getChildren().addAll(title, new Separator(), info, buttons);
         return card;
     }
 
-    private Text createDetailText(String content) {
-        Text text = new Text(content);
-        text.setWrappingWidth(300);
+    private Text createInfoText(String label, String value) {
+        Text text = new Text(label + ": " + value);
+        text.setFill(javafx.scene.paint.Color.GRAY); // Version sécurisée sans import
         return text;
     }
 
-    private Button createActionButton(String text, String color) {
+    private Button createStyledButton(String text, String color) {
         Button btn = new Button(text);
         btn.setStyle("-fx-background-color: " + color + "; -fx-text-fill: white;");
         return btn;
     }
 
-    private void fillForm(Intervention intervention) {
-        cbType.setValue(intervention.getTypeIntervention());
-        tfDescription.setText(intervention.getDescription());
-        tfEtat.setText(intervention.getEtat());
-        dpDate.setValue(intervention.getDateIntervention().toLocalDate());
-        tfHeure.setText(intervention.getHeureIntervention().toString());
-        tfLampadaireId.setText(String.valueOf(intervention.getLampadaireId()));
-        tfTechnicienId.setText(String.valueOf(intervention.getTechnicienId()));
-        tfReclamationId.setText(String.valueOf(intervention.getID_reclamation()));
+    private void fillForm(Intervention i) {
+        cbType.setValue(i.getTypeIntervention());
+        tfDescription.setText(i.getDescription());
+        cbEtat.setValue(i.getEtat());
+        dpDate.setValue(i.getDateIntervention().toLocalDate());
+        tfHeure.setText(i.getHeureIntervention().toString());
+        tfLampadaireId.setText(String.valueOf(i.getLampadaireId()));
+        tfTechnicienId.setText(String.valueOf(i.getTechnicienId()));
+        tfReclamationId.setText(String.valueOf(i.getID_reclamation()));
     }
 
     @FXML
     private void handleAdd() {
         try {
-            Intervention intervention = new Intervention(
+            Intervention i = new Intervention(
                     cbType.getValue(),
                     tfDescription.getText(),
-                    tfEtat.getText(),
+                    cbEtat.getValue(),
                     Date.valueOf(dpDate.getValue()),
                     Time.valueOf(tfHeure.getText()),
                     Integer.parseInt(tfLampadaireId.getText()),
                     Integer.parseInt(tfTechnicienId.getText()),
                     Integer.parseInt(tfReclamationId.getText())
             );
-
-            service.add(intervention);
+            service.add(i);
             loadData();
             clearForm();
         } catch (Exception e) {
@@ -144,7 +146,7 @@ public class GestionInterventionController implements Initializable {
 
         selectedIntervention.setTypeIntervention(cbType.getValue());
         selectedIntervention.setDescription(tfDescription.getText());
-        selectedIntervention.setEtat(tfEtat.getText());
+        selectedIntervention.setEtat(cbEtat.getValue());
         selectedIntervention.setDateIntervention(Date.valueOf(dpDate.getValue()));
         selectedIntervention.setHeureIntervention(Time.valueOf(tfHeure.getText()));
         selectedIntervention.setLampadaireId(Integer.parseInt(tfLampadaireId.getText()));
@@ -160,17 +162,22 @@ public class GestionInterventionController implements Initializable {
     private void handleDelete() {
         if (selectedIntervention == null) return;
 
-        if (showConfirmation("Confirmer suppression",
-                "Voulez-vous vraiment supprimer cette intervention ?")) {
+        if (showConfirmation("Confirmer suppression", "Supprimer cette intervention ?")) {
             service.delete(selectedIntervention);
             loadData();
             clearForm();
         }
     }
+
+    @FXML
+    private void handleClear() {
+        clearForm();
+    }
+
     private void clearForm() {
         cbType.getSelectionModel().clearSelection();
         tfDescription.clear();
-        tfEtat.clear();
+        cbEtat.getSelectionModel().clearSelection();
         dpDate.setValue(null);
         tfHeure.clear();
         tfLampadaireId.clear();
@@ -179,26 +186,12 @@ public class GestionInterventionController implements Initializable {
         selectedIntervention = null;
     }
 
-    @FXML
-    private void handleClear() {
-        clearForm(); // Utilise la méthode existante de nettoyage
-    }
-
-    @FXML
-    private void handleRefresh() {
-        loadData(); // Utilise la méthode existante de chargement
-    }
-
-
-
-    private boolean showConfirmation(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle(title);
-        alert.setContentText(message);
-        return alert.showAndWait().get() == ButtonType.OK;
-    }
-
     private void showAlert(String title, String message) {
         new Alert(Alert.AlertType.ERROR, message, ButtonType.OK).show();
+    }
+
+    private boolean showConfirmation(String title, String message) {
+        return new Alert(Alert.AlertType.CONFIRMATION, message, ButtonType.OK, ButtonType.CANCEL)
+                .showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK;
     }
 }

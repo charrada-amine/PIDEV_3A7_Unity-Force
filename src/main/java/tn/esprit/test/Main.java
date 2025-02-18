@@ -130,7 +130,7 @@ public class Main {
                 lampadaireId,
                 citoyenId
         );
-        reclamation.setId(id);
+        reclamation.setID_reclamation(id);
         serviceReclamation.update(reclamation);
         System.out.println("✅ Réclamation mise à jour avec succès!");
     }
@@ -141,7 +141,7 @@ public class Main {
         scanner.nextLine(); // Consume newline
 
         Reclamation reclamation = new Reclamation();
-        reclamation.setId(id);
+        reclamation.setID_reclamation(id);
         serviceReclamation.delete(reclamation);
         System.out.println("✅ Réclamation supprimée avec succès!");
     }
@@ -246,7 +246,7 @@ public class Main {
                 technicienId,
                 reclamationId
         );
-        intervention.setId(id);
+        intervention.setID_intervention(id);
         serviceIntervention.update(intervention);
         System.out.println("✅ Intervention mise à jour avec succès!");
     }
@@ -257,7 +257,7 @@ public class Main {
         scanner.nextLine(); // Consume newline
 
         Intervention intervention = new Intervention();
-        intervention.setId(id);
+        intervention.setID_intervention(id);
         serviceIntervention.delete(intervention);
         System.out.println("✅ Intervention supprimée avec succès!");
     }

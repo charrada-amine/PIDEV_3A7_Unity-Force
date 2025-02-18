@@ -28,14 +28,20 @@ public class ServiceIntervention implements IService<Intervention> {
             pstm.setTime(5, intervention.getHeureIntervention());
             pstm.setInt(6, intervention.getLampadaireId());
             pstm.setInt(7, intervention.getTechnicienId());
-            pstm.setInt(8, intervention.getID_reclamation()); // Ajout de ID_reclamation
+
+            // Gestion de la valeur NULL pour ID_reclamation
+            if(intervention.getID_reclamation() != null) {
+                pstm.setInt(8, intervention.getID_reclamation());
+            } else {
+                pstm.setNull(8, Types.INTEGER);
+            }
 
             pstm.executeUpdate();
 
-            // Retrieve the generated ID_intervention
+            // Mise à jour de l'ID généré
             ResultSet generatedKeys = pstm.getGeneratedKeys();
             if (generatedKeys.next()) {
-                intervention.setId(generatedKeys.getInt(1));
+                intervention.setID_intervention(generatedKeys.getInt(1));
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -53,15 +59,18 @@ public class ServiceIntervention implements IService<Intervention> {
 
             while (rs.next()) {
                 Intervention i = new Intervention();
-                i.setId(rs.getInt("ID_intervention"));
-                i.setTypeIntervention(TypeIntervention.valueOf(rs.getString("typeIntervention").toUpperCase()));
+                i.setID_intervention(rs.getInt("ID_intervention"));
+                i.setTypeIntervention(TypeIntervention.valueOf(rs.getString("typeIntervention")));
                 i.setDescription(rs.getString("description"));
                 i.setEtat(rs.getString("etat"));
                 i.setDateIntervention(rs.getDate("dateIntervention"));
                 i.setHeureIntervention(rs.getTime("heureIntervention"));
                 i.setLampadaireId(rs.getInt("lampadaireId"));
                 i.setTechnicienId(rs.getInt("technicienId"));
-                i.setID_reclamation(rs.getInt("ID_reclamation")); // Récupération de ID_reclamation
+
+                // Gestion correcte des valeurs NULL
+                Integer idReclamation = rs.getObject("ID_reclamation", Integer.class);
+                i.setID_reclamation(idReclamation);
 
                 interventions.add(i);
             }
@@ -76,7 +85,7 @@ public class ServiceIntervention implements IService<Intervention> {
     @Override
     public void update(Intervention intervention) {
         try {
-            String qry = "UPDATE `intervention` SET `typeIntervention`=?, `description`=?, `etat`=?, `dateIntervention`=?, `heureIntervention`=?, `lampadaireId`=?, `technicienId`=?, `ID_reclamation`=? WHERE `id`=?";
+            String qry = "UPDATE `intervention` SET `typeIntervention`=?, `description`=?, `etat`=?, `dateIntervention`=?, `heureIntervention`=?, `lampadaireId`=?, `technicienId`=?, `ID_reclamation`=? WHERE `ID_intervention`=?";
             PreparedStatement pstm = cnx.prepareStatement(qry);
             pstm.setString(1, intervention.getTypeIntervention().name());
             pstm.setString(2, intervention.getDescription());
@@ -85,8 +94,15 @@ public class ServiceIntervention implements IService<Intervention> {
             pstm.setTime(5, intervention.getHeureIntervention());
             pstm.setInt(6, intervention.getLampadaireId());
             pstm.setInt(7, intervention.getTechnicienId());
-            pstm.setInt(8, intervention.getID_reclamation()); // Ajout de ID_reclamation
-            pstm.setInt(9, intervention.getId());
+
+            // Gestion de la valeur NULL
+            if(intervention.getID_reclamation() != null) {
+                pstm.setInt(8, intervention.getID_reclamation());
+            } else {
+                pstm.setNull(8, Types.INTEGER);
+            }
+
+            pstm.setInt(9, intervention.getID_intervention());
 
             int rowsUpdated = pstm.executeUpdate();
             if (rowsUpdated > 0) {
@@ -102,9 +118,9 @@ public class ServiceIntervention implements IService<Intervention> {
     @Override
     public void delete(Intervention intervention) {
         try {
-            String qry = "DELETE FROM `intervention` WHERE `id`=?";
+            String qry = "DELETE FROM `intervention` WHERE `ID_intervention`=?";
             PreparedStatement pstm = cnx.prepareStatement(qry);
-            pstm.setInt(1, intervention.getId());
+            pstm.setInt(1, intervention.getID_intervention());
 
             int rowsDeleted = pstm.executeUpdate();
             if (rowsDeleted > 0) {
