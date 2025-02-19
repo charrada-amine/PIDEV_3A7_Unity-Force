@@ -133,7 +133,7 @@
             </VBox>
 
             <!-- Colonne droite : liste des utilisateurs -->
-            <ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+            <ScrollPane fx:id="scrollPane" fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="scroll-pane"
                         style="-fx-background: transparent; -fx-padding: 10;">
                 <FlowPane fx:id="userFlowPane" orientation="VERTICAL" hgap="20" vgap="20" style="-fx-padding: 10;"/>
             </ScrollPane>

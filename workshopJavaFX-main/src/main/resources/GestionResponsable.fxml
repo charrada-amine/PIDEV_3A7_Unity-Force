@@ -6,6 +6,7 @@
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 <?import java.lang.String?>
 <?import javafx.collections.FXCollections?>
+<?import javafx.collections.FXCollections?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.GestionResponsableController" stylesheets="@styles/style.css">
 
@@ -42,7 +43,7 @@
         </VBox>
     </left>
 
-    <!-- Conteneur principal -->
+    <!-- Conteneur principal avec la liste à côté du formulaire -->
     <center>
         <HBox spacing="30" style="-fx-padding: 20;">
             <!-- Formulaire de gestion des responsables -->
@@ -55,8 +56,6 @@
                     <TextField fx:id="prenomField" promptText="Prénom" styleClass="modern-input"/>
                     <TextField fx:id="emailField" promptText="Email" styleClass="modern-input"/>
                     <PasswordField fx:id="passwordField" promptText="Mot de passe" styleClass="modern-input"/>
-
-
 
                     <HBox spacing="10">
                         <!-- Label pour les modules -->
@@ -87,13 +86,15 @@
                 </VBox>
             </VBox>
 
-            <!-- Liste des responsables -->
-            <ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+            <!-- Liste des responsables placée à côté du formulaire -->
+            <ScrollPane fx:id="scrollPane" fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="scroll-pane"
                         style="-fx-background: transparent; -fx-padding: 10;">
                 <FlowPane fx:id="responsableFlowPane" orientation="VERTICAL" hgap="20" vgap="20" style="-fx-padding: 10;"/>
             </ScrollPane>
         </HBox>
+
     </center>
+
 
     <!-- Pied de page -->
     <bottom>

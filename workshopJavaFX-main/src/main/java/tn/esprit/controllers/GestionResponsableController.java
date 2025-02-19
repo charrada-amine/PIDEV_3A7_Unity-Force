@@ -41,7 +41,7 @@ public class GestionResponsableController {
             System.err.println("Erreur : 'responsableFlowPane' est nul. Vérifiez le fichier FXML.");
         } else {
             System.out.println("FlowPane 'responsableFlowPane' initialisé correctement.");
-            loadResponsables();
+            loadUsers();
         }
     }
 
@@ -107,11 +107,9 @@ public class GestionResponsableController {
         // Champ Modules (non modifiable)
         Label modulesLabel = new Label("Modules:");
         modulesLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
-        TextArea modulesField = new TextArea(String.join(", ", responsable.getModules()));
+        TextField modulesField = new TextField(String.join(", ", responsable.getModules())); // Utiliser un TextField au lieu d'un TextArea
         modulesField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         modulesField.setEditable(false);
-        modulesField.setPrefHeight(50); // Ajuster la hauteur pour afficher plusieurs modules
-        modulesField.setMaxWidth(150); // Réduire la largeur du champ Modules
         HBox modulesBox = new HBox(10, modulesLabel, modulesField); // Aligner le label et le champ Modules
         modulesBox.setAlignment(Pos.CENTER_LEFT);
 
@@ -128,22 +126,21 @@ public class GestionResponsableController {
 
         return card;
     }
-
     @FXML
-    private void loadResponsables() {
+    private void loadUsers() {
         if (responsableFlowPane == null) {
             System.err.println("Erreur : 'responsableFlowPane' est nul lors de l'appel de 'loadResponsables'.");
             return;
         }
+
         ServiceResponsable serviceResponsable = new ServiceResponsable();
-
-
         List<responsable> responsables;
 
         try {
             responsables = serviceResponsable.getAllResponsables();
         } catch (Exception e) {
             System.err.println("Erreur lors de la récupération des responsables : " + e.getMessage());
+            e.printStackTrace();
             return;
         }
 
@@ -156,39 +153,15 @@ public class GestionResponsableController {
         ObservableList<VBox> responsableCards = FXCollections.observableArrayList();
 
         for (responsable r : responsables) {
-            VBox responsableCard = createResponsableCard(r);
+            VBox responsableCard = createResponsableCard(r);  // Utilisation de la méthode createResponsableCard
             responsableCards.add(responsableCard);
         }
 
         responsableFlowPane.getChildren().clear();
         responsableFlowPane.getChildren().addAll(responsableCards);
     }
-    public boolean emailExistsResponsable(String email) {
-        String query = "SELECT COUNT(*) FROM utilisateur WHERE email = ?";
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
 
-        try {
-            Connection connection = MyDatabase.getInstance().getCnx(); // Connexion partagée
-            preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setString(1, email);
-            resultSet = preparedStatement.executeQuery();
 
-            if (resultSet.next()) {
-                return resultSet.getInt(1) > 0; // Si le résultat est supérieur à 0, l'email existe
-            }
-        } catch (SQLException e) {
-            System.out.println("Erreur lors de la vérification de l'email : " + e.getMessage());
-        } finally {
-            try {
-                if (resultSet != null) resultSet.close();
-                if (preparedStatement != null) preparedStatement.close();
-            } catch (SQLException e) {
-                System.out.println("Erreur lors de la fermeture des ressources : " + e.getMessage());
-            }
-        }
-        return false;
-    }
     @FXML
     public void handleClear() {
         clearFields();
@@ -395,7 +368,7 @@ public class GestionResponsableController {
             serviceUtilisateur.updateFieldResponsable(userId, "modules", formattedModules);
 
             // Recharger les utilisateurs pour refléter la modification
-            loadResponsables();
+            loadUsers();
 
             // Réinitialiser les champs
             clearFields();
@@ -452,7 +425,7 @@ public class GestionResponsableController {
                         if (result.isPresent() && result.get() == ButtonType.OK) {
                             serviceResponsable.deleteById(id);
                             showAlert("Succès", "Responsable supprimé avec succès !");
-                            loadResponsables(); // Recharger la liste après suppression
+                            loadUsers(); // Recharger la liste après suppression
                         }
                     } else {
                         showAlert("Erreur", "Responsable avec l'ID " + id + " introuvable.");
