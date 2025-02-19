@@ -28,7 +28,8 @@ public class GestionResponsableController {
     private FlowPane responsableFlowPane;
     private final ServiceResponsable serviceResponsable = new ServiceResponsable();
     private final ServiceUtilisateur serviceUtilisateur = new ServiceUtilisateur();
-
+    @FXML
+    private TextField idField, nameField, prenomField, emailField, passwordField, modulesField ;
     @FXML
     private void initialize() {
         if (responsableFlowPane == null) {
@@ -183,193 +184,137 @@ public class GestionResponsableController {
         }
         return false;
     }
+    public boolean emailExists(String email) {
+        String query = "SELECT COUNT(*) FROM utilisateur WHERE email = ?";
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        try {
+            Connection connection = MyDatabase.getInstance().getCnx(); // Connexion partagée
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, email);
+            resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de la vérification de l'email : " + e.getMessage());
+        } finally {
+            try {
+                if (resultSet != null) resultSet.close();
+                if (preparedStatement != null) preparedStatement.close();
+            } catch (SQLException e) {
+                System.out.println("Erreur lors de la fermeture des ressources : " + e.getMessage());
+            }
+        }
+        return false;
+    }
     @FXML
     private void handleUpdateResponsable() {
-        // Créer un nouveau GridPane chaque fois que cette méthode est appelée
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
+        try {
+            // Récupérer l'ID du responsable
+            String userIdText = idField.getText();
+            if (userIdText.isEmpty()) {
+                showAlert("Erreur", "L'ID de l'utilisateur/responsable ne peut pas être vide.");
+                return;
+            }
 
-        // Champ pour entrer l'ID du responsable
-        TextField userIdField = new TextField();
-        grid.addRow(0, new Label("Entrez l'ID du responsable:"), userIdField);
+            int userId;
+            try {
+                userId = Integer.parseInt(userIdText);
+                if (userId <= 0) {
+                    showAlert("Erreur", "L'ID doit être un nombre entier positif.");
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                showAlert("Erreur", "L'ID doit être un nombre entier.");
+                return;
+            }
 
-        // Champ pour sélectionner quel champ modifier
-        ComboBox<String> fieldSelectionCombo = new ComboBox<>();
-        fieldSelectionCombo.getItems().add(""); // Option vide par défaut
-        fieldSelectionCombo.getItems().addAll("Nom", "Prénom", "Email", "Mot de passe" ,"Modules");
-        fieldSelectionCombo.getSelectionModel().selectFirst();
+            // Vérifier si l'utilisateur existe
+            utilisateur existingUser = serviceUtilisateur.getUtilisateurById(userId);
+            if (existingUser == null) {
+                showAlert("Erreur", "Aucun utilisateur trouvé avec cet ID.");
+                return;
+            }
 
-        // Champs pour les différentes modifications
-        TextField nomField = new TextField();
-        TextField prenomField = new TextField();
-        TextField emailField = new TextField();
-        TextField passwordField = new TextField();
-        TextArea modulesField = new TextArea();
+            // Récupérer et valider les champs
+            String newName = nameField.getText().trim();
+            if (newName.isEmpty() || !newName.matches("[A-Za-zÀ-ÖØ-öø-ÿ\\s-]+")) {
+                showAlert("Erreur", "Le nom doit contenir uniquement des lettres et ne peut pas être vide.");
+                return;
+            }
 
-        // Ajout des champs au GridPane
-        grid.addRow(1, new Label("Sélectionnez le champ à modifier:"), fieldSelectionCombo);
-        grid.addRow(2, new Label("Nom:"), nomField);
-        grid.addRow(3, new Label("Prénom:"), prenomField);
-        grid.addRow(4, new Label("Email:"), emailField);
-        grid.addRow(5, new Label("Mot de passe:"), passwordField);
-        grid.addRow(6, new Label("Modules (séparés par des virgules):"), modulesField);
+            String newPrenom = prenomField.getText().trim();
+            if (newPrenom.isEmpty() || !newPrenom.matches("[A-Za-zÀ-ÖØ-öø-ÿ\\s-]+")) {
+                showAlert("Erreur", "Le prénom doit contenir uniquement des lettres et ne peut pas être vide.");
+                return;
+            }
 
-        // Masquer tous les champs de modification par défaut
-        nomField.setVisible(false);
-        prenomField.setVisible(false);
-        emailField.setVisible(false);
-        passwordField.setVisible(false);
-        modulesField.setVisible(false);
+            String newEmail = emailField.getText().trim();
+            if (newEmail.isEmpty() || !newEmail.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                showAlert("Erreur", "L'email doit être valide.");
+                return;
+            }
+            if (!newEmail.equals(existingUser.getEmail()) && emailExists(newEmail)) {
+                showAlert("Erreur", "L'email est déjà utilisé.");
+                return;
+            }
 
-        // Création des boutons OK et Annuler
-        ButtonType okButton = ButtonType.OK;
-        ButtonType cancelButton = ButtonType.CANCEL;
+            String newPassword = passwordField.getText().trim();
+            if (newPassword.isEmpty() || newPassword.length() < 8
+                    || !newPassword.matches(".*\\d.*")
+                    || !newPassword.matches(".*[A-Z].*")) {
+                showAlert("Erreur", "Le mot de passe doit comporter au moins 8 caractères, un chiffre et une lettre majuscule.");
+                return;
+            }
 
-        // Création du dialogue
-        Dialog<utilisateur> dialog = new Dialog<>();
-        dialog.setTitle("Modifier Responsable");
-        dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getButtonTypes().addAll(okButton, cancelButton);
+            // Validation des modules
+            String modulesText = modulesField.getText().trim();
+            if (modulesText.isEmpty()) {
+                showAlert("Erreur", "Les modules ne peuvent pas être vides.");
+                return;
+            }
 
-        // Listener sur le ComboBox pour afficher uniquement le champ sélectionné
-        fieldSelectionCombo.valueProperty().addListener((observable, oldValue, newValue) -> {
-            // Masquer tous les champs
-            nomField.setVisible(false);
-            prenomField.setVisible(false);
-            emailField.setVisible(false);
-            passwordField.setVisible(false);
-            modulesField.setVisible(false);
-
-            // Afficher uniquement le champ sélectionné
-            if (newValue != null && !newValue.isEmpty()) {
-                switch (newValue) {
-                    case "Nom":
-                        nomField.setVisible(true);
-                        break;
-                    case "Prénom":
-                        prenomField.setVisible(true);
-                        break;
-                    case "Email":
-                        emailField.setVisible(true);
-                        break;
-                    case "Mot de passe":
-                        passwordField.setVisible(true);
-                        break;
-                    case "Modules":
-                        modulesField.setVisible(true);
-                        break;
+            String[] modulesArray = modulesText.split(",");
+            for (String module : modulesArray) {
+                if (module.trim().isEmpty()) {
+                    showAlert("Erreur", "Chaque module doit être un texte non vide.");
+                    return;
                 }
             }
-        });
+            String formattedModules = String.join(",", modulesArray);
 
-        // Gérer le résultat du dialogue
-        dialog.setResultConverter(button -> {
-            if (button == okButton) {
-                // Récupérer l'ID du responsable et le valider
-                String userIdText = userIdField.getText();
-                if (userIdText.isEmpty()) {
-                    showAlert("Erreur", "L'ID du responsable ne peut pas être vide.");
-                    return null;
-                }
+            // Mise à jour des champs dans le service
+            serviceUtilisateur.updateFieldResponsable(userId, "nom", newName);
+            serviceUtilisateur.updateFieldResponsable(userId, "prenom", newPrenom);
+            serviceUtilisateur.updateFieldResponsable(userId, "email", newEmail);
+            serviceUtilisateur.updateFieldResponsable(userId, "motdepasse", newPassword);
+            serviceUtilisateur.updateFieldResponsable(userId, "modules", formattedModules);
 
-                int userId;
-                try {
-                    userId = Integer.parseInt(userIdText);
-                } catch (NumberFormatException e) {
-                    showAlert("Erreur", "L'ID doit être un nombre entier.");
-                    return null;
-                }
+            // Recharger les utilisateurs pour refléter la modification
+            loadResponsables();
 
-                // Vérifier si c'est un responsable valide
-                utilisateur selectedResponsable = serviceUtilisateur.getUtilisateurById(userId);
-                if (selectedResponsable == null) {
-                    showAlert("Erreur", "Aucun responsable trouvé avec cet ID.");
-                    return null;
-                }
+            // Réinitialiser les champs
+            clearFields();
 
-                // Vérification de l'email (si le champ est modifié)
-                if ("Email".equals(fieldSelectionCombo.getValue()) && !emailField.getText().isEmpty()) {
-                    String email = emailField.getText();
-                    if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-                        showAlert("Erreur", "L'email doit être valide.");
-                        return null;
-                    }
-
-                    // Vérifier si l'email existe déjà
-                    if (emailExistsResponsable(email)) {
-                        showAlert("Erreur", "L'email est déjà utilisé.");
-                        return null;
-                    }
-                }
-
-                // Mettre à jour le champ sélectionné
-                switch (fieldSelectionCombo.getValue()) {
-                    case "Nom":
-                        if (nomField.getText().isEmpty()) {
-                            showAlert("Erreur", "Le nom ne peut pas être vide.");
-                            return null;
-                        }
-                        serviceUtilisateur.updateField(selectedResponsable.getId_utilisateur(), "nom", nomField.getText());
-                        break;
-                    case "Prénom":
-                        if (prenomField.getText().isEmpty()) {
-                            showAlert("Erreur", "Le prénom ne peut pas être vide.");
-                            return null;
-                        }
-                        serviceUtilisateur.updateField(selectedResponsable.getId_utilisateur(), "prenom", prenomField.getText());
-                        break;
-                    case "Email":
-                        serviceUtilisateur.updateField(selectedResponsable.getId_utilisateur(), "email", emailField.getText());
-                        break;
-                    case "Mot de passe":
-                        if (passwordField.getText().isEmpty() || passwordField.getText().length() < 8 ||
-                                !passwordField.getText().matches(".*[A-Z].*") || !passwordField.getText().matches(".*\\d.*")) {
-                            showAlert("Erreur de saisie", "Le mot de passe doit comporter au moins 8 caractères, avec une majuscule et un chiffre.");
-                            return null;
-                        }
-                        serviceUtilisateur.updateField(selectedResponsable.getId_utilisateur(), "motdepasse", passwordField.getText());
-                        break;
-                    case "Modules":
-                        String modulesText = modulesField.getText();
-                        if (modulesText.isEmpty()) {
-                            showAlert("Erreur", "Les modules ne peuvent pas être vides.");
-                            return null;
-                        }
-
-                        // Valider le format des modules
-                        String[] modulesArray = modulesText.split(",");
-                        for (String module : modulesArray) {
-                            if (module.trim().isEmpty()) {
-                                showAlert("Erreur", "Chaque module doit être un texte non vide.");
-                                return null;
-                            }
-                        }
-
-                        // Conversion en format texte compatible avec la base de données
-                        String formattedModules = String.join(",", modulesArray);
-
-                        try {
-                            serviceUtilisateur.updateFieldResponsable(selectedResponsable.getId_utilisateur(), "modules", formattedModules);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            showAlert("Erreur", "Échec de la mise à jour des modules : " + e.getMessage());
-                            return null;
-                        }
-                        break;
-
-                    default:
-                        showAlert("Erreur", "Aucun champ sélectionné pour la modification.");
-                        return null;
-                }
-
-                loadResponsables(); // Recharger la liste après modification
-            }
-            return null;
-        });
-
-        dialog.showAndWait();
+            // Confirmation de la modification
+            showAlert("Succès", "Responsable modifié avec succès.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Une erreur est survenue lors de la modification.");
+        }
     }
+    private void clearFields() {
+        idField.clear();
+        nameField.clear();
+        prenomField.clear();
+        emailField.clear();
+        passwordField.clear();
+        modulesField.clear(); // Réinitialiser le champ des modules
+    }
+
 
 
     @FXML

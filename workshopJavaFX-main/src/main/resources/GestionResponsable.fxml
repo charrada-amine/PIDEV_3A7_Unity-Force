@@ -1,41 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import java.lang.String?>
+<?import javafx.collections.FXCollections?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.GestionResponsableController">
-    <!-- Barre d'outils supérieure -->
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.GestionResponsableController" stylesheets="@styles/style.css">
+
+    <!-- Barre d'actions supérieure -->
     <top>
-        <HBox spacing="8" style="-fx-background-color: #e0e0e0; -fx-padding: 8;">
-            <Label text="Gestion des responsables" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
-            <Region HBox.hgrow="ALWAYS" /> <!-- Espacement flexible pour aligner les boutons à droite -->
-            <Button text="Modifier" onAction="#handleUpdateResponsable" style="-fx-background-color: #FFC107; -fx-text-fill: black;" />
-            <Button text="Supprimer" onAction="#handleDeleteResponsable" style="-fx-background-color: #F44336; -fx-text-fill: white;" />
+        <HBox spacing="10" style="-fx-background-color: #f5f5f5; -fx-padding: 10;">
+            <!-- Barre supérieure vide ou pour un autre contenu -->
         </HBox>
     </top>
 
-    <!-- Zone centrale avec les responsables -->
+    <left>
+        <VBox prefWidth="240" styleClass="nav-bar">
+            <Label text="Gestion utilisateur" styleClass="nav-title"/>
+        </VBox>
+    </left>
+
+    <!-- Conteneur principal -->
     <center>
-        <ScrollPane fx:id="scrollPane" fitToWidth="true" style="-fx-background: transparent;">
-            <FlowPane fx:id="responsableFlowPane"
-                      orientation="VERTICAL"
-                      hgap="15"
-                      vgap="15"
-                      alignment="CENTER">
-                <padding>
-                    <Insets top="15.0" right="15.0" bottom="15.0" left="15.0"/>
-                </padding>
-            </FlowPane>
-        </ScrollPane>
+        <HBox spacing="30" style="-fx-padding: 20;">
+            <!-- Formulaire de gestion des responsables -->
+            <VBox spacing="20" styleClass="card" prefWidth="400">
+                <Label text="Gestion des Responsables" style="-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #202124;"/>
+
+                <VBox spacing="10" style="-fx-padding: 20;"> <!-- Marges internes -->
+                    <TextField fx:id="idField" promptText="ID" styleClass="modern-input"/>
+                    <TextField fx:id="nameField" promptText="Nom" styleClass="modern-input"/>
+                    <TextField fx:id="prenomField" promptText="Prénom" styleClass="modern-input"/>
+                    <TextField fx:id="emailField" promptText="Email" styleClass="modern-input"/>
+                    <PasswordField fx:id="passwordField" promptText="Mot de passe" styleClass="modern-input"/>
+
+
+
+                    <HBox spacing="10">
+                        <!-- Label pour les modules -->
+                        <Label text="Modules :" />
+
+                        <!-- TextField pour les modules -->
+                        <TextField fx:id="modulesField" promptText="Modules" styleClass="modern-input"/>
+                    </HBox>
+
+                    <!-- Boutons d'action -->
+                    <HBox spacing="10" alignment="CENTER" style="-fx-padding: 10;">
+                        <Button text="Modifier" onAction="#handleUpdateResponsable" styleClass="action-button,edit">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-edit" iconSize="16" iconColor="#ffffff"/>
+                            </graphic>
+                        </Button>
+                        <Button text="Supprimer" onAction="#handleDeleteResponsable" styleClass="action-button,delete">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-trash-alt" iconSize="16" iconColor="#ffffff"/>
+                            </graphic>
+                        </Button>
+                    </HBox>
+                </VBox>
+            </VBox>
+
+            <!-- Liste des responsables -->
+            <ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                        style="-fx-background: transparent; -fx-padding: 10;">
+                <FlowPane fx:id="responsableFlowPane" orientation="VERTICAL" hgap="20" vgap="20" style="-fx-padding: 10;"/>
+            </ScrollPane>
+        </HBox>
     </center>
 
-    <!-- Footer -->
+    <!-- Pied de page -->
     <bottom>
-        <Label text="Gestion des responsables - Application" style="-fx-font-size: 12px; -fx-text-fill: #555555;" alignment="CENTER">
-            <padding>
-                <Insets top="10" bottom="10"/>
-            </padding>
-        </Label>
+        <Label text="© 2025 Gestion des responsables - Tous droits réservés" style="-fx-font-size: 12px; -fx-text-fill: #888888; -fx-padding: 10;" alignment="CENTER"/>
     </bottom>
+
 </BorderPane>

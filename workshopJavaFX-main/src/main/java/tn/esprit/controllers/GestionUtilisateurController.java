@@ -5,7 +5,10 @@ import java.text.SimpleDateFormat;
 import javafx.geometry.Pos;
 import tn.esprit.utils.MyDatabase;
 import tn.esprit.models.utilisateur;
-
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import tn.esprit.models.Role;
 import tn.esprit.models.Specialite;
 import java.util.Scanner;
@@ -34,146 +37,48 @@ import java.util.*;
 
 public class GestionUtilisateurController {
 
-    @FXML private FlowPane userFlowPane;
-    @FXML private ScrollPane scrollPane;
-
-    private final ServiceUtilisateur serviceUtilisateur = new ServiceUtilisateur();
-    private final ServiceCitoyen serviceCitoyen = new ServiceCitoyen();
-    private final ServiceResponsable serviceResponsable = new ServiceResponsable();
-    private final ServiceTechnicien serviceTechnicien = new ServiceTechnicien();
-
-    private String roleSelectionne = "Tous"; // Valeur par défaut
-    private utilisateur selectedUser;  // Déclarez la variable selectedUser
-
+    @FXML
+    private TextField idField, nameField, prenomField, emailField, passwordField, zoneIdField, modulesField;
 
     @FXML
+    private ComboBox<String> roleComboBox, specialiteComboBox;
+
+    @FXML
+    private HBox zoneIdBox, specialiteBox, modulesBox;
+
+    @FXML
+    private FlowPane userFlowPane;
+    private String roleSelectionne = "Tous"; // Valeur par défaut
+    private List<utilisateur> users = new ArrayList<>();
+    private Button updateButton;
+    @FXML
+    private Button citoyenButton;  // Bouton pour les Citoyens
+    @FXML
+    private Button technicienButton; // Bouton pour les Techniciens
+    @FXML
+    private Button responsableButton; // Bouton pour les Responsables
+
+    @FXML
+    private ScrollPane scrollPane;
+
+    private ServiceUtilisateur serviceUtilisateur = new ServiceUtilisateur();
+
+    // Initialisation du contrôleur
+    @FXML
     public void initialize() {
-        loadUsers(); // Charge les utilisateurs au démarrage
+        loadUsers();
+        displayUsers(users);  // Appeler la méthode pour afficher les utilisateurs, en passant la liste des utilisateurs
+
+        // Remplir les ComboBox avec des valeurs prédéfinies pour les rôles et spécialités
+        roleComboBox.setItems(FXCollections.observableArrayList("Citoyen", "Responsable", "Technicien"));
+        specialiteComboBox.setItems(FXCollections.observableArrayList("Maintenance", "Électricité", "Autre"));
+
+        // Cacher les champs spécifiques selon le rôle sélectionné
+        roleComboBox.setOnAction(e -> handleRoleChange());
     }
-
-
-    public void setRoleSelectionne(String role) {
-        this.roleSelectionne = role;
-        loadUsers(); // Recharge les utilisateurs filtrés
-    }
-
-    private void loadUsers() {
-        List<utilisateur> users = serviceUtilisateur.getAllUtilisateurs();
-
-        // Filtrer les utilisateurs par rôle sélectionné
-        if (!"Tous".equals(roleSelectionne)) {
-            users.removeIf(user -> !user.getRole().toString().equalsIgnoreCase(roleSelectionne));
-        }
-
-        // Effacer les anciennes cartes
-        userFlowPane.getChildren().clear();
-
-        // Afficher les utilisateurs sous forme de cartes
-        for (utilisateur user : users) {
-            VBox card = createUserCard(user);
-            userFlowPane.getChildren().add(card);
-        }
-    }
-    private void handleUserClick(utilisateur user) {
-        selectedUser = user;  // Enregistrer l'utilisateur sélectionné
-        showAlert("Utilisateur sélectionné", "L'utilisateur " + user.getNom() + " a été sélectionné.");
-    }
-
-
-    private VBox createUserCard(utilisateur user) {
-        VBox card = new VBox(10);
-        card.setStyle("-fx-border-color: #ddd; -fx-border-width: 1; -fx-padding: 10; -fx-background-color: #f9f9f9; -fx-alignment: center;");
-
-        // Champ ID (non modifiable)
-        Label idLabel = new Label("ID:");
-        idLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: black;");
-        TextField idField = new TextField(String.valueOf(user.getId_utilisateur()));
-        idField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
-        idField.setEditable(false); // Non modifiable
-        HBox idBox = new HBox(10, idLabel, idField); // Aligner le label et le champ ID
-        idBox.setAlignment(Pos.CENTER_LEFT); // Aligner à gauche
-
-        // Champ Nom
-        Label nameLabel = new Label("Nom:");
-        nameLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
-        TextField nameField = new TextField(user.getNom());
-        nameField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
-        nameField.setEditable(false); // Non modifiable
-        HBox nameBox = new HBox(10, nameLabel, nameField); // Aligner le label et le champ Nom
-        nameBox.setAlignment(Pos.CENTER_LEFT);
-
-        // Champ Prénom
-        Label prenomLabel = new Label("Prénom:");
-        prenomLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
-        TextField prenomField = new TextField(user.getPrenom());
-        prenomField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
-        prenomField.setEditable(false); // Non modifiable
-        HBox prenomBox = new HBox(10, prenomLabel, prenomField); // Aligner le label et le champ Prénom
-        prenomBox.setAlignment(Pos.CENTER_LEFT);
-
-        // Champ Email
-        Label emailLabel = new Label("Email:");
-        emailLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
-        TextField emailField = new TextField(user.getEmail());
-        emailField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
-        emailField.setEditable(false); // Non modifiable
-        HBox emailBox = new HBox(10, emailLabel, emailField); // Aligner le label et le champ Email
-        emailBox.setAlignment(Pos.CENTER_LEFT);
-
-        // Champ Mot de passe
-        Label passwordLabel = new Label("Mot de passe:");
-        passwordLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
-        TextField mdpfield = new TextField(user.getMotdepasse());
-        mdpfield.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
-        mdpfield.setEditable(false); // Non modifiable
-        HBox mdpBox = new HBox(10, passwordLabel, mdpfield); // Aligner le label et le champ Mot de passe
-        mdpBox.setAlignment(Pos.CENTER_LEFT);
-
-        // Champ Rôle
-        Label roleLabel = new Label("Rôle:");
-        roleLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
-        TextField roleField = new TextField(user.getRole().name());
-        roleField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
-        roleField.setEditable(false); // Non modifiable
-        HBox roleBox = new HBox(10, roleLabel, roleField); // Aligner le label et le champ Rôle
-        roleBox.setAlignment(Pos.CENTER_LEFT);
-
-        // Champ Date d'inscription
-        Label dateInscriptionLabel = new Label("Date d'inscription");
-        dateInscriptionLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: black;");
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        String dateInscriptionString = sdf.format(user.getDateinscription());  // Convertir la Date en String
-        TextField dateinscription = new TextField(dateInscriptionString);
-        dateinscription.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
-        dateinscription.setEditable(false); // Non modifiable
-        HBox dateInscriptionBox = new HBox(10, dateInscriptionLabel, dateinscription); // Aligner le label et le champ Date d'inscription
-        dateInscriptionBox.setAlignment(Pos.CENTER_LEFT);
-
-        // Ajouter les HBoxes à la carte
-        card.getChildren().addAll(idBox, nameBox, prenomBox, emailBox, mdpBox, roleBox, dateInscriptionBox);
-
-        return card;
-    }
-
-
-    private String getRoleDetails(utilisateur user) {
-        switch (user.getRole()) {
-            case citoyen:
-                citoyen c = serviceCitoyen.getCitoyenById(user.getId_utilisateur());
-                return (c != null) ? "Zone: " + c.getZoneId() : "Citoyen non trouvé";
-            case technicien:
-                technicien t = serviceTechnicien.getAllTechniciens().stream()
-                        .filter(tech -> tech.getId_utilisateur() == user.getId_utilisateur())
-                        .findFirst().orElse(null);
-                return (t != null) ? "Spécialité: " + t.getSpecialite() : "Technicien non trouvé";
-            case responsable:
-                responsable r = serviceResponsable.getAllResponsables().stream()
-                        .filter(resp -> resp.getId_utilisateur() == user.getId_utilisateur())
-                        .findFirst().orElse(null);
-                return (r != null) ? "Modules: " + String.join(", ", r.getModules()) : "Responsable non trouvé";
-            default:
-                return "Rôle inconnu";
-        }
+    private void displayUsers(List<utilisateur> users) {
+        // Appeler handleDisplayUsers pour afficher les utilisateurs
+        handleDisplayUsers(users);
     }
     public boolean emailExists(String email) {
         String query = "SELECT COUNT(*) FROM utilisateur WHERE email = ?";
@@ -203,132 +108,240 @@ public class GestionUtilisateurController {
     }
 
 
-    @FXML
-    private void handleAddUser() {
-        try {
-            Dialog<utilisateur> dialog = new Dialog<>();
-            dialog.setTitle("Nouvel Utilisateur");
 
-            // Configuration du formulaire
-            GridPane grid = new GridPane();
-            grid.setHgap(10);
-            grid.setVgap(10);
-
-            TextField nomField = new TextField();
-            TextField prenomField = new TextField();
-            TextField emailField = new TextField();
-            TextField passwordField = new TextField();
-            ComboBox<Role> roleCombo = new ComboBox<>();
-            roleCombo.getItems().addAll(Role.values());
-
-            TextField zoneField = new TextField();
-            ComboBox<Specialite> specialiteCombo = new ComboBox<>();
-            specialiteCombo.getItems().addAll(Specialite.values());
-            TextField modulesField = new TextField();
-
-            grid.addRow(0, new Label("Nom:"), nomField);
-            grid.addRow(1, new Label("Prénom:"), prenomField);
-            grid.addRow(2, new Label("Email:"), emailField);
-            grid.addRow(3, new Label("Mot de passe:"), passwordField);
-            grid.addRow(4, new Label("Rôle:"), roleCombo);
-
-            roleCombo.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-                grid.getChildren().removeIf(node -> GridPane.getRowIndex(node) != null && GridPane.getRowIndex(node) >= 5);
-                if (newVal == Role.citoyen) {
-                    grid.addRow(5, new Label("Zone ID:"), zoneField);
-                } else if (newVal == Role.technicien) {
-                    grid.addRow(5, new Label("Spécialité:"), specialiteCombo);
-                } else if (newVal == Role.responsable) {
-                    grid.addRow(5, new Label("Modules (csv):"), modulesField);
-                }
-            });
-
-            dialog.getDialogPane().setContent(grid);
-            dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-            dialog.setResultConverter(buttonType -> {
-                if (buttonType == ButtonType.OK) {
-                    // Validation des champs
-                    if (nomField.getText().isEmpty()) {
-                        showAlert("Erreur de saisie", "Le nom ne peut pas être vide.");
-                        return null;
-                    }
-                    if (prenomField.getText().isEmpty()) {
-                        showAlert("Erreur de saisie", "Le prénom ne peut pas être vide.");
-                        return null;
-                    }
-                    if (emailField.getText().isEmpty() || !emailField.getText().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-                        showAlert("Erreur de saisie", "Veuillez entrer un email valide.");
-                        return null;
-                    }
-                    if (emailExists(emailField.getText())) {
-                        showAlert("Erreur de saisie", "L'email est déjà utilisé.");
-                        return null;
-                    }
-                    if (passwordField.getText().isEmpty() || passwordField.getText().length() < 8 ||
-                            !passwordField.getText().matches(".*[A-Z].*") || !passwordField.getText().matches(".*\\d.*")) {
-                        showAlert("Erreur de saisie", "Le mot de passe doit comporter au moins 8 caractères, avec une majuscule et un chiffre.");
-                        return null;
-                    }
-                    if (roleCombo.getValue() == null) {
-                        showAlert("Erreur de saisie", "Veuillez sélectionner un rôle.");
-                        return null;
-                    }
-
-                    utilisateur user = new utilisateur(
-                            nomField.getText(),
-                            prenomField.getText(),
-                            emailField.getText(),
-                            passwordField.getText(),
-                            roleCombo.getValue(),
-                            new Date()
-                    );
-
-                    try {
-                        switch (user.getRole()) {
-                            case citoyen:
-                                if (zoneField.getText().isEmpty() || !zoneField.getText().matches("\\d+")) {
-                                    showAlert("Erreur de saisie", "La zone ID doit être un nombre entier.");
-                                    return null;
-                                }
-                                int zoneId = Integer.parseInt(zoneField.getText());
-                                serviceUtilisateur.add(user, null, new ArrayList<>(), zoneId);
-                                break;
-                            case technicien:
-                                if (specialiteCombo.getValue() == null) {
-                                    showAlert("Erreur de saisie", "Veuillez sélectionner une spécialité.");
-                                    return null;
-                                }
-                                serviceUtilisateur.add(user, specialiteCombo.getValue(), new ArrayList<>(), 0);
-                                break;
-                            case responsable:
-                                if (modulesField.getText().isEmpty()) {
-                                    showAlert("Erreur de saisie", "Veuillez entrer des modules.");
-                                    return null;
-                                }
-                                List<String> modules = Arrays.asList(modulesField.getText().split("\\s*,\\s*"));
-                                serviceUtilisateur.add(user, null, modules, 0);
-                                break;
-                        }
-                    } catch (Exception e) {
-                        showAlert("Erreur", "Erreur lors de l'enregistrement : " + e.getMessage());
-                        return null;
-                    }
-
-                    return user;
-                }
-                return null;
-            });
-
-            dialog.showAndWait().ifPresent(user -> {
-                System.out.println("Utilisateur ajouté : " + user);
-                loadUsers(); // Recharge la liste des utilisateurs après l'ajout
-            });
-        } catch (Exception e) {
-            System.err.println("Erreur : " + e.getMessage());
-            e.printStackTrace();
+    // Gérer l'affichage des champs selon le rôle sélectionné
+    private void handleRoleChange() {
+        String role = roleComboBox.getValue();
+        if ("Citoyen".equals(role)) {
+            zoneIdBox.setVisible(true);
+            specialiteBox.setVisible(false);
+            modulesBox.setVisible(false);
+        } else if ("Technicien".equals(role)) {
+            zoneIdBox.setVisible(false);
+            specialiteBox.setVisible(true);
+            modulesBox.setVisible(false);
+        } else if ("Responsable".equals(role)) {
+            zoneIdBox.setVisible(false);
+            specialiteBox.setVisible(false);
+            modulesBox.setVisible(true);
         }
     }
+    @FXML
+    public void filterByResponsable() {
+        try {
+            // Charger la vue GestionResponsable.fxml
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("GestionResponsable.fxml"));
+            Parent root = loader.load();
+
+            // Créer une nouvelle scène avec la vue chargée
+            Stage stage = (Stage) responsableButton.getScene().getWindow(); // Remplacez myButton par un vrai composant (par ex., un bouton)
+            stage.setScene(new Scene(root)); // Remplacer la scène actuelle par la nouvelle vue
+            stage.show();  // Afficher la nouvelle scène
+        } catch (Exception e) {
+            e.printStackTrace();  // Afficher l'erreur en cas de problème
+        }
+    }
+
+    // Méthode de filtrage pour les Citoyens
+    @FXML
+    public void filterByCitoyen() {
+        // Méthode vide pour filtrer les Citoyens
+        // Ajouter ici la logique de filtrage selon votre besoin
+    }
+
+    // Méthode de filtrage pour les Techniciens
+    @FXML
+    public void filterByTechnicien() {
+        // Méthode vide pour filtrer les Techniciens
+        // Ajouter ici la logique de filtrage selon votre besoin
+    }
+    private VBox createUserCard(utilisateur user) {
+        VBox card = new VBox(10);
+        card.setStyle("-fx-border-color: #ddd; -fx-border-width: 1; -fx-padding: 10; -fx-background-color: #f9f9f9; -fx-alignment: center;");
+
+        // Champ ID (non modifiable)
+        Label idLabel = new Label("ID:");
+        idLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: black;");
+        TextField idField = new TextField(String.valueOf(user.getId_utilisateur()));
+        idField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
+        idField.setEditable(false); // Non modifiable
+        HBox idBox = new HBox(10, idLabel, idField);
+        idBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Champ Nom
+        Label nameLabel = new Label("Nom:");
+        nameLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
+        TextField nameField = new TextField(user.getNom());
+        nameField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
+        nameField.setEditable(false);
+        HBox nameBox = new HBox(10, nameLabel, nameField);
+        nameBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Champ Prénom
+        Label prenomLabel = new Label("Prénom:");
+        prenomLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
+        TextField prenomField = new TextField(user.getPrenom());
+        prenomField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
+        prenomField.setEditable(false);
+        HBox prenomBox = new HBox(10, prenomLabel, prenomField);
+        prenomBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Champ Email
+        Label emailLabel = new Label("Email:");
+        emailLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
+        TextField emailField = new TextField(user.getEmail());
+        emailField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
+        emailField.setEditable(false);
+        HBox emailBox = new HBox(10, emailLabel, emailField);
+        emailBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Champ Mot de passe
+        Label passwordLabel = new Label("Mot de passe:");
+        passwordLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
+        TextField mdpfield = new TextField(user.getMotdepasse());
+        mdpfield.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
+        mdpfield.setEditable(false);
+        HBox mdpBox = new HBox(10, passwordLabel, mdpfield);
+        mdpBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Champ Rôle
+        Label roleLabel = new Label("Rôle:");
+        roleLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
+        TextField roleField = new TextField(user.getRole().name());
+        roleField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
+        roleField.setEditable(false);
+        HBox roleBox = new HBox(10, roleLabel, roleField);
+        roleBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Champ Date d'inscription
+        Label dateInscriptionLabel = new Label("Date d'inscription");
+        dateInscriptionLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: black;");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        String dateInscriptionString = sdf.format(user.getDateinscription());
+        TextField dateinscription = new TextField(dateInscriptionString);
+        dateinscription.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
+        dateinscription.setEditable(false);
+        HBox dateInscriptionBox = new HBox(10, dateInscriptionLabel, dateinscription);
+        dateInscriptionBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Ajouter les HBoxes à la carte
+        card.getChildren().addAll(idBox, nameBox, prenomBox, emailBox, mdpBox, roleBox, dateInscriptionBox);
+
+        return card;
+    }
+
+    @FXML
+    private void handleDisplayUsers(List<utilisateur> users) {
+        // Créer une VBox pour contenir toutes les lignes de cartes
+        VBox userCardsContainer = new VBox(10);
+
+        // Créer une HBox pour chaque ligne de cartes (2 cartes par ligne)
+        HBox row = new HBox(10);
+        row.setAlignment(Pos.CENTER);
+
+        // Ajouter chaque carte utilisateur dans la ligne (2 par ligne)
+        for (int i = 0; i < users.size(); i++) {
+            utilisateur user = users.get(i);
+            VBox userCard = createUserCard(user);
+
+            // Ajouter la carte à la ligne
+            row.getChildren().add(userCard);
+
+            // Si deux cartes sont ajoutées, ajouter la ligne à la VBox principale et créer une nouvelle ligne
+            if ((i + 1) % 2 == 0 || i == users.size() - 1) {
+                userCardsContainer.getChildren().add(row);
+                row = new HBox(10); // Créer une nouvelle ligne pour les cartes suivantes
+                row.setAlignment(Pos.CENTER);
+            }
+        }
+
+        // Ajouter le conteneur principal à l'interface utilisateur
+        userFlowPane.getChildren().add(userCardsContainer);
+    }
+
+    @FXML
+    public void handleAddUser() {
+        try {
+            String name = nameField.getText();
+            String prenom = prenomField.getText();
+            String email = emailField.getText();
+            String password = passwordField.getText();
+            String roleString = roleComboBox.getValue();
+
+            // Validation des champs
+            if (name.isEmpty() || prenom.isEmpty() || email.isEmpty() || password.isEmpty() || roleString == null) {
+                showAlert("Erreur", "Tous les champs doivent être remplis.");
+                return;
+            }
+
+            // Validation de l'email
+            if (email.isEmpty() || !email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                showAlert("Erreur", "L'email ne peut pas être vide et doit être valide.");
+                return;
+            }
+            if (emailExists(email)) {
+                showAlert("Erreur de saisie", "L'email est déjà utilisé.");
+                return;
+            }
+
+            // Validation du mot de passe
+            if (password.length() < 8 || !password.matches(".*\\d.*") || !password.matches(".*[A-Z].*")) {
+                showAlert("Erreur", "Le mot de passe doit comporter au moins 8 caractères, un chiffre et une lettre majuscule.");
+                return;
+            }
+
+
+            // Afficher la valeur du rôle sélectionné
+            System.out.println("Role selected: " + roleString);
+
+            // Conversion du rôle avec le bon format
+            Role role = Role.valueOf(roleString.toLowerCase());  // Utilisation de toLowerCase()
+
+            utilisateur user = new utilisateur(name, prenom, email, password, role, new Date());
+
+            // Traitement spécifique selon le rôle
+            switch (role) {
+                case citoyen:
+                    if (zoneIdField.getText().isEmpty()) {
+                        showAlert("Erreur", "Le champ Zone ID est obligatoire pour un citoyen.");
+                        return;
+                    }
+                    int zoneId = Integer.parseInt(zoneIdField.getText());
+                    serviceUtilisateur.add(user, null, new ArrayList<>(), zoneId);
+                    break;
+                case technicien:
+                    String specialiteString = specialiteComboBox.getValue();
+                    if (specialiteString == null) {
+                        showAlert("Erreur", "Veuillez sélectionner une spécialité.");
+                        return;
+                    }
+                    Specialite specialite = Specialite.valueOf(specialiteString.toLowerCase());
+                    serviceUtilisateur.add(user, specialite, new ArrayList<>(), 0);
+                    break;
+                case responsable:
+                    if (modulesField.getText().isEmpty()) {
+                        showAlert("Erreur", "Veuillez entrer des modules.");
+                        return;
+                    }
+                    List<String> modules = List.of(modulesField.getText().split("\\s*,\\s*"));
+                    serviceUtilisateur.add(user, null, modules, 0);
+                    break;
+            }
+
+            // Ajoutez la carte utilisateur dans l'interface après l'ajout
+            VBox userCard = createUserCard(user); // Créer la carte de l'utilisateur
+            userFlowPane.getChildren().add(userCard); // Ajouter la carte à l'FlowPane
+
+            // Réinitialiser les champs
+            clearFields();
+            showAlert("Succès", "Utilisateur ajouté avec succès.");
+        } catch (Exception e) {
+            e.printStackTrace(); // Ajouter un trace de l'erreur
+            showAlert("Erreur", "Une erreur est survenue lors de l'ajout.");
+        }
+    }
+
+
 
 
     @FXML
@@ -338,7 +351,7 @@ public class GestionUtilisateurController {
         grid.setHgap(10);
         grid.setVgap(10);
 
-        // Ajoute un champ pour entrer l'ID de l'utilisateur
+        // Ajouter un champ pour entrer l'ID de l'utilisateur
         TextField userIdField = new TextField();
         grid.addRow(0, new Label("Entrez l'ID de l'utilisateur:"), userIdField);
 
@@ -354,7 +367,7 @@ public class GestionUtilisateurController {
         TextField emailField = new TextField();
         TextField mdpField = new TextField();
 
-        // Ajoute les champs de texte pour les modifications
+        // Ajouter les champs de texte pour les modifications
         grid.addRow(1, new Label("Sélectionnez le champ à modifier:"), fieldSelectionCombo);
         grid.addRow(2, new Label("Nom:"), nomField);
         grid.addRow(3, new Label("Prénom:"), prenomField);
@@ -371,7 +384,7 @@ public class GestionUtilisateurController {
         ButtonType okButton = ButtonType.OK;
         ButtonType cancelButton = ButtonType.CANCEL;
 
-        // Crée le dialog
+        // Créer le dialog
         Dialog<utilisateur> dialog = new Dialog<>();
         dialog.setTitle("Modifier Utilisateur");
         dialog.getDialogPane().setContent(grid);
@@ -435,21 +448,34 @@ public class GestionUtilisateurController {
                     showAlert("Erreur", "Le prénom ne peut pas être vide.");
                     return null;
                 }
-                if (fieldSelectionCombo.getValue().equals("Email") && emailField.getText().isEmpty() || !emailField.getText().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-                    showAlert("Erreur", "L'email ne peut pas être vide.");
-                    return null;
+
+                // Validation de l'email seulement si l'utilisateur modifie le champ "Email"
+                if (fieldSelectionCombo.getValue().equals("Email")) {
+                    if (emailField.getText().isEmpty()) {
+                        showAlert("Erreur", "L'email ne peut pas être vide.");
+                        return null;
+                    }
+                    if (!emailField.getText().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                        showAlert("Erreur", "L'email n'est pas valide.");
+                        return null;
+                    }
+                    if (emailExists(emailField.getText())) {
+                        showAlert("Erreur de saisie", "L'email est déjà utilisé.");
+                        return null;
+                    }
                 }
-                if (emailExists(emailField.getText())) {
-                    showAlert("Erreur de saisie", "L'email est déjà utilisé.");
-                    return null;
-                }
-                if (fieldSelectionCombo.getValue().equals("Mot de passe") && mdpField.getText().isEmpty()) {
-                    showAlert("Erreur", "Le mot de passe ne peut pas être vide.");
-                    return null;
-                }
-                if (fieldSelectionCombo.getValue().equals("Mot de passe") && mdpField.getText().length() < 6) {
-                    showAlert("Erreur", "Le mot de passe doit avoir au moins 6 caractères.");
-                    return null;
+
+                // Validation du mot de passe uniquement si le champ "Mot de passe" est sélectionné
+                if (fieldSelectionCombo.getValue().equals("Mot de passe")) {
+                    if (mdpField.getText().isEmpty()) {
+                        showAlert("Erreur", "Le mot de passe ne peut pas être vide.");
+                        return null;
+                    }
+                    if (mdpField.getText().length() < 8 || !mdpField.getText().matches(".*\\d.*") || !mdpField.getText().matches(".*[A-Z].*")) {
+                        showAlert("Erreur", "Le mot de passe doit comporter au moins 8 caractères, un chiffre et une lettre majuscule.");
+                        return null;
+                    }
+
                 }
 
                 // Récupérer l'utilisateur correspondant à l'ID
@@ -487,8 +513,19 @@ public class GestionUtilisateurController {
     }
 
 
+
+    // Méthode pour trouver un utilisateur par ID
+   /* private utilisateur findUserById(int id) {
+        // Implémentation pour retrouver un utilisateur par son ID dans votre service ou base de données
+        // Par exemple, avec votre serviceUtilisateur:
+        return serviceUtilisateur.getUtilisateurById(id);
+    }*/
+
+
+
+    // Supprimer un utilisateur
     @FXML
-    private void handleDeleteUser() {
+    public void handleDeleteUser() {
         // Créer un GridPane pour le formulaire de suppression
         GridPane grid = new GridPane();
         grid.setHgap(10);
@@ -555,17 +592,55 @@ public class GestionUtilisateurController {
         dialog.showAndWait();
     }
 
-
+    // Réinitialiser les champs
     @FXML
-    private void handleRefresh() {
-        loadUsers();
+    public void handleClear() {
+        clearFields();
     }
 
-    private void showAlert(String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
+    // Fonction pour réinitialiser les champs du formulaire
+    private void clearFields() {
+        nameField.clear();
+        prenomField.clear();
+        emailField.clear();
+        passwordField.clear();
+        zoneIdField.clear();
+        modulesField.clear();
+        roleComboBox.setValue(null);
+        specialiteComboBox.setValue(null);
+        zoneIdBox.setVisible(false);
+        specialiteBox.setVisible(false);
+        modulesBox.setVisible(false);
+    }
+
+    // Fonction pour afficher une alerte
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(null);
-        alert.setContentText(content);
+        alert.setContentText(message);
         alert.showAndWait();
+    }
+    public void setRoleSelectionne(String role) {
+        this.roleSelectionne = role;
+        loadUsers(); // Recharge les utilisateurs filtrés
+    }
+
+     private void loadUsers() {
+        List<utilisateur> users = serviceUtilisateur.getAllUtilisateurs();
+
+        // Filtrer les utilisateurs par rôle sélectionné
+        if (!"Tous".equals(roleSelectionne)) {
+            users.removeIf(user -> !user.getRole().toString().equalsIgnoreCase(roleSelectionne));
+        }
+
+        // Effacer les anciennes cartes
+        userFlowPane.getChildren().clear();
+
+        // Afficher les utilisateurs sous forme de cartes
+        for (utilisateur user : users) {
+            VBox card = createUserCard(user);
+            userFlowPane.getChildren().add(card);
+        }
     }
 }

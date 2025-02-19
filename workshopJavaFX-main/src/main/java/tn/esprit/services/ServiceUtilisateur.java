@@ -242,6 +242,33 @@ public class ServiceUtilisateur {
         return utilisateurs;
     }
 
+    public void update(utilisateur user) {
+        String sql = "UPDATE utilisateurs SET nom = ?, prenom = ?, email = ?, motdepasse = ? WHERE id_utilisateur = ?";
+
+        try (Connection connection = MyDatabase.getConnection(); // Assurez-vous que DatabaseConnection est bien votre gestionnaire de connexion
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+            // Paramètres de la requête
+            stmt.setString(1, user.getNom());
+            stmt.setString(2, user.getPrenom());
+            stmt.setString(3, user.getEmail());
+            stmt.setString(4, user.getMotdepasse());
+            stmt.setInt(6, user.getId_utilisateur());
+
+            // Exécution de la mise à jour
+            int rowsUpdated = stmt.executeUpdate();
+
+            if (rowsUpdated > 0) {
+                System.out.println("Utilisateur mis à jour avec succès.");
+            } else {
+                System.out.println("Aucun utilisateur trouvé avec cet ID.");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors de la mise à jour de l'utilisateur.");
+        }
+    }
 
 
 

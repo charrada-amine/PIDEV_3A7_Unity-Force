@@ -15,6 +15,7 @@ import tn.esprit.models.utilisateur;
 import tn.esprit.services.ServiceTechnicien;
 import tn.esprit.services.ServiceUtilisateur;
 import tn.esprit.utils.MyDatabase;
+import tn.esprit.models.Role; // Adaptez le chemin selon votre projet.
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -29,15 +30,18 @@ import java.util.stream.Collectors;
 public class GestionTechnicienController {
 
     @FXML
+    private TextField idField, nameField, prenomField, emailField, passwordField;
+    @FXML
+    private ComboBox<String> specialiteComboBox;
+    @FXML
+
     private FlowPane technicienFlowPane; // Correspond à 'fx:id="technicienFlowPane"' dans le FXML
     private final ServiceUtilisateur serviceUtilisateur = new ServiceUtilisateur();
     private final ServiceTechnicien serviceTechnicien = new ServiceTechnicien();
     @FXML
 
-    private ComboBox<String> specialiteCombo = new ComboBox<>();
 
 
-    @FXML
     private void initialize() {
         if (technicienFlowPane == null) {
             System.err.println("Erreur : 'technicienFlowPane' est nul. Vérifiez le fichier FXML.");
@@ -45,9 +49,9 @@ public class GestionTechnicienController {
             System.out.println("FlowPane 'technicienFlowPane' initialisé correctement.");
             loadUsers(); // Charger les techniciens
         }
-            if (specialiteCombo != null) {
+            if (specialiteComboBox != null) {
                 // Initialiser le ComboBox avec les noms des valeurs de l'énumération Specialite
-                specialiteCombo.setItems(FXCollections.observableArrayList(
+                specialiteComboBox.setItems(FXCollections.observableArrayList(
                         Arrays.stream(Specialite.values())
                                 .map(Specialite::name) // Récupérer le nom des spécialités sous forme de String
                                 .collect(Collectors.toList())
@@ -142,32 +146,7 @@ public class GestionTechnicienController {
 
         return card;
     }
-    public boolean emailExistsTechnicien(String email) {
-        String query = "SELECT COUNT(*) FROM utilisateur WHERE email = ?";
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
 
-        try {
-            Connection connection = MyDatabase.getInstance().getCnx(); // Connexion partagée
-            preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setString(1, email);
-            resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-                return resultSet.getInt(1) > 0; // Si le résultat est supérieur à 0, l'email existe
-            }
-        } catch (SQLException e) {
-            System.out.println("Erreur lors de la vérification de l'email : " + e.getMessage());
-        } finally {
-            try {
-                if (resultSet != null) resultSet.close();
-                if (preparedStatement != null) preparedStatement.close();
-            } catch (SQLException e) {
-                System.out.println("Erreur lors de la fermeture des ressources : " + e.getMessage());
-            }
-        }
-        return false;
-    }
 
     @FXML
     private void loadUsers() {
@@ -203,6 +182,32 @@ public class GestionTechnicienController {
         technicienFlowPane.getChildren().clear();
         technicienFlowPane.getChildren().addAll(technicienCards);
     }
+    public boolean emailExists(String email) {
+        String query = "SELECT COUNT(*) FROM utilisateur WHERE email = ?";
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        try {
+            Connection connection = MyDatabase.getInstance().getCnx(); // Connexion partagée
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, email);
+            resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de la vérification de l'email : " + e.getMessage());
+        } finally {
+            try {
+                if (resultSet != null) resultSet.close();
+                if (preparedStatement != null) preparedStatement.close();
+            } catch (SQLException e) {
+                System.out.println("Erreur lors de la fermeture des ressources : " + e.getMessage());
+            }
+        }
+        return false;
+    }
 
 
     private technicien getSelectedTechnicien() {
@@ -212,195 +217,99 @@ public class GestionTechnicienController {
     }
     @FXML
     private void handleUpdateTechnicien() {
-        // Créer un GridPane pour le formulaire de modification
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-
-        // Champ pour entrer l'ID du technicien
-        TextField technicienIdField = new TextField();
-        grid.addRow(0, new Label("Entrez l'ID du technicien:"), technicienIdField);
-
-        // Champ pour sélectionner quel champ modifier
-        ComboBox<String> fieldSelectionCombo = new ComboBox<>();
-        fieldSelectionCombo.getItems().add(""); // Option vide par défaut
-        fieldSelectionCombo.getItems().addAll("Nom", "Prénom", "Email", "Mot de passe", "Spécialité");
-        fieldSelectionCombo.getSelectionModel().selectFirst(); // Sélectionne l'option vide par défaut
-
-        // Champs pour les différentes modifications
-        TextField nomField = new TextField();
-        TextField prenomField = new TextField();
-        TextField emailField = new TextField();
-        TextField mdpField = new TextField();
-        ComboBox<String> specialiteCombo = new ComboBox<>(); // Spécialité sous forme de ComboBox
-        specialiteCombo.getItems().addAll("maintenance", "electricite", "autre");
-
-        // Ajout des champs au GridPane
-        grid.addRow(1, new Label("Sélectionnez le champ à modifier:"), fieldSelectionCombo);
-        grid.addRow(2, new Label("Nom:"), nomField);
-        grid.addRow(3, new Label("Prénom:"), prenomField);
-        grid.addRow(4, new Label("Email:"), emailField);
-        grid.addRow(5, new Label("Mot de passe:"), mdpField);
-        grid.addRow(6, new Label("Spécialité:"), specialiteCombo);
-
-        // Masquer tous les champs de modification par défaut
-        nomField.setVisible(false);
-        prenomField.setVisible(false);
-        emailField.setVisible(false);
-        mdpField.setVisible(false);
-        specialiteCombo.setVisible(false);
-
-        // Création des boutons OK et Annuler
-        ButtonType okButton = ButtonType.OK;
-        ButtonType cancelButton = ButtonType.CANCEL;
-
-        // Création du dialogue
-        Dialog<utilisateur> dialog = new Dialog<>();
-        dialog.setTitle("Modifier Technicien");
-        dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getButtonTypes().addAll(okButton, cancelButton);
-
-        // Listener sur le ComboBox pour afficher uniquement le champ sélectionné
-        fieldSelectionCombo.valueProperty().addListener((observable, oldValue, newValue) -> {
-            // Masquer tous les champs
-            nomField.setVisible(false);
-            prenomField.setVisible(false);
-            emailField.setVisible(false);
-            mdpField.setVisible(false);
-            specialiteCombo.setVisible(false);
-
-            // Afficher uniquement le champ sélectionné
-            if (newValue != null && !newValue.isEmpty()) {
-                switch (newValue) {
-                    case "Nom":
-                        nomField.setVisible(true);
-                        break;
-                    case "Prénom":
-                        prenomField.setVisible(true);
-                        break;
-                    case "Email":
-                        emailField.setVisible(true);
-                        break;
-                    case "Mot de passe":
-                        mdpField.setVisible(true);
-                        break;
-                    case "Spécialité":
-                        specialiteCombo.setVisible(true);
-                        break;
-                }
+        try {
+            // Récupérer l'ID du technicien
+            String userIdText = idField.getText();
+            if (userIdText.isEmpty()) {
+                showAlert("Erreur", "L'ID de l'utilisateur/technicien ne peut pas être vide.");
+                return;
             }
-        });
 
-        // Gérer le résultat du dialogue
-        dialog.setResultConverter(button -> {
-            if (button == okButton) {
-                // Récupérer l'ID du technicien et le valider
-                String technicienIdText = technicienIdField.getText();
-                if (technicienIdText.isEmpty()) {
-                    showAlert("Erreur", "L'ID du technicien ne peut pas être vide.");
-                    return null;
+            int userId;
+            try {
+                userId = Integer.parseInt(userIdText);
+                if (userId <= 0) {
+                    showAlert("Erreur", "L'ID doit être un nombre entier positif.");
+                    return;
                 }
-
-                int technicienId;
-                try {
-                    technicienId = Integer.parseInt(technicienIdText);
-                } catch (NumberFormatException e) {
-                    showAlert("Erreur", "L'ID doit être un nombre entier.");
-                    return null;
-                }
-
-                // Vérifier si le technicien existe
-                utilisateur selectedUser = serviceUtilisateur.getUtilisateurById(technicienId);
-                if (selectedUser == null) {
-                    showAlert("Erreur", "Aucun technicien trouvé avec cet ID.");
-                    return null;
-                }
-
-                // Vérifier que le champ de modification est sélectionné
-                if (fieldSelectionCombo.getValue().isEmpty()) {
-                    showAlert("Erreur", "Veuillez sélectionner un champ à modifier.");
-                    return null;
-                }
-
-                // Vérification des champs avant modification
-                if (fieldSelectionCombo.getValue().equals("Nom") && nomField.getText().isEmpty()) {
-                    showAlert("Erreur", "Le nom ne peut pas être vide.");
-                    return null;
-                }
-                if (fieldSelectionCombo.getValue().equals("Prénom") && prenomField.getText().isEmpty()) {
-                    showAlert("Erreur", "Le prénom ne peut pas être vide.");
-                    return null;
-                }
-                if (fieldSelectionCombo.getValue().equals("Email")) {
-                    String email = emailField.getText();
-
-                    // Vérification si l'email est vide ou invalide
-                    if (email.isEmpty() || !email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-                        showAlert("Erreur", "L'email est invalide ou vide.");
-                        return null;
-                    }
-
-                    // Vérifier si l'email existe déjà pour un autre technicien
-                    if (emailExistsTechnicien(email)) {
-                        showAlert("Erreur de saisie", "L'email est déjà utilisé.");
-                        return null;
-                    }
-                }
-
-                // Vérification du mot de passe
-                if (fieldSelectionCombo.getValue().equals("Mot de passe") &&
-                        (mdpField.getText().isEmpty() || mdpField.getText().length() < 8 ||
-                                !mdpField.getText().matches(".*[A-Z].*") || !mdpField.getText().matches(".*\\d.*"))) {
-                    showAlert("Erreur de saisie", "Le mot de passe doit comporter au moins 8 caractères, avec une majuscule et un chiffre.");
-                    return null;
-                }
-
-                // Mettre à jour le mot de passe si tout est valide
-                if (fieldSelectionCombo.getValue().equals("Mot de passe")) {
-                    serviceUtilisateur.updateField(selectedUser.getId_utilisateur(), "motdepasse", mdpField.getText());
-                }
-
-                // Mettre à jour le champ sélectionné
-                switch (fieldSelectionCombo.getValue()) {
-                    case "Nom":
-                        serviceUtilisateur.updateField(selectedUser.getId_utilisateur(), "nom", nomField.getText());
-                        break;
-                    case "Prénom":
-                        serviceUtilisateur.updateField(selectedUser.getId_utilisateur(), "prenom", prenomField.getText());
-                        break;
-                    case "Email":
-                        serviceUtilisateur.updateField(selectedUser.getId_utilisateur(), "email", emailField.getText());
-                        break;
-                    case "Mot de passe":
-                        serviceUtilisateur.updateField(selectedUser.getId_utilisateur(), "motdepasse", mdpField.getText());
-                        break;
-                    case "Spécialité":
-                        String selectedSpecialiteString = specialiteCombo.getValue();
-                        if (selectedSpecialiteString != null && !selectedSpecialiteString.trim().isEmpty()) {
-                            serviceUtilisateur.updateFieldTechnicien(
-                                    selectedUser.getId_utilisateur(),
-                                    "specialite",
-                                    selectedSpecialiteString
-                            );
-                        } else {
-                            showAlert("Erreur", "Veuillez sélectionner une spécialité valide.");
-                            return null;
-                        }
-                        break;
-                    default:
-                        showAlert("Erreur", "Aucun champ sélectionné pour la modification.");
-                        return null;
-                }
-
-                // Recharger la liste après modification
-                loadUsers();
+            } catch (NumberFormatException e) {
+                showAlert("Erreur", "L'ID doit être un nombre entier.");
+                return;
             }
-            return null;
-        });
 
-        dialog.showAndWait();
+            // Vérifier si l'utilisateur existe
+            utilisateur existingUser = serviceUtilisateur.getUtilisateurById(userId);
+            if (existingUser == null) {
+                showAlert("Erreur", "Aucun utilisateur trouvé avec cet ID.");
+                return;
+            }
+
+            // Récupérer et valider les champs
+            String newName = nameField.getText().trim();
+            if (newName.isEmpty() || !newName.matches("[A-Za-zÀ-ÖØ-öø-ÿ\\s-]+")) {
+                showAlert("Erreur", "Le nom doit contenir uniquement des lettres et ne peut pas être vide.");
+                return;
+            }
+
+            String newPrenom = prenomField.getText().trim();
+            if (newPrenom.isEmpty() || !newPrenom.matches("[A-Za-zÀ-ÖØ-öø-ÿ\\s-]+")) {
+                showAlert("Erreur", "Le prénom doit contenir uniquement des lettres et ne peut pas être vide.");
+                return;
+            }
+
+            String newEmail = emailField.getText().trim();
+            if (newEmail.isEmpty() || !newEmail.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                showAlert("Erreur", "L'email doit être valide.");
+                return;
+            }
+            if (!newEmail.equals(existingUser.getEmail()) && emailExists(newEmail)) {
+                showAlert("Erreur", "L'email est déjà utilisé.");
+                return;
+            }
+
+            String newPassword = passwordField.getText().trim();
+            if (newPassword.isEmpty() || newPassword.length() < 8
+                    || !newPassword.matches(".*\\d.*")
+                    || !newPassword.matches(".*[A-Z].*")) {
+                showAlert("Erreur", "Le mot de passe doit comporter au moins 8 caractères, un chiffre et une lettre majuscule.");
+                return;
+            }
+
+            // Validation de la spécialité
+            String newSpecialite = specialiteComboBox.getValue();
+            if (newSpecialite == null || newSpecialite.trim().isEmpty()) {
+                showAlert("Erreur", "La spécialité doit être sélectionnée.");
+                return;
+            }
+
+            // Mise à jour des champs dans le service
+            serviceUtilisateur.updateFieldTechnicien(userId, "nom", newName);
+            serviceUtilisateur.updateFieldTechnicien(userId, "prenom", newPrenom);
+            serviceUtilisateur.updateFieldTechnicien(userId, "email", newEmail);
+            serviceUtilisateur.updateFieldTechnicien(userId, "motdepasse", newPassword);
+            serviceUtilisateur.updateFieldTechnicien(userId, "specialite", newSpecialite);
+
+            // Recharger les utilisateurs pour refléter la modification
+            loadUsers();
+
+            // Réinitialiser les champs
+            clearFields();
+
+            // Confirmation de la modification
+            showAlert("Succès", "Technicien modifié avec succès.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Une erreur est survenue lors de la modification.");
+        }
     }
-
+    private void clearFields() {
+        idField.clear();
+        nameField.clear();
+        prenomField.clear();
+        emailField.clear();
+        passwordField.clear();
+        specialiteComboBox.setValue(null); // Réinitialiser le ComboBox
+    }
 
     @FXML
     private void handleDeleteTechnicien() {

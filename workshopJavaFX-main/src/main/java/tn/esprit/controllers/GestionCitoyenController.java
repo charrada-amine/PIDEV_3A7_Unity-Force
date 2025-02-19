@@ -24,7 +24,8 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class GestionCitoyenController {
-
+    @FXML
+    private TextField idField, nameField, prenomField, emailField, passwordField, zoneIdField;
     @FXML
     private FlowPane citoyenFlowPane; // Correspond à 'fx:id="citoyenFlowPane"' dans le FXML
     private final ServiceUtilisateur serviceUtilisateur = new ServiceUtilisateur();
@@ -38,6 +39,33 @@ public class GestionCitoyenController {
             loadUsers(); // Charger les citoyens
         }
     }
+    public boolean emailExists(String email) {
+        String query = "SELECT COUNT(*) FROM utilisateur WHERE email = ?";
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        try {
+            Connection connection = MyDatabase.getInstance().getCnx(); // Connexion partagée
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, email);
+            resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                return resultSet.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de la vérification de l'email : " + e.getMessage());
+        } finally {
+            try {
+                if (resultSet != null) resultSet.close();
+                if (preparedStatement != null) preparedStatement.close();
+            } catch (SQLException e) {
+                System.out.println("Erreur lors de la fermeture des ressources : " + e.getMessage());
+            }
+        }
+        return false;
+    }
+
 
     private VBox createUserCard(citoyen citoyen) {
         VBox card = new VBox(10);
@@ -187,171 +215,97 @@ public class GestionCitoyenController {
     }
     @FXML
     private void handleUpdateCitoyen() {
-        // Créer un GridPane pour le formulaire de modification
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-
-        // Champ pour entrer l'ID de l'utilisateur/citoyen
-        TextField userIdField = new TextField();
-        grid.addRow(0, new Label("Entrez l'ID de l'utilisateur/citoyen:"), userIdField);
-
-        // Champ pour sélectionner quel champ modifier
-        ComboBox<String> fieldSelectionCombo = new ComboBox<>();
-        fieldSelectionCombo.getItems().add(""); // Option vide par défaut
-        fieldSelectionCombo.getItems().addAll("Nom", "Prénom", "Email", "Mot de passe", "Zone ID");
-        fieldSelectionCombo.getSelectionModel().selectFirst(); // Sélectionne l'option vide par défaut
-
-        // Champs pour les différentes modifications
-        TextField nomField = new TextField();
-        TextField prenomField = new TextField();
-        TextField emailField = new TextField();
-        TextField mdpField = new TextField();
-        TextField zoneIdField = new TextField(); // Nouveau champ pour Zone ID
-
-        // Ajout des champs au GridPane
-        grid.addRow(1, new Label("Sélectionnez le champ à modifier:"), fieldSelectionCombo);
-        grid.addRow(2, new Label("Nom:"), nomField);
-        grid.addRow(3, new Label("Prénom:"), prenomField);
-        grid.addRow(4, new Label("Email:"), emailField);
-        grid.addRow(5, new Label("Mot de passe:"), mdpField);
-        grid.addRow(6, new Label("Zone ID:"), zoneIdField); // Ajout du champ Zone ID
-
-        // Masquer tous les champs de modification par défaut
-        nomField.setVisible(false);
-        prenomField.setVisible(false);
-        emailField.setVisible(false);
-        mdpField.setVisible(false);
-        zoneIdField.setVisible(false);
-
-        // Création des boutons OK et Annuler
-        ButtonType okButton = ButtonType.OK;
-        ButtonType cancelButton = ButtonType.CANCEL;
-
-        // Création du dialogue
-        Dialog<utilisateur> dialog = new Dialog<>();
-        dialog.setTitle("Modifier Utilisateur / Citoyen");
-        dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getButtonTypes().addAll(okButton, cancelButton);
-
-        // Listener sur le ComboBox pour afficher uniquement le champ sélectionné
-        fieldSelectionCombo.valueProperty().addListener((observable, oldValue, newValue) -> {
-            // Masquer tous les champs
-            nomField.setVisible(false);
-            prenomField.setVisible(false);
-            emailField.setVisible(false);
-            mdpField.setVisible(false);
-            zoneIdField.setVisible(false);
-
-            // Afficher uniquement le champ sélectionné
-            if (newValue != null && !newValue.isEmpty()) {
-                switch (newValue) {
-                    case "Nom":
-                        nomField.setVisible(true);
-                        break;
-                    case "Prénom":
-                        prenomField.setVisible(true);
-                        break;
-                    case "Email":
-                        emailField.setVisible(true);
-                        break;
-                    case "Mot de passe":
-                        mdpField.setVisible(true);
-                        break;
-                    case "Zone ID":
-                        zoneIdField.setVisible(true);
-                        break;
-                }
+        try {
+            // Récupérer l'ID du citoyen
+            String userIdText = idField.getText();
+            if (userIdText.isEmpty()) {
+                showAlert("Erreur", "L'ID de l'utilisateur/citoyen ne peut pas être vide.");
+                return;
             }
-        });
 
-        // Gérer le résultat du dialogue
-        dialog.setResultConverter(button -> {
-            if (button == okButton) {
-                // Récupérer l'ID utilisateur/citoyen et le valider
-                String userIdText = userIdField.getText();
-                if (userIdText.isEmpty()) {
-                    showAlert("Erreur", "L'ID de l'utilisateur/citoyen ne peut pas être vide.");
-                    return null;
-                }
-
-                int userId;
-                try {
-                    userId = Integer.parseInt(userIdText);
-                } catch (NumberFormatException e) {
-                    showAlert("Erreur", "L'ID doit être un nombre entier.");
-                    return null;
-                }
-
-                // Vérifier si c'est un utilisateur ou un citoyen
-                utilisateur selectedUser = serviceUtilisateur.getUtilisateurById(userId);
-                if (selectedUser == null) {
-                    showAlert("Erreur", "Aucun utilisateur/citoyen trouvé avec cet ID.");
-                    return null;
-                }
-
-                // Vérification des champs et mise à jour
-                String fieldToUpdate = fieldSelectionCombo.getValue();
-                switch (fieldToUpdate) {
-                    case "Nom":
-                        if (nomField.getText().isEmpty()) {
-                            showAlert("Erreur", "Le nom ne peut pas être vide.");
-                            return null;
-                        }
-                        serviceUtilisateur.updateField(selectedUser.getId_utilisateur(), "nom", nomField.getText());
-                        break;
-                    case "Prénom":
-                        if (prenomField.getText().isEmpty()) {
-                            showAlert("Erreur", "Le prénom ne peut pas être vide.");
-                            return null;
-                        }
-                        serviceUtilisateur.updateField(selectedUser.getId_utilisateur(), "prenom", prenomField.getText());
-                        break;
-                    case "Email":
-                        String email = emailField.getText();
-                        if (email.isEmpty()) {
-                            showAlert("Erreur", "L'email ne peut pas être vide.");
-                            return null;
-                        }
-                        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-                            showAlert("Erreur", "L'email est invalide.");
-                            return null;
-                        }
-                        if (emailExistsCitoyen(email)) {
-                            showAlert("Erreur", "L'email est déjà utilisé.");
-                            return null;
-                        }
-                        serviceUtilisateur.updateField(selectedUser.getId_utilisateur(), "email", email);
-                        break;
-                    case "Mot de passe":
-                        if (mdpField.getText().isEmpty() || mdpField.getText().length() < 8 ||
-                                !mdpField.getText().matches(".*[A-Z].*") || !mdpField.getText().matches(".*\\d.*")) {
-                            showAlert("Erreur de saisie", "Le mot de passe doit comporter au moins 8 caractères, avec une majuscule et un chiffre.");
-                            return null;
-                        }
-                        serviceUtilisateur.updateField(selectedUser.getId_utilisateur(), "motdepasse", mdpField.getText());
-                        break;
-                    case "Zone ID":
-                        try {
-                            int newZoneId = Integer.parseInt(zoneIdField.getText());
-                            serviceUtilisateur.updateField(selectedUser.getId_utilisateur(), "zoneId", String.valueOf(newZoneId));
-                        } catch (NumberFormatException e) {
-                            showAlert("Erreur", "Le Zone ID doit être un nombre entier.");
-                            return null;
-                        }
-                        break;
-                    default:
-                        showAlert("Erreur", "Aucun champ sélectionné pour la modification.");
-                        return null;
-                }
-
-                loadUsers(); // Recharger la liste après modification
+            int userId;
+            try {
+                userId = Integer.parseInt(userIdText);
+            } catch (NumberFormatException e) {
+                showAlert("Erreur", "L'ID doit être un nombre entier.");
+                return;
             }
-            return null;
-        });
 
-        dialog.showAndWait();
+            // Vérifier si l'utilisateur existe
+            utilisateur existingUser = serviceUtilisateur.getUtilisateurById(userId);
+            if (existingUser == null) {
+                showAlert("Erreur", "Aucun citoyen trouvé avec cet ID.");
+                return;
+            }
+
+            // Récupérer et valider les champs
+            String newName = nameField.getText();
+            String newPrenom = prenomField.getText();
+            String newEmail = emailField.getText();
+            String newPassword = passwordField.getText();
+            String newZoneIdText = zoneIdField.getText();
+
+            if (newName.isEmpty() || newPrenom.isEmpty() || newEmail.isEmpty() || newPassword.isEmpty() || newZoneIdText.isEmpty()) {
+                showAlert("Erreur", "Tous les champs doivent être remplis.");
+                return;
+            }
+
+            // Validation de l'email
+            if (!newEmail.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                showAlert("Erreur", "L'email doit être valide.");
+                return;
+            }
+            if (!newEmail.equals(existingUser.getEmail()) && emailExists(newEmail)) {
+                showAlert("Erreur", "L'email est déjà utilisé.");
+                return;
+            }
+
+            // Validation du mot de passe
+            if (newPassword.length() < 8 || !newPassword.matches(".*\\d.*") || !newPassword.matches(".*[A-Z].*")) {
+                showAlert("Erreur", "Le mot de passe doit comporter au moins 8 caractères, un chiffre et une lettre majuscule.");
+                return;
+            }
+
+            // Validation du Zone ID
+            int newZoneId;
+            try {
+                newZoneId = Integer.parseInt(newZoneIdText);
+            } catch (NumberFormatException e) {
+                showAlert("Erreur", "Le Zone ID doit être un nombre entier.");
+                return;
+            }
+
+            // Mise à jour des champs dans le service
+            serviceUtilisateur.updateField(userId, "nom", newName);
+            serviceUtilisateur.updateField(userId, "prenom", newPrenom);
+            serviceUtilisateur.updateField(userId, "email", newEmail);
+            serviceUtilisateur.updateField(userId, "motdepasse", newPassword);
+            serviceUtilisateur.updateField(userId, "zoneId", String.valueOf(newZoneId));
+
+            // Recharger les utilisateurs pour refléter la modification
+            loadUsers();
+
+            // Réinitialiser les champs
+            clearFields();
+
+            // Confirmation de la modification
+            showAlert("Succès", "Citoyen modifié avec succès.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Une erreur est survenue lors de la modification.");
+        }
     }
+    // Fonction pour réinitialiser les champs du formulaire
+    private void clearFields() {
+        idField.clear();
+        nameField.clear();
+        prenomField.clear();
+        emailField.clear();
+        passwordField.clear();
+        zoneIdField.clear();
+
+    }
+
 
 
     private void showAlert(String title, String content) {
@@ -413,5 +367,3 @@ public class GestionCitoyenController {
 
 
 }
-
-
