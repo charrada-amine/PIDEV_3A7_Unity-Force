@@ -15,3 +15,4 @@
         <Button text="Gestion Zones" onAction="#navigateToZones" style="-fx-background-color: #06d6a0; -fx-text-fill: white; -fx-font-size: 16px; -fx-pref-width: 250px; -fx-padding: 15;"/>
     </VBox>
 </VBox>
+

@@ -16,7 +16,7 @@
             <Label text="Gestion Urbaine" styleClass="nav-title"/>
             <Button text="Lampadaires" styleClass="nav-button" onAction="#handleShowLampadaires">
                 <graphic>
-                    <FontIcon iconLiteral="far-lightbulb" iconSize="16" iconColor="#ffffff"/>
+                    <FontIcon iconLiteral="fas-lightbulb" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
             <Button text="Zones" styleClass="nav-button" onAction="#handleNavigateToZones">
