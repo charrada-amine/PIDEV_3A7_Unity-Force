@@ -39,37 +39,46 @@
             <VBox spacing="20" styleClass="card" prefWidth="380">
                 <Label text="Gestion des Lampadaires" style="-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #202124;"/>
 
-                <VBox spacing="20">
+                <VBox spacing="10">
                     <TextField fx:id="tfType" promptText="Type" styleClass="modern-input"/>
-                    <TextField fx:id="tfPuissance" promptText="Puissance (W)" styleClass="modern-input"/>
-                    <ComboBox fx:id="cbEtat" promptText="État" styleClass="modern-input"/>
-                    <DatePicker fx:id="dpDateInstallation" promptText="Date Installation" styleClass="modern-input"/>
-                    <TextField fx:id="tfIdZone" promptText="ID Zone" styleClass="modern-input"/>
+                    <Label fx:id="lblTypeError" styleClass="error-message" visible="false"/>
 
-                    <!-- Nouveaux boutons modernisés -->
-                    <HBox spacing="15" styleClass="button-container">
-                        <Button text="Ajouter" onAction="#handleAdd" styleClass="action-button,add">
-                            <graphic>
-                                <FontIcon iconLiteral="fas-plus-circle" iconSize="16" iconColor="white"/>
-                            </graphic>
-                        </Button>
-                        <Button text="Modifier" onAction="#handleUpdate" styleClass="action-button,edit">
-                            <graphic>
-                                <FontIcon iconLiteral="fas-edit" iconSize="16" iconColor="white"/>
-                            </graphic>
-                        </Button>
-                        <Button text="Supprimer" onAction="#handleDelete" styleClass="action-button,delete">
-                            <graphic>
-                                <FontIcon iconLiteral="fas-trash-alt" iconSize="16" iconColor="white"/>
-                            </graphic>
-                        </Button>
-                        <Button text="Réinitialiser" onAction="#handleClear" styleClass="action-button,reset">
-                            <graphic>
-                                <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
-                            </graphic>
-                        </Button>
-                    </HBox>
+                    <TextField fx:id="tfPuissance" promptText="Puissance (W)" styleClass="modern-input"/>
+                    <Label fx:id="lblPuissanceError" styleClass="error-message" visible="false"/>
+
+                    <ComboBox fx:id="cbEtat" promptText="État" styleClass="modern-input"/>
+                    <Label fx:id="lblEtatError" styleClass="error-message" visible="false"/>
+
+                    <DatePicker fx:id="dpDateInstallation" promptText="Date Installation" styleClass="modern-input"/>
+                    <Label fx:id="lblDateError" styleClass="error-message" visible="false"/>
+
+                    <TextField fx:id="tfIdZone" promptText="ID Zone" styleClass="modern-input"/>
+                    <Label fx:id="lblZoneError" styleClass="error-message" visible="false"/>
                 </VBox>
+
+                <!-- Nouveaux boutons modernisés -->
+                <HBox spacing="15" styleClass="button-container">
+                    <Button text="Ajouter" onAction="#handleAdd" styleClass="action-button,add">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-plus-circle" iconSize="16" iconColor="white"/>
+                        </graphic>
+                    </Button>
+                    <Button text="Modifier" onAction="#handleUpdate" styleClass="action-button,edit">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-edit" iconSize="16" iconColor="white"/>
+                        </graphic>
+                    </Button>
+                    <Button text="Supprimer" onAction="#handleDelete" styleClass="action-button,delete">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-trash-alt" iconSize="16" iconColor="white"/>
+                        </graphic>
+                    </Button>
+                    <Button text="Réinitialiser" onAction="#handleClear" styleClass="action-button,reset">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
+                        </graphic>
+                    </Button>
+                </HBox>
             </VBox>
 
             <!-- Zone des cartes de lampadaires -->

@@ -25,7 +25,9 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import tn.esprit.models.Lampadaire;
 import tn.esprit.models.Lampadaire.EtatLampadaire;
+import tn.esprit.models.Zone;
 import tn.esprit.services.ServiceLampadaire;
+import tn.esprit.services.ServiceZone;
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
@@ -41,7 +43,10 @@ public class GestionLampadaireController implements Initializable {
     @FXML private TextField tfIdZone;
     @FXML private FlowPane cardContainer;
     @FXML private ScrollPane scrollPane;
+    @FXML private Label lblZoneError;
+
     private final ServiceLampadaire serviceLampadaire = new ServiceLampadaire();
+    private final ServiceZone serviceZone = new ServiceZone();
     private final ObservableList<Lampadaire> lampadaires = FXCollections.observableArrayList();
     private Lampadaire selectedLampadaire;
 
@@ -54,7 +59,23 @@ public class GestionLampadaireController implements Initializable {
         cardContainer.setPadding(new Insets(20));
         Font.loadFont(getClass().getResourceAsStream("/fonts/Roboto-Regular.ttf"), 14);
 
+        // Reset error style on text change
+        tfIdZone.textProperty().addListener((observable, oldValue, newValue) -> {
+            tfIdZone.getStyleClass().remove("error-field");
+            lblZoneError.setVisible(false);
+            tfType.textProperty().addListener((obs, oldVal, newVal) -> resetFieldError(tfType, lblTypeError));
+            tfPuissance.textProperty().addListener((obs, oldVal, newVal) -> resetFieldError(tfPuissance, lblPuissanceError));
+            cbEtat.valueProperty().addListener((obs, oldVal, newVal) -> resetFieldError(cbEtat, lblEtatError));
+            dpDateInstallation.valueProperty().addListener((obs, oldVal, newVal) -> resetFieldError(dpDateInstallation, lblDateError));
+            tfIdZone.textProperty().addListener((obs, oldVal, newVal) -> resetFieldError(tfIdZone, lblZoneError));
+
+        });
+
         loadData();
+    }
+    private void resetFieldError(Control field, Label errorLabel) {
+        field.getStyleClass().remove("error-field");
+        errorLabel.setVisible(false);
     }
 
     private void loadData() {
@@ -71,9 +92,10 @@ public class GestionLampadaireController implements Initializable {
 
     private Text createInfoText(String label, String value) {
         Text text = new Text(label + ": " + value);
-        text.setFont(Font.font("Roboto", 14)); // Modification ici
+        text.setFont(Font.font("Roboto", 14));
         return text;
     }
+
     private void handleDeleteLampadaire(Lampadaire lampadaire) {
         if (showConfirmation("Confirmation", "Supprimer ce lampadaire ?")) {
             try {
@@ -119,7 +141,13 @@ public class GestionLampadaireController implements Initializable {
             clearForm();
             showSuccessFeedback();
         } catch (Exception e) {
-            showAlert("Erreur d'ajout", e.getMessage());
+            if (e.getMessage().startsWith("La zone avec l'ID")) {
+                tfIdZone.getStyleClass().add("error-field");
+                lblZoneError.setText(e.getMessage());
+                lblZoneError.setVisible(true);
+            } else {
+                showAlert("Erreur d'ajout", e.getMessage());
+            }
         }
     }
 
@@ -167,9 +195,19 @@ public class GestionLampadaireController implements Initializable {
             clearForm();
             showSuccessFeedback();
         } catch (Exception e) {
-            showAlert("Erreur de modification", e.getMessage());
+            if (e.getMessage().startsWith("La zone avec l'ID")) {
+                tfIdZone.getStyleClass().add("error-field");
+                lblZoneError.setText(e.getMessage());
+                lblZoneError.setVisible(true);
+            } else {
+                showAlert("Erreur de modification", e.getMessage());
+            }
         }
     }
+    @FXML private Label lblTypeError;
+    @FXML private Label lblPuissanceError;
+    @FXML private Label lblEtatError;
+    @FXML private Label lblDateError;
 
     @FXML
     private void handleDelete() {
@@ -206,8 +244,80 @@ public class GestionLampadaireController implements Initializable {
     private void handleClear() {
         clearForm();
     }
+    private void validateInputs() throws Exception {
+        boolean hasError = false;
 
-    private void validateInputs() throws Exception {}
+        // Réinitialiser les erreurs
+        resetErrorStyles();
+
+        // Vérification du champ Type
+        if (tfType.getText().isEmpty()) {
+            showError(tfType, lblTypeError, "Le type est requis");
+            hasError = true;
+        }
+
+        // Vérification du champ Puissance
+        try {
+            Float.parseFloat(tfPuissance.getText());
+        } catch (NumberFormatException e) {
+            showError(tfPuissance, lblPuissanceError, "La puissance doit être un nombre");
+            hasError = true;
+        }
+
+        // Vérification de l'état
+        if (cbEtat.getValue() == null) {
+            showError(cbEtat, lblEtatError, "Sélectionnez un état");
+            hasError = true;
+        }
+
+        // Vérification de la date
+        if (dpDateInstallation.getValue() == null) {
+            showError(dpDateInstallation, lblDateError, "Sélectionnez une date");
+            hasError = true;
+        }
+
+        // Vérification de l'ID de la zone
+        try {
+            int idZone = Integer.parseInt(tfIdZone.getText());
+            if (serviceZone.getById(idZone) == null) {
+                throw new Exception("La zone avec l'ID " + idZone + " n'existe pas");
+            }
+        } catch (NumberFormatException e) {
+            showError(tfIdZone, lblZoneError, "L'ID de la zone doit être un nombre entier");
+            hasError = true;
+        } catch (Exception e) {
+            showError(tfIdZone, lblZoneError, e.getMessage());
+            hasError = true;
+        }
+
+        if (hasError) {
+            throw new Exception("Corrigez les erreurs avant de continuer");
+        }
+    }
+    private void showError(Control field, Label errorLabel, String message) {
+        if (!field.getStyleClass().contains("error-field")) {
+            field.getStyleClass().add("error-field");
+        }
+        errorLabel.setText(message);
+        errorLabel.setVisible(true);
+    }
+
+    private void resetErrorStyles() {
+        // Supprimer les styles d'erreur de tous les champs
+        tfType.getStyleClass().remove("error-field");
+        tfPuissance.getStyleClass().remove("error-field");
+        cbEtat.getStyleClass().remove("error-field");
+        dpDateInstallation.getStyleClass().remove("error-field");
+        tfIdZone.getStyleClass().remove("error-field");
+
+        // Cacher les labels d'erreur
+        lblTypeError.setVisible(false);
+        lblPuissanceError.setVisible(false);
+        lblEtatError.setVisible(false);
+        lblDateError.setVisible(false);
+        lblZoneError.setVisible(false);
+    }
+
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -253,24 +363,21 @@ public class GestionLampadaireController implements Initializable {
         VBox card = new VBox(15);
         card.getStyleClass().add("card");
 
-        // En-tête avec icône
         HBox header = new HBox(10);
         FontIcon icon = new FontIcon(FontAwesomeSolid.LIGHTBULB);
         icon.setIconSize(24);
         icon.setIconColor(Color.web("#1a73e8"));
 
         Label title = new Label("Lampadaire #" + lampadaire.getIdLamp());
-        title.setStyle("-fx-font-size: 18; -fx-text-fill: #202124;"); // La police est déjà gérée par CSS
+        title.setStyle("-fx-font-size: 18; -fx-text-fill: #202124;");
 
         header.getChildren().addAll(icon, title);
 
-        // Formatage de la date
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         String dateFormatted = (lampadaire.getDateInstallation() != null)
                 ? lampadaire.getDateInstallation().format(formatter)
                 : "N/A";
 
-        // Contenu
         VBox content = new VBox(8);
         content.getChildren().addAll(
                 createInfoRow(FontAwesomeSolid.TAG, "Type : " + lampadaire.getTypeLampadaire()),
@@ -280,29 +387,23 @@ public class GestionLampadaireController implements Initializable {
                 createInfoRow(FontAwesomeSolid.CALENDAR, "Installation : " + dateFormatted)
         );
 
-        // Boutons d'action AVEC GESTIONNAIRES D'ÉVÉNEMENTS
         HBox buttons = new HBox(10);
-
-        // Bouton Modifier
         Button btnModifier = createIconButton("Modifier", FontAwesomeSolid.PENCIL_ALT, "-secondary");
-        btnModifier.setOnAction(e -> fillForm(lampadaire)); // Remplit le formulaire
-
-        // Bouton Supprimer
         Button btnSupprimer = createIconButton("Supprimer", FontAwesomeSolid.TRASH, "#ea4335");
-        btnSupprimer.setOnAction(e -> handleDeleteLampadaire(lampadaire)); // Suppression directe
+
+        btnModifier.setOnAction(e -> fillForm(lampadaire));
+        btnSupprimer.setOnAction(e -> handleDeleteLampadaire(lampadaire));
 
         buttons.getChildren().addAll(btnModifier, btnSupprimer);
-
         card.getChildren().addAll(header, new Separator(), content, buttons);
 
-        // Style visuel de la carte
         card.setStyle("-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16;");
         card.setEffect(new DropShadow(10, Color.gray(0.3)));
 
         return card;
     }
 
-    private HBox createInfoRow(FontAwesomeSolid iconType, String text) { // ✅ Paramètre Solid
+    private HBox createInfoRow(FontAwesomeSolid iconType, String text) {
         FontIcon icon = new FontIcon(iconType);
         icon.setIconSize(16);
         icon.setIconColor(Color.web("#5f6368"));
@@ -313,7 +414,7 @@ public class GestionLampadaireController implements Initializable {
         return new HBox(10, icon, label);
     }
 
-    private Button createIconButton(String text, FontAwesomeSolid iconType, String color) { // ✅ Paramètre Solid
+    private Button createIconButton(String text, FontAwesomeSolid iconType, String color) {
         FontIcon icon = new FontIcon(iconType);
         icon.setIconSize(16);
         icon.setIconColor(Color.WHITE);

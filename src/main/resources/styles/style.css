@@ -212,3 +212,13 @@
     -fx-padding: 25 0 0 0;
     -fx-alignment: center;
 }
+/* Error styling */
+.error-field {
+    -fx-border-color: #ef4444 !important;
+}
+
+.error-message {
+    -fx-text-fill: #ef4444;
+    -fx-font-size: 12px;
+    -fx-padding: 2 0 0 5;
+}
