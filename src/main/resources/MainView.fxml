@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.net.URL?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+
+<TabPane xmlns="http://javafx.com/javafx/17"
+         xmlns:fx="http://javafx.com/fxml/1"
+         tabClosingPolicy="UNAVAILABLE"
+         styleClass="main-tab-pane"
+         prefWidth="1200"
+         prefHeight="800">
+
+    <!-- Interventions Tab -->
+    <Tab text="Interventions" styleClass="main-tab">
+        <content>
+            <fx:include source="GestionIntervention.fxml"/>
+        </content>
+    </Tab>
+
+    <!-- Reclamations Tab -->
+    <Tab text="Réclamations" styleClass="main-tab">
+        <content>
+            <fx:include source="GestionReclamation.fxml"/>
+        </content>
+    </Tab>
+
+    <stylesheets>
+        <URL value="@styles/style.css"/>
+    </stylesheets>
+</TabPane>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx/fxml/1"
+            fx:controller="tn.esprit.controllers.GestionReclamationController"
+            stylesheets="@styles/style.css">
+
+    <left>
+        <VBox prefWidth="240" styleClass="nav-bar">
+            <Label text="Gestion Urbaine" styleClass="nav-title"/>
+            <Button text="Réclamations" styleClass="nav-button" onAction="#handleShowReclamations">
+                <graphic>
+                    <FontIcon iconLiteral="fas-exclamation-circle" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Interventions" styleClass="nav-button" onAction="#handleNavigateToInterventions">
+                <graphic>
+                    <FontIcon iconLiteral="fas-tools" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Retour" styleClass="nav-button" onAction="#handleBack">
+                <graphic>
+                    <FontIcon iconLiteral="fas-arrow-left" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+        </VBox>
+    </left>
+
+    <center>
+        <HBox spacing="30" style="-fx-padding: 25;">
+            <VBox spacing="20" styleClass="form-card" prefWidth="380">
+                <Label text="Gestion des Réclamations" styleClass="form-title"/>
+
+                <VBox spacing="15">
+                    <TextField fx:id="tfDescription" promptText="Description" styleClass="modern-input"/>
+                    <DatePicker fx:id="dpDate" promptText="Date de réclamation" styleClass="modern-input"/>
+                    <TextField fx:id="tfHeure" promptText="Heure (HH:MM:SS)" styleClass="modern-input"/>
+                    <ComboBox fx:id="cbStatut" promptText="Statut actuel" styleClass="modern-input"/>
+                    <TextField fx:id="tfLampadaireId" promptText="ID du Lampadaire" styleClass="modern-input"/>
+                    <TextField fx:id="tfCitoyenId" promptText="ID du Citoyen" styleClass="modern-input"/>
+
+                    <HBox spacing="15" styleClass="action-buttons">
+                        <Button text="Ajouter" onAction="#handleAdd" styleClass="action-button add">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-plus-circle" iconSize="16"/>
+                            </graphic>
+                        </Button>
+                        <Button text="Modifier" onAction="#handleUpdate" styleClass="action-button edit">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-edit" iconSize="16"/>
+                            </graphic>
+                        </Button>
+                        <Button text="Supprimer" onAction="#handleDelete" styleClass="action-button delete">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-trash-alt" iconSize="16"/>
+                            </graphic>
+                        </Button>
+                        <Button text="Réinitialiser" onAction="#handleClear" styleClass="action-button reset">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-undo" iconSize="16"/>
+                            </graphic>
+                        </Button>
+                    </HBox>
+                </VBox>
+            </VBox>
+
+            <ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER"
+                        styleClass="card-scroll">
+                <FlowPane fx:id="cardContainer" hgap="25" vgap="25" style="-fx-padding: 20;"/>
+            </ScrollPane>
+        </HBox>
+    </center>
+</BorderPane>

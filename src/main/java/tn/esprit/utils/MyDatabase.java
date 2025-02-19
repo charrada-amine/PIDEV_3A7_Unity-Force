@@ -7,6 +7,7 @@ import java.sql.SQLException;
 public class MyDatabase {
     private static MyDatabase instance;
 <<<<<<< HEAD
+<<<<<<< HEAD
     private Connection cnx;
 
     private final String URL = "jdbc:mysql://localhost:3306/projetpi_3a";
@@ -28,11 +29,18 @@ public class MyDatabase {
         }
 =======
     private final String URL ="jdbc:mysql://127.0.0.1:3306/noorcity";
+=======
+    private final String URL ="jdbc:mysql://127.0.0.1:3307/pidev";
+>>>>>>> origin/AzizBenAmmar/GestionInterventions_Reclamations
     private final String USERNAME ="root";
     private final String PASSWORD = "";
     private Connection  cnx ;
 
+<<<<<<< HEAD
     public MyDatabase() {
+=======
+    private MyDatabase() {
+>>>>>>> origin/AzizBenAmmar/GestionInterventions_Reclamations
         try {
             cnx = DriverManager.getConnection(URL,USERNAME,PASSWORD);
             System.out.println("connected ...");
@@ -45,13 +53,17 @@ public class MyDatabase {
     public static MyDatabase getInstance() {
         if (instance == null)
             instance = new MyDatabase();
+<<<<<<< HEAD
 >>>>>>> a3c932b0e96e26782012e7d55e0b3688bdf4452d
+=======
+>>>>>>> origin/AzizBenAmmar/GestionInterventions_Reclamations
         return instance;
     }
 
     public Connection getCnx() {
         return cnx;
     }
+<<<<<<< HEAD
 <<<<<<< HEAD
 
     public void closeConnection() {
@@ -69,3 +81,6 @@ public class MyDatabase {
 =======
 }
 >>>>>>> a3c932b0e96e26782012e7d55e0b3688bdf4452d
+=======
+}
+>>>>>>> origin/AzizBenAmmar/GestionInterventions_Reclamations

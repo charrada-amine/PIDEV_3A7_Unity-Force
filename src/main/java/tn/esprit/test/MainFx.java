@@ -16,6 +16,7 @@ public class MainFx extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+<<<<<<< HEAD
         FXMLLoader loader= new FXMLLoader(getClass().getResource("/GestionCapteur.fxml"));
         try {
             Parent root =loader.load();
@@ -29,5 +30,19 @@ public class MainFx extends Application {
         }
 
 
+=======
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/MainView.fxml"));
+            Parent root = loader.load();
+
+            Scene scene = new Scene(root, 1200, 800);
+            primaryStage.setTitle("Gestion des interventions et réclamations");
+            primaryStage.setScene(scene);
+            primaryStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+>>>>>>> origin/AzizBenAmmar/GestionInterventions_Reclamations
     }
 }
