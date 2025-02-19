@@ -40,7 +40,7 @@ public class GestionCapteurController implements Initializable {
     private TextField lampadaireIdField;
 
     @FXML
-    private VBox capteurCardContainer;
+    private FlowPane capteurCardContainer;
 
 
 
@@ -64,16 +64,24 @@ public class GestionCapteurController implements Initializable {
 
     private void loadCapteurs() {
         capteurCardContainer.getChildren().clear();
+        System.out.println("Nombre de capteurs récupérés : " + serviceCapteur.getAll().size()); // Debug
+
         for (Capteur capteur : serviceCapteur.getAll()) {
             VBox card = createCapteurCard(capteur);
             capteurCardContainer.getChildren().add(card);
+            System.out.println("Carte ajoutée : " + capteur.getType() + " - " + capteur.getEtat()); // Debug
         }
+
+        System.out.println("Total cartes affichées : " + capteurCardContainer.getChildren().size()); // Debug
     }
+
 
     private VBox createCapteurCard(Capteur capteur) {
         VBox card = new VBox();
         card.setSpacing(5);
         card.setPadding(new Insets(10));
+        card.setPrefWidth(200); // Ajoute une largeur
+        card.setPrefHeight(100); // Ajoute une hauteur
         card.setStyle("-fx-border-color: gray; -fx-background-color: white; -fx-background-radius: 5; -fx-border-radius: 5;");
 
         Label idLabel = new Label("ID: " + capteur.getId());
@@ -82,11 +90,18 @@ public class GestionCapteurController implements Initializable {
         Label dateLabel = new Label("Date d'installation: " + capteur.getDateinstallation());
         Label lampadaireIdLabel = new Label("Lampadaire ID: " + capteur.getLampadaireId());
 
+        idLabel.setStyle("-fx-text-fill: black;");  // Force la couleur du texte
+        typeLabel.setStyle("-fx-text-fill: black;");
+        etatLabel.setStyle("-fx-text-fill: black;");
+        dateLabel.setStyle("-fx-text-fill: black;");
+        lampadaireIdLabel.setStyle("-fx-text-fill: black;");
+
         card.setOnMouseClicked(event -> selectCapteur(capteur));
 
         card.getChildren().addAll(idLabel, typeLabel, etatLabel, dateLabel, lampadaireIdLabel);
         return card;
     }
+
 
     private void selectCapteur(Capteur capteur) {
         selectedCapteur = capteur;

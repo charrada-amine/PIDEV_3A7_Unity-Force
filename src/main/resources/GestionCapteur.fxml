@@ -1,57 +1,92 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.DatePicker?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.GestionCapteurController" spacing="10" alignment="CENTER" stylesheets="@styles.css">
-    <padding>
-        <Insets top="10" right="10" bottom="10" left="10"/>
-    </padding>
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx/fxml/1"
+            fx:controller="tn.esprit.controllers.GestionCapteurController"
+            stylesheets="@styles/style.css">
 
-    <!-- Titre -->
-    <Label text="Gestion des Capteurs" styleClass="title-label">
-        <font>
-            <Font size="22"/>
-        </font>
-    </Label>
+    <!-- Barre de navigation latérale -->
+    <left>
+        <VBox prefWidth="240" styleClass="nav-bar">
+            <Label text="Gestion Urbaine" styleClass="nav-title"/>
+            <Button text="Capteurs" styleClass="nav-button" onAction="#handleRefresh">
+                <graphic>
+                    <FontIcon iconLiteral="fas-microchip" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Données" styleClass="nav-button" onAction="#handleGoToGestionDonnee">
+                <graphic>
+                    <FontIcon iconLiteral="fas-database" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Retour" styleClass="nav-button" onAction="#handleBack">
+                <graphic>
+                    <FontIcon iconLiteral="fas-arrow-left" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+        </VBox>
+    </left>
 
-    <!-- Formulaire pour ajouter/modifier un capteur -->
-    <HBox spacing="10" alignment="CENTER_LEFT" styleClass="hbox">
-        <Label text="ID:"/>
-        <TextField fx:id="idField" promptText="ID" disable="true"/>
+    <!-- Contenu principal -->
+    <center>
+        <HBox spacing="30" style="-fx-padding: 25;">
+            <!-- Formulaire de gestion des capteurs -->
+            <VBox spacing="20" styleClass="card" prefWidth="380">
+                <Label text="Gestion des Capteurs" style="-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #202124;"/>
 
-        <Label text="Type:"/>
-        <ComboBox fx:id="typeComboBox" promptText="Sélectionnez un type"/>
+                <VBox spacing="10">
+                    <TextField fx:id="idField" promptText="ID (Désactivé)" disable="true" styleClass="modern-input"/>
+                    <Label fx:id="lblIdError" styleClass="error-message" visible="false"/>
 
-        <Label text="État:"/>
-        <ComboBox fx:id="etatComboBox" promptText="Sélectionnez un état"/>
+                    <ComboBox fx:id="typeComboBox" promptText="Type de capteur" styleClass="modern-input"/>
+                    <Label fx:id="lblTypeError" styleClass="error-message" visible="false"/>
 
-        <Label text="Date d'installation:"/>
-        <DatePicker fx:id="datePicker"/>
+                    <ComboBox fx:id="etatComboBox" promptText="État du capteur" styleClass="modern-input"/>
+                    <Label fx:id="lblEtatError" styleClass="error-message" visible="false"/>
 
-        <Label text="Lampadaire ID:"/>
-        <TextField fx:id="lampadaireIdField" promptText="Lampadaire ID"/>
-    </HBox>
+                    <DatePicker fx:id="datePicker" promptText="Date d'installation" styleClass="modern-input"/>
+                    <Label fx:id="lblDateError" styleClass="error-message" visible="false"/>
 
-    <!-- Boutons pour les opérations CRUD -->
-    <HBox spacing="10" alignment="CENTER" styleClass="hbox">
-        <Button text="Ajouter" onAction="#handleAddCapteur" styleClass="button"/>
-        <Button text="Modifier" onAction="#handleUpdateCapteur" styleClass="button"/>
-        <Button text="Supprimer" onAction="#handleDeleteCapteur" styleClass="button"/>
-        <Button text="Rafraîchir" onAction="#handleRefresh" styleClass="button"/>
-        <Button text="Aller à GestionDonnee" onAction="#handleGoToGestionDonnee" styleClass="button"/>
-    </HBox>
+                    <TextField fx:id="lampadaireIdField" promptText="ID Lampadaire" styleClass="modern-input"/>
+                    <Label fx:id="lblLampadaireError" styleClass="error-message" visible="false"/>
+                </VBox>
 
-    <!-- ScrollPane pour permettre le défilement des cartes de capteurs -->
-    <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="scroll-pane">
-        <VBox fx:id="capteurCardContainer" spacing="10" alignment="TOP_CENTER"/>
-    </ScrollPane>
-</VBox>
+                <!-- Boutons CRUD -->
+                <HBox spacing="15" styleClass="button-container">
+                    <Button text="Ajouter" onAction="#handleAddCapteur" styleClass="action-button,add">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-plus-circle" iconSize="16" iconColor="white"/>
+                        </graphic>
+                    </Button>
+                    <Button text="Modifier" onAction="#handleUpdateCapteur" styleClass="action-button,edit">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-edit" iconSize="16" iconColor="white"/>
+                        </graphic>
+                    </Button>
+                    <Button text="Supprimer" onAction="#handleDeleteCapteur" styleClass="action-button,delete">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-trash-alt" iconSize="16" iconColor="white"/>
+                        </graphic>
+                    </Button>
+                    <Button text="Réinitialiser" onAction="#handleRefresh" styleClass="action-button,reset">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
+                        </graphic>
+                    </Button>
+                </HBox>
+            </VBox>
+
+            <!-- Zone des cartes de capteurs -->
+            <ScrollPane fx:id="capteurScrollPane" fitToWidth="true" hbarPolicy="NEVER"
+                        style="-fx-background: transparent; -fx-border-width: 0;"
+                        prefWidth="600">
+                <FlowPane fx:id="capteurCardContainer" hgap="25" vgap="25" style="-fx-padding: 20;"/>
+            </ScrollPane>
+        </HBox>
+    </center>
+</BorderPane>

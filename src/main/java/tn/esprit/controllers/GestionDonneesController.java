@@ -2,9 +2,12 @@ package tn.esprit.controllers;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.geometry.Insets;
 import tn.esprit.models.*;
@@ -43,7 +46,7 @@ public class GestionDonneesController implements Initializable {
     private TextField valeurField;
 
     @FXML
-    private VBox donneeCardContainer;
+    private FlowPane donneeCardContainer;
 
     @FXML
     private Label valeurIndicationLabel;
@@ -178,10 +181,15 @@ public class GestionDonneesController implements Initializable {
 
     private VBox createDonneeCard(Donnee donnee) {
         VBox card = new VBox();
-        card.setSpacing(5);
-        card.setPadding(new Insets(10));
-        card.setStyle("-fx-border-color: gray; -fx-background-color: white; -fx-background-radius: 5; -fx-border-radius: 5;");
+        card.setSpacing(10);
+        card.setPadding(new Insets(15));
+        card.setPrefWidth(220);
+        card.setPrefHeight(120);
 
+        // Appliquer une classe CSS pour un style uniforme
+        card.getStyleClass().add("donnee-card");
+
+        // Labels avec classes CSS
         Label idLabel = new Label("ID: " + donnee.getId());
         Label dateLabel = new Label("Date: " + donnee.getDateCollecte());
         Label heureLabel = new Label("Heure: " + donnee.getHeureCollecte());
@@ -189,15 +197,45 @@ public class GestionDonneesController implements Initializable {
         Label valeurLabel = new Label("Valeur: " + getValeurString(donnee));
         Label typeLabel = new Label("Type: " + getTypeString(donnee));
 
-        // Ajouter un gestionnaire d'événements pour la sélection de la carte
-        card.setOnMouseClicked(event -> {
-            selectDonnee(donnee); // Sélectionner la donnée
-        });
+        // Appliquer une classe CSS aux labels
+        idLabel.getStyleClass().add("donnee-label");
+        dateLabel.getStyleClass().add("donnee-label");
+        heureLabel.getStyleClass().add("donnee-label");
+        capteurIdLabel.getStyleClass().add("donnee-label");
+        valeurLabel.getStyleClass().add("donnee-label");
+        typeLabel.getStyleClass().add("donnee-label");
 
-        card.getChildren().addAll(idLabel, dateLabel, heureLabel, capteurIdLabel, valeurLabel, typeLabel);
-        card.setUserData(donnee); // Associer la donnée à la carte
+        // Organiser les labels dans un GridPane pour un alignement propre
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(5);
+
+        grid.add(new Label("ID:"), 0, 0);
+        grid.add(idLabel, 1, 0);
+        grid.add(new Label("Date:"), 0, 1);
+        grid.add(dateLabel, 1, 1);
+        grid.add(new Label("Heure:"), 0, 2);
+        grid.add(heureLabel, 1, 2);
+        grid.add(new Label("Capteur ID:"), 0, 3);
+        grid.add(capteurIdLabel, 1, 3);
+        grid.add(new Label("Valeur:"), 0, 4);
+        grid.add(valeurLabel, 1, 4);
+        grid.add(new Label("Type:"), 0, 5);
+        grid.add(typeLabel, 1, 5);
+
+        // Ajouter un effet visuel au survol
+        card.setOnMouseEntered(event -> card.setStyle("-fx-background-color: #f0f0f0;"));
+        card.setOnMouseExited(event -> card.setStyle("-fx-background-color: white;"));
+
+        // Gestionnaire d'événements pour sélectionner une donnée
+        card.setOnMouseClicked(event -> selectDonnee(donnee));
+
+        // Ajouter les éléments dans la carte
+        card.getChildren().add(grid);
+        card.setUserData(donnee);
         return card;
     }
+
 
     private String getValeurString(Donnee donnee) {
         if (donnee instanceof DonneeMouvement) return String.valueOf(((DonneeMouvement) donnee).getValeur());
@@ -271,5 +309,8 @@ public class GestionDonneesController implements Initializable {
             e.printStackTrace(); // Afficher l'erreur en cas de problème
             System.err.println("Erreur lors du chargement de GestionCapteur.fxml : " + e.getMessage());
         }
+    }
+
+    public void handleBack(ActionEvent actionEvent) {
     }
 }

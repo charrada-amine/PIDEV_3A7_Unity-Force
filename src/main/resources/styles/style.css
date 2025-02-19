@@ -212,3 +212,23 @@
     -fx-padding: 25 0 0 0;
     -fx-alignment: center;
 }
+.donnee-card {
+    -fx-border-color: #4a90e2;
+    -fx-border-radius: 8px;
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 5, 0, 0, 3);
+    -fx-transition: all 0.3s ease-in-out;
+}
+
+.donnee-card:hover {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #2a6fdb;
+}
+
+.donnee-label {
+    -fx-text-fill: black; /* Texte en noir */
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
