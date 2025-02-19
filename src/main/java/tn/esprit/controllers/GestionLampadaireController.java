@@ -29,6 +29,8 @@ import tn.esprit.services.ServiceLampadaire;
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 public class GestionLampadaireController implements Initializable {
 
@@ -50,6 +52,8 @@ public class GestionLampadaireController implements Initializable {
         cardContainer.setHgap(20);
         cardContainer.setVgap(20);
         cardContainer.setPadding(new Insets(20));
+        Font.loadFont(getClass().getResourceAsStream("/fonts/Roboto-Regular.ttf"), 14);
+
         loadData();
     }
 
@@ -57,41 +61,6 @@ public class GestionLampadaireController implements Initializable {
         lampadaires.setAll(serviceLampadaire.getAll());
         cardContainer.getChildren().clear();
         lampadaires.forEach(lampadaire -> cardContainer.getChildren().add(createLampadaireCard(lampadaire)));
-    }
-
-    private VBox createLampadaireCard(Lampadaire lampadaire) {
-        VBox card = new VBox(10);
-        card.getStyleClass().add("card");
-        card.setPrefWidth(300);
-        card.setPadding(new Insets(15));
-        card.setOpacity(0);
-        card.setTranslateY(20);
-        Timeline fadeIn = new Timeline(new KeyFrame(Duration.millis(300), new KeyValue(card.opacityProperty(), 1), new KeyValue(card.translateYProperty(), 0)));
-        fadeIn.play();
-        DropShadow hoverEffect = new DropShadow(15, Color.web("#4361ee33"));
-        hoverEffect.setSpread(0.2);
-        card.setOnMouseEntered(e -> { card.setEffect(hoverEffect); card.setTranslateY(-4); });
-        card.setOnMouseExited(e -> { card.setEffect(null); card.setTranslateY(0); });
-        Text titleText = new Text("Lampadaire #" + lampadaire.getIdLamp());
-        titleText.setFont(Font.font("Segoe UI", 16));
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        String dateInstallation = (lampadaire.getDateInstallation() != null) ? lampadaire.getDateInstallation().format(formatter) : "N/A";
-        VBox content = new VBox(8);
-        content.getChildren().addAll(
-                createInfoText("Type", lampadaire.getTypeLampadaire()),
-                createInfoText("Puissance", lampadaire.getPuissance() + " W"),
-                createInfoText("État", lampadaire.getEtat().toString()),
-                createInfoText("Installation", dateInstallation),
-                createInfoText("Zone", String.valueOf(lampadaire.getIdZone()))
-        );
-        HBox buttonBox = new HBox(10);
-        Button editButton = createStyledButton("Modifier", "#4361ee");
-        Button deleteButton = createStyledButton("Supprimer", "#ef476f");
-        editButton.setOnAction(e -> fillForm(lampadaire));
-        deleteButton.setOnAction(e -> handleDeleteLampadaire(lampadaire));
-        buttonBox.getChildren().addAll(editButton, deleteButton);
-        card.getChildren().addAll(titleText, new Separator(), content, buttonBox);
-        return card;
     }
 
     private Button createStyledButton(String text, String color) {
@@ -102,10 +71,9 @@ public class GestionLampadaireController implements Initializable {
 
     private Text createInfoText(String label, String value) {
         Text text = new Text(label + ": " + value);
-        text.setFont(Font.font("Segoe UI", 14));
+        text.setFont(Font.font("Roboto", 14)); // Modification ici
         return text;
     }
-
     private void handleDeleteLampadaire(Lampadaire lampadaire) {
         if (showConfirmation("Confirmation", "Supprimer ce lampadaire ?")) {
             try {
@@ -167,6 +135,7 @@ public class GestionLampadaireController implements Initializable {
             showAlert("Erreur", "Impossible de charger le menu principal");
         }
     }
+
     @FXML
     private void handleNavigateToZones(ActionEvent event) {
         try {
@@ -179,6 +148,7 @@ public class GestionLampadaireController implements Initializable {
             showAlert("Erreur", "Impossible de charger la gestion des zones");
         }
     }
+
     @FXML
     private void handleUpdate() {
         if (selectedLampadaire == null) {
@@ -220,6 +190,19 @@ public class GestionLampadaireController implements Initializable {
     }
 
     @FXML
+    private void handleShowLampadaires() {
+        try {
+            clearForm();
+            lampadaires.setAll(serviceLampadaire.getAll());
+            cardContainer.getChildren().clear();
+            lampadaires.forEach(l -> cardContainer.getChildren().add(createLampadaireCard(l)));
+            showSuccessFeedback();
+        } catch (Exception e) {
+            showAlert("Erreur", "Impossible de charger les lampadaires : " + e.getMessage());
+        }
+    }
+
+    @FXML
     private void handleClear() {
         clearForm();
     }
@@ -252,7 +235,9 @@ public class GestionLampadaireController implements Initializable {
     private void showSuccessFeedback() {
         Pane root = (Pane) cardContainer.getParent();
         Label feedback = new Label("✓ Opération réussie !");
-        feedback.setStyle("-fx-background-color: #06d6a0; -fx-text-fill: white; -fx-padding: 8 16; -fx-background-radius: 20; -fx-font-weight: 600;");
+        feedback.setStyle("-fx-background-color: linear-gradient(to right, #34a853, #2d8a4a); " +
+                "-fx-text-fill: white; -fx-padding: 12 24; -fx-background-radius: 24; " +
+                "-fx-font-weight: 700;");
         feedback.setTranslateY(-50);
         feedback.setOpacity(0);
         root.getChildren().add(feedback);
@@ -262,5 +247,81 @@ public class GestionLampadaireController implements Initializable {
         );
         animation.setOnFinished(e -> root.getChildren().remove(feedback));
         animation.play();
+    }
+
+    private VBox createLampadaireCard(Lampadaire lampadaire) {
+        VBox card = new VBox(15);
+        card.getStyleClass().add("card");
+
+        // En-tête avec icône
+        HBox header = new HBox(10);
+        FontIcon icon = new FontIcon(FontAwesomeSolid.LIGHTBULB);
+        icon.setIconSize(24);
+        icon.setIconColor(Color.web("#1a73e8"));
+
+        Label title = new Label("Lampadaire #" + lampadaire.getIdLamp());
+        title.setStyle("-fx-font-size: 18; -fx-text-fill: #202124;"); // La police est déjà gérée par CSS
+
+        header.getChildren().addAll(icon, title);
+
+        // Formatage de la date
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String dateFormatted = (lampadaire.getDateInstallation() != null)
+                ? lampadaire.getDateInstallation().format(formatter)
+                : "N/A";
+
+        // Contenu
+        VBox content = new VBox(8);
+        content.getChildren().addAll(
+                createInfoRow(FontAwesomeSolid.TAG, "Type : " + lampadaire.getTypeLampadaire()),
+                createInfoRow(FontAwesomeSolid.BOLT, "Puissance : " + lampadaire.getPuissance() + " W"),
+                createInfoRow(FontAwesomeSolid.POWER_OFF, "État : " + lampadaire.getEtat().toString()),
+                createInfoRow(FontAwesomeSolid.MAP_MARKER, "Zone ID : " + lampadaire.getIdZone()),
+                createInfoRow(FontAwesomeSolid.CALENDAR, "Installation : " + dateFormatted)
+        );
+
+        // Boutons d'action AVEC GESTIONNAIRES D'ÉVÉNEMENTS
+        HBox buttons = new HBox(10);
+
+        // Bouton Modifier
+        Button btnModifier = createIconButton("Modifier", FontAwesomeSolid.PENCIL_ALT, "-secondary");
+        btnModifier.setOnAction(e -> fillForm(lampadaire)); // Remplit le formulaire
+
+        // Bouton Supprimer
+        Button btnSupprimer = createIconButton("Supprimer", FontAwesomeSolid.TRASH, "#ea4335");
+        btnSupprimer.setOnAction(e -> handleDeleteLampadaire(lampadaire)); // Suppression directe
+
+        buttons.getChildren().addAll(btnModifier, btnSupprimer);
+
+        card.getChildren().addAll(header, new Separator(), content, buttons);
+
+        // Style visuel de la carte
+        card.setStyle("-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16;");
+        card.setEffect(new DropShadow(10, Color.gray(0.3)));
+
+        return card;
+    }
+
+    private HBox createInfoRow(FontAwesomeSolid iconType, String text) { // ✅ Paramètre Solid
+        FontIcon icon = new FontIcon(iconType);
+        icon.setIconSize(16);
+        icon.setIconColor(Color.web("#5f6368"));
+
+        Label label = new Label(text);
+        label.setStyle("-fx-text-fill: #5f6368;");
+
+        return new HBox(10, icon, label);
+    }
+
+    private Button createIconButton(String text, FontAwesomeSolid iconType, String color) { // ✅ Paramètre Solid
+        FontIcon icon = new FontIcon(iconType);
+        icon.setIconSize(16);
+        icon.setIconColor(Color.WHITE);
+
+        Button button = new Button(text, icon);
+        button.setStyle("-fx-background-color: " + color + "; -fx-text-fill: white;");
+        button.setContentDisplay(ContentDisplay.LEFT);
+        button.setGraphicTextGap(8);
+        return button;
     }
 }
