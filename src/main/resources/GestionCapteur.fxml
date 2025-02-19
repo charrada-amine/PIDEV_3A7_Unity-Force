@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.GestionCapteurController" spacing="10" alignment="CENTER" stylesheets="@styles.css">
+    <padding>
+        <Insets top="10" right="10" bottom="10" left="10"/>
+    </padding>
+
+    <!-- Titre -->
+    <Label text="Gestion des Capteurs" styleClass="title-label">
+        <font>
+            <Font size="22"/>
+        </font>
+    </Label>
+
+    <!-- Formulaire pour ajouter/modifier un capteur -->
+    <HBox spacing="10" alignment="CENTER_LEFT" styleClass="hbox">
+        <Label text="ID:"/>
+        <TextField fx:id="idField" promptText="ID" disable="true"/>
+
+        <Label text="Type:"/>
+        <ComboBox fx:id="typeComboBox" promptText="Sélectionnez un type"/>
+
+        <Label text="État:"/>
+        <ComboBox fx:id="etatComboBox" promptText="Sélectionnez un état"/>
+
+        <Label text="Date d'installation:"/>
+        <DatePicker fx:id="datePicker"/>
+
+        <Label text="Lampadaire ID:"/>
+        <TextField fx:id="lampadaireIdField" promptText="Lampadaire ID"/>
+    </HBox>
+
+    <!-- Boutons pour les opérations CRUD -->
+    <HBox spacing="10" alignment="CENTER" styleClass="hbox">
+        <Button text="Ajouter" onAction="#handleAddCapteur" styleClass="button"/>
+        <Button text="Modifier" onAction="#handleUpdateCapteur" styleClass="button"/>
+        <Button text="Supprimer" onAction="#handleDeleteCapteur" styleClass="button"/>
+        <Button text="Rafraîchir" onAction="#handleRefresh" styleClass="button"/>
+        <Button text="Aller à GestionDonnee" onAction="#handleGoToGestionDonnee" styleClass="button"/>
+    </HBox>
+
+    <!-- ScrollPane pour permettre le défilement des cartes de capteurs -->
+    <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="scroll-pane">
+        <VBox fx:id="capteurCardContainer" spacing="10" alignment="TOP_CENTER"/>
+    </ScrollPane>
+</VBox>
