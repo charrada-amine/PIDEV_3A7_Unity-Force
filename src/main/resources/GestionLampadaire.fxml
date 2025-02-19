@@ -1,36 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.geometry.Insets?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
-<?import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid?> <!-- Import ajouté -->
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
-            xmlns:fx="http://javafx.com/fxml/1"
+            xmlns:fx="http://javafx/fxml/1"
             fx:controller="tn.esprit.controllers.GestionLampadaireController"
             stylesheets="@styles/style.css">
 
     <!-- Barre de navigation latérale -->
     <left>
-        <VBox prefWidth="240" style="-fx-background-color: white; -fx-padding: 16; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 16, 0, 4, 4);">
-            <Label text="Gestion Urbaine" style="-fx-font-size: 20; -fx-text-fill: #202124; -fx-font-weight: 800; -fx-padding: 0 0 20 0;"/>
-
-            <!-- Icônes validées avec FontAwesome 5 -->
+        <VBox prefWidth="240" styleClass="nav-bar">
+            <Label text="Gestion Urbaine" styleClass="nav-title"/>
             <Button text="Lampadaires" styleClass="nav-button" onAction="#handleShowLampadaires">
                 <graphic>
-                    <FontIcon iconLiteral="far-lightbulb" iconSize="16" iconColor="#1a73e8"/>
+                    <FontIcon iconLiteral="far-lightbulb" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
             <Button text="Zones" styleClass="nav-button" onAction="#handleNavigateToZones">
                 <graphic>
-                    <FontIcon iconLiteral="fas-map-marker" iconSize="16" iconColor="#1a73e8"/>
+                    <FontIcon iconLiteral="fas-map-marker" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
             <Button text="Retour" styleClass="nav-button" onAction="#handleBack">
                 <graphic>
-                    <FontIcon iconLiteral="fas-arrow-left" iconSize="16" iconColor="#1a73e8"/>
+                    <FontIcon iconLiteral="fas-arrow-left" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
         </VBox>
@@ -40,43 +36,43 @@
     <center>
         <HBox spacing="30" style="-fx-padding: 25;">
             <!-- Formulaire modernisé -->
-            <VBox spacing="20" style="-fx-background-color: white; -fx-padding: 25; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 4);" prefWidth="380">
-                <Label text="Gestion des Lampadaires" style="-fx-font-size: 24px; -fx-text-fill: #202124; -fx-font-weight: 800;"/>
+            <VBox spacing="20" styleClass="card" prefWidth="380">
+                <Label text="Gestion des Lampadaires" style="-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #202124;"/>
 
-                <VBox spacing="20"> <!-- Espacement augmenté -->
+                <VBox spacing="20">
                     <TextField fx:id="tfType" promptText="Type" styleClass="modern-input"/>
                     <TextField fx:id="tfPuissance" promptText="Puissance (W)" styleClass="modern-input"/>
                     <ComboBox fx:id="cbEtat" promptText="État" styleClass="modern-input"/>
                     <DatePicker fx:id="dpDateInstallation" promptText="Date Installation" styleClass="modern-input"/>
                     <TextField fx:id="tfIdZone" promptText="ID Zone" styleClass="modern-input"/>
 
-                    <!-- Boutons avec icônes -->
-                    <HBox spacing="12" style="-fx-padding: 20 0 0 0;">
-                        <Button text="Ajouter" onAction="#handleAdd" styleClass="btn btn-primary">
+                    <!-- Nouveaux boutons modernisés -->
+                    <HBox spacing="15" styleClass="button-container">
+                        <Button text="Ajouter" onAction="#handleAdd" styleClass="action-button,add">
                             <graphic>
                                 <FontIcon iconLiteral="fas-plus-circle" iconSize="16" iconColor="white"/>
                             </graphic>
                         </Button>
-                        <Button text="Modifier" onAction="#handleUpdate" styleClass="btn btn-primary">
+                        <Button text="Modifier" onAction="#handleUpdate" styleClass="action-button,edit">
                             <graphic>
                                 <FontIcon iconLiteral="fas-edit" iconSize="16" iconColor="white"/>
                             </graphic>
                         </Button>
-                        <Button text="Supprimer" onAction="#handleDelete" styleClass="btn btn-danger">
+                        <Button text="Supprimer" onAction="#handleDelete" styleClass="action-button,delete">
                             <graphic>
                                 <FontIcon iconLiteral="fas-trash-alt" iconSize="16" iconColor="white"/>
                             </graphic>
                         </Button>
-                        <Button text="Réinitialiser" onAction="#handleClear" styleClass="btn btn-secondary">
+                        <Button text="Réinitialiser" onAction="#handleClear" styleClass="action-button,reset">
                             <graphic>
-                                <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#5f6368"/>
+                                <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
                             </graphic>
                         </Button>
                     </HBox>
                 </VBox>
             </VBox>
 
-            <!-- Cartes des lampadaires -->
+            <!-- Zone des cartes de lampadaires -->
             <ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER"
                         style="-fx-background: transparent; -fx-border-width: 0;"
                         prefWidth="600">
