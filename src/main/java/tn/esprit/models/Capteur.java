@@ -18,6 +18,10 @@ public class Capteur {
         this.lampadaireId = lampadaireId;
     }
 
+    public Capteur() {
+
+    }
+
     // Getters et Setters
     public int getId() {
         return id_capteur;

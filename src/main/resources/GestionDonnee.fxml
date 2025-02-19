@@ -12,59 +12,58 @@
 <?import javafx.scene.text.Font?>
 
 <ScrollPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="tn.esprit.controllers.GestionDonneesController" fitToWidth="true">
+            fx:controller="tn.esprit.controllers.GestionDonneesController"
+            fitToWidth="true"
+            stylesheets="@styles.css">
     <content>
-        <VBox spacing="10" alignment="CENTER">
+        <VBox spacing="10" alignment="CENTER" styleClass="vbox">
             <padding>
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
 
             <!-- Titre -->
-            <Label text="Gestion des Données">
+            <Label text="Gestion des Données" styleClass="title-label">
                 <font>
                     <Font size="20"/>
                 </font>
             </Label>
 
             <!-- Sélection du type de capteur -->
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label text="Type de capteur:"/>
-                <ComboBox fx:id="typeCapteurComboBox" promptText="Sélectionnez un type" onAction="#updateValeurIndication"/>
+            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="hbox">
+                <Label text="Type de capteur:" styleClass="label"/>
+                <ComboBox fx:id="typeCapteurComboBox" promptText="Sélectionnez un type" onAction="#updateValeurIndication" styleClass="combo-box"/>
             </HBox>
 
             <!-- Formulaire pour ajouter/modifier des données -->
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label text="Date de collecte:"/>
-                <DatePicker fx:id="dateCollectePicker"/>
+            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="hbox">
+                <Label text="Date de collecte:" styleClass="label"/>
+                <DatePicker fx:id="dateCollectePicker" styleClass="text-field"/>
 
-                <Label text="Heure de collecte:"/>
-                <TextField fx:id="heureCollecteField" promptText="HH:MM:SS"/>
-            </HBox>
+                <Label text="Heure de collecte:" styleClass="label"/>
+                <TextField fx:id="heureCollecteField" promptText="HH:MM:SS" styleClass="text-field"/>
 
-            <!-- Nouveau ComboBox pour afficher les ID des capteurs -->
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label text="ID du capteur:"/>
-                <ComboBox fx:id="capteurIdComboBox" promptText="Sélectionnez un ID"/>
+                <Label text="ID du capteur:" styleClass="label"/>
+                <ComboBox fx:id="capteurIdComboBox" promptText="Sélectionnez un ID" styleClass="combo-box"/>
             </HBox>
 
             <!-- Valeur avec indication dynamique -->
-            <VBox spacing="5" alignment="CENTER_LEFT">
-                <Label text="Valeur:"/>
-                <TextField fx:id="valeurField" promptText="Valeur"/>
+            <VBox spacing="5" alignment="CENTER_LEFT" styleClass="vbox">
+                <Label text="Valeur:" styleClass="label"/>
+                <TextField fx:id="valeurField" promptText="Valeur" styleClass="text-field"/>
                 <Label fx:id="valeurIndicationLabel" text="Sélectionnez un type de capteur" style="-fx-font-size: 12px; -fx-text-fill: grey;"/>
             </VBox>
 
             <!-- Boutons pour les opérations CRUD -->
-            <HBox spacing="10" alignment="CENTER">
-                <Button text="Ajouter" onAction="#handleAddDonnee"/>
-                <Button text="Modifier" onAction="#handleUpdateDonnee"/>
-                <Button text="Supprimer" onAction="#handleDeleteDonnee"/>
-                <Button text="Rafraîchir" onAction="#handleRefresh"/>
-                <Button text="Aller à GestionCapteur" onAction="#handleGoToGestionCapteur"/>
+            <HBox spacing="10" alignment="CENTER" styleClass="hbox">
+                <Button text="Ajouter" onAction="#handleAddDonnee" styleClass="button"/>
+                <Button text="Modifier" onAction="#handleUpdateDonnee" styleClass="button"/>
+                <Button text="Supprimer" onAction="#handleDeleteDonnee" styleClass="button"/>
+                <Button text="Rafraîchir" onAction="#handleRefresh" styleClass="button"/>
+                <Button text="Aller à GestionCapteur" onAction="#handleGoToGestionCapteur" styleClass="button"/>
             </HBox>
 
             <!-- VBox pour afficher les données sous forme de cartes -->
-            <VBox fx:id="donneeCardContainer" spacing="10" alignment="TOP_CENTER"/>
+            <VBox fx:id="donneeCardContainer" spacing="10" alignment="TOP_CENTER" styleClass="vbox"/>
         </VBox>
     </content>
 </ScrollPane>

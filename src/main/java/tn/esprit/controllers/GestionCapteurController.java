@@ -1,7 +1,6 @@
 package tn.esprit.controllers;
 
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
@@ -13,16 +12,15 @@ import tn.esprit.models.Capteur.EtatCapteur;
 import tn.esprit.models.Capteur.TypeCapteur;
 import tn.esprit.services.ServiceCapteur;
 
-import java.awt.event.ActionEvent;
-import java.net.URL;
-import java.util.ResourceBundle;
-
-
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
+import java.net.URL;
+import java.time.LocalDate;
+import java.util.ResourceBundle;
+import javafx.scene.layout.FlowPane;
 
 public class GestionCapteurController implements Initializable {
 
@@ -44,9 +42,12 @@ public class GestionCapteurController implements Initializable {
     @FXML
     private VBox capteurCardContainer;
 
+
+
+
     private ServiceCapteur serviceCapteur;
 
-    private Capteur selectedCapteur; // Variable pour stocker le capteur sélectionné
+    private Capteur selectedCapteur;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -56,13 +57,13 @@ public class GestionCapteurController implements Initializable {
         typeComboBox.setItems(FXCollections.observableArrayList(TypeCapteur.values()));
         etatComboBox.setItems(FXCollections.observableArrayList(EtatCapteur.values()));
 
-        // Charger les capteurs dans le CardView
+
+        // Charger les capteurs
         loadCapteurs();
     }
 
     private void loadCapteurs() {
-        capteurCardContainer.getChildren().clear(); // Effacer les anciennes cartes
-
+        capteurCardContainer.getChildren().clear();
         for (Capteur capteur : serviceCapteur.getAll()) {
             VBox card = createCapteurCard(capteur);
             capteurCardContainer.getChildren().add(card);
@@ -81,18 +82,14 @@ public class GestionCapteurController implements Initializable {
         Label dateLabel = new Label("Date d'installation: " + capteur.getDateinstallation());
         Label lampadaireIdLabel = new Label("Lampadaire ID: " + capteur.getLampadaireId());
 
-        // Ajouter un gestionnaire d'événements pour la sélection de la carte
-        card.setOnMouseClicked(event -> {
-            selectCapteur(capteur); // Sélectionner le capteur
-        });
+        card.setOnMouseClicked(event -> selectCapteur(capteur));
 
         card.getChildren().addAll(idLabel, typeLabel, etatLabel, dateLabel, lampadaireIdLabel);
-        card.setUserData(capteur); // Associer le capteur à la carte
         return card;
     }
 
     private void selectCapteur(Capteur capteur) {
-        this.selectedCapteur = capteur; // Mettre à jour le capteur sélectionné
+        selectedCapteur = capteur;
         idField.setText(String.valueOf(capteur.getId()));
         typeComboBox.setValue(capteur.getType());
         datePicker.setValue(capteur.getDateinstallation());
@@ -102,9 +99,13 @@ public class GestionCapteurController implements Initializable {
 
     @FXML
     private void handleAddCapteur() {
+        if (!validateFields()) {
+            return;
+        }
+
         try {
             Capteur capteur = new Capteur(
-                    0, // ID sera généré automatiquement par la base de données
+                    0,
                     typeComboBox.getValue(),
                     datePicker.getValue(),
                     etatComboBox.getValue(),
@@ -113,50 +114,92 @@ public class GestionCapteurController implements Initializable {
             serviceCapteur.add(capteur);
             loadCapteurs();
             clearFields();
+            showSuccessAlert("Capteur ajouté avec succès !");
         } catch (Exception e) {
-            showAlert("Erreur", "Veuillez remplir tous les champs correctement.");
+            showAlert("Erreur", "Une erreur est survenue lors de l'ajout du capteur.");
         }
     }
 
     @FXML
     private void handleUpdateCapteur() {
-        if (selectedCapteur != null) {
-            try {
-                Capteur capteur = new Capteur(
-                        Integer.parseInt(idField.getText()),
-                        typeComboBox.getValue(),
-                        datePicker.getValue(),
-                        etatComboBox.getValue(),
-                        Integer.parseInt(lampadaireIdField.getText())
-                );
-                serviceCapteur.update(capteur);
-                loadCapteurs();
-                clearFields();
-                showSuccessAlert("Capteur mis à jour avec succès !");
-            } catch (Exception e) {
-                showAlert("Erreur", "Veuillez remplir tous les champs correctement.");
-            }
-        } else {
+        if (selectedCapteur == null) {
             showAlert("Erreur", "Veuillez sélectionner un capteur à modifier.");
+            return;
+        }
+
+        if (!validateFields()) {
+            return;
+        }
+
+        try {
+            Capteur capteur = new Capteur(
+                    Integer.parseInt(idField.getText()),
+                    typeComboBox.getValue(),
+                    datePicker.getValue(),
+                    etatComboBox.getValue(),
+                    Integer.parseInt(lampadaireIdField.getText())
+            );
+            serviceCapteur.update(capteur);
+            loadCapteurs();
+            clearFields();
+            showSuccessAlert("Capteur mis à jour avec succès !");
+        } catch (Exception e) {
+            showAlert("Erreur", "Une erreur est survenue lors de la modification du capteur.");
         }
     }
 
     @FXML
     private void handleDeleteCapteur() {
-        if (selectedCapteur != null) {
-            serviceCapteur.delete(selectedCapteur.getId());
-            loadCapteurs();
-            clearFields();
-            showSuccessAlert("Capteur supprimé avec succès !");
-            selectedCapteur = null; // Réinitialiser la sélection après la suppression
-        } else {
+        if (selectedCapteur == null) {
             showAlert("Erreur", "Veuillez sélectionner un capteur à supprimer.");
+            return;
         }
+
+        serviceCapteur.delete(selectedCapteur.getId());
+        loadCapteurs();
+        clearFields();
+        selectedCapteur = null;
+        showSuccessAlert("Capteur supprimé avec succès !");
     }
 
     @FXML
     private void handleRefresh() {
         loadCapteurs();
+    }
+
+    private boolean validateFields() {
+        String errorMessage = "";
+
+        if (typeComboBox.getValue() == null) {
+            errorMessage += "- Veuillez sélectionner un type de capteur.\n";
+        }
+
+        if (etatComboBox.getValue() == null) {
+            errorMessage += "- Veuillez sélectionner un état pour le capteur.\n";
+        }
+
+        if (datePicker.getValue() == null) {
+            errorMessage += "- Veuillez choisir une date d'installation.\n";
+        } else if (datePicker.getValue().isAfter(LocalDate.now())) {
+            errorMessage += "- La date d'installation ne peut pas être dans le futur.\n";
+        }
+
+        if (lampadaireIdField.getText().isEmpty()) {
+            errorMessage += "- Veuillez entrer l'ID du lampadaire.\n";
+        } else {
+            try {
+                Integer.parseInt(lampadaireIdField.getText());
+            } catch (NumberFormatException e) {
+                errorMessage += "- L'ID du lampadaire doit être un nombre valide.\n";
+            }
+        }
+
+        if (!errorMessage.isEmpty()) {
+            showAlert("Validation des champs", errorMessage);
+            return false;
+        }
+
+        return true;
     }
 
     private void clearFields() {
@@ -182,21 +225,32 @@ public class GestionCapteurController implements Initializable {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
     public void handleGoToGestionDonnee(javafx.event.ActionEvent actionEvent) {
         try {
-            // Charger le fichier FXML de la page GestionDonnee
             Parent gestionDonneeParent = FXMLLoader.load(getClass().getResource("/GestionDonnee.fxml"));
             Scene gestionDonneeScene = new Scene(gestionDonneeParent);
-
-            // Obtenir la scène actuelle et la fenêtre
             Stage window = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
-
-            // Changer la scène
             window.setScene(gestionDonneeScene);
             window.show();
         } catch (IOException e) {
-            e.printStackTrace(); // Afficher l'erreur en cas de problème
             System.err.println("Erreur lors du chargement de GestionDonnee.fxml : " + e.getMessage());
         }
     }
+
+    @FXML
+    private void handleShowCapteurs() {
+        System.out.println("Affichage des capteurs...");
+    }
+
+    @FXML
+    private void handleNavigateToLampadaires() {
+        System.out.println("Navigation vers Lampadaires...");
+    }
+
+    @FXML
+    private void handleBack() {
+        System.out.println("Retour à l'écran précédent...");
+    }
+
 }

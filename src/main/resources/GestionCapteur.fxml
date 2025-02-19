@@ -11,20 +11,20 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.GestionCapteurController" spacing="10" alignment="CENTER">
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.GestionCapteurController" spacing="10" alignment="CENTER" stylesheets="@styles.css">
     <padding>
         <Insets top="10" right="10" bottom="10" left="10"/>
     </padding>
 
     <!-- Titre -->
-    <Label text="Gestion des Capteurs">
+    <Label text="Gestion des Capteurs" styleClass="title-label">
         <font>
-            <Font size="20"/>
+            <Font size="22"/>
         </font>
     </Label>
 
     <!-- Formulaire pour ajouter/modifier un capteur -->
-    <HBox spacing="10" alignment="CENTER_LEFT">
+    <HBox spacing="10" alignment="CENTER_LEFT" styleClass="hbox">
         <Label text="ID:"/>
         <TextField fx:id="idField" promptText="ID" disable="true"/>
 
@@ -42,17 +42,16 @@
     </HBox>
 
     <!-- Boutons pour les opérations CRUD -->
-    <HBox spacing="10" alignment="CENTER">
-        <Button text="Ajouter" onAction="#handleAddCapteur"/>
-        <Button text="Modifier" onAction="#handleUpdateCapteur"/>
-        <Button text="Supprimer" onAction="#handleDeleteCapteur"/>
-        <Button text="Rafraîchir" onAction="#handleRefresh"/>
-        <!-- Bouton pour rediriger vers GestionCapteur.fxml -->
-        <Button text="Aller à GestionDonnee" onAction="#handleGoToGestionDonnee"/>
+    <HBox spacing="10" alignment="CENTER" styleClass="hbox">
+        <Button text="Ajouter" onAction="#handleAddCapteur" styleClass="button"/>
+        <Button text="Modifier" onAction="#handleUpdateCapteur" styleClass="button"/>
+        <Button text="Supprimer" onAction="#handleDeleteCapteur" styleClass="button"/>
+        <Button text="Rafraîchir" onAction="#handleRefresh" styleClass="button"/>
+        <Button text="Aller à GestionDonnee" onAction="#handleGoToGestionDonnee" styleClass="button"/>
     </HBox>
 
     <!-- ScrollPane pour permettre le défilement des cartes de capteurs -->
-    <ScrollPane fitToWidth="true" fitToHeight="true">
+    <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="scroll-pane">
         <VBox fx:id="capteurCardContainer" spacing="10" alignment="TOP_CENTER"/>
     </ScrollPane>
 </VBox>
