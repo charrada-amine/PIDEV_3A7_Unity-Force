@@ -1,87 +1,80 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.DatePicker?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.FlowPane?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<BorderPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.GestionInterventionController">
-    <padding>
-        <Insets bottom="10" left="10" right="10" top="10" />
-    </padding>
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx/fxml/1"
+            fx:controller="tn.esprit.controllers.GestionInterventionController"
+            stylesheets="@styles/style.css">
 
-    <top>
-        <VBox spacing="20">
-            <Label style="-fx-font-size: 24; -fx-font-weight: bold;" text="Gestion des Interventions" />
-
-            <GridPane hgap="15" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8;" vgap="10">
-                <columnConstraints>
-                    <ColumnConstraints minWidth="100" prefWidth="120" />
-                    <ColumnConstraints minWidth="200" prefWidth="250" />
-                </columnConstraints>
-
-                <Label text="Type:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                <ComboBox fx:id="cbType" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-
-                <Label text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                <TextField fx:id="tfDescription" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-
-                <Label text="État:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                <ComboBox fx:id="cbEtat" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-
-                <Label text="Date:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-                <DatePicker fx:id="dpDate" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-
-                <Label text="Heure (HH:mm:ss):" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-                <TextField fx:id="tfHeure" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-
-                <Label text="Lampadaire ID:" GridPane.columnIndex="0" GridPane.rowIndex="5" />
-                <TextField fx:id="tfLampadaireId" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-
-                <Label text="Technicien ID:" GridPane.columnIndex="0" GridPane.rowIndex="6" />
-                <TextField fx:id="tfTechnicienId" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-
-                <Label text="Réclamation ID:" GridPane.columnIndex="0" GridPane.rowIndex="7" />
-                <TextField fx:id="tfReclamationId" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-
-                <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="8">
-                    <Button onAction="#handleAdd" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Ajouter" />
-                    <Button onAction="#handleUpdate" style="-fx-background-color: #2196F3; -fx-text-fill: white;" text="enregistrer les modifications" />
-                    <Button onAction="#handleDelete" style="-fx-background-color: #f44336; -fx-text-fill: white;" text="Supprimer" />
-                    <Button onAction="#handleClear" style="-fx-background-color: #9e9e9e; -fx-text-fill: white;" text="Vider" />
-                </HBox>
-            <rowConstraints>
-               <RowConstraints />
-               <RowConstraints />
-               <RowConstraints />
-               <RowConstraints />
-               <RowConstraints />
-               <RowConstraints />
-               <RowConstraints />
-               <RowConstraints />
-               <RowConstraints />
-            </rowConstraints>
-            </GridPane>
+    <left>
+        <VBox prefWidth="240" styleClass="nav-bar">
+            <Label text="Gestion Urbaine" styleClass="nav-title"/>
+            <Button text="Interventions" styleClass="nav-button" onAction="#handleShowInterventions">
+                <graphic>
+                    <FontIcon iconLiteral="fas-tools" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Réclamations" styleClass="nav-button" onAction="#handleNavigateToReclamations">
+                <graphic>
+                    <FontIcon iconLiteral="fas-exclamation-circle" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Retour" styleClass="nav-button" onAction="#handleBack">
+                <graphic>
+                    <FontIcon iconLiteral="fas-arrow-left" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
         </VBox>
-    </top>
+    </left>
 
     <center>
-        <ScrollPane fx:id="scrollPane" fitToWidth="true" style="-fx-background: transparent;">
-            <FlowPane fx:id="cardContainer" hgap="20" vgap="20">
-                <padding>
-                    <Insets bottom="20" left="20" right="20" top="20" />
-                </padding>
-            </FlowPane>
-        </ScrollPane>
+        <HBox spacing="30" style="-fx-padding: 25;">
+            <VBox spacing="20" styleClass="form-card" prefWidth="380">
+                <Label text="Gestion des Interventions" styleClass="form-title"/>
+
+                <VBox spacing="15">
+                    <ComboBox fx:id="cbType" promptText="Type d'intervention" styleClass="modern-input"/>
+                    <TextField fx:id="tfDescription" promptText="Description" styleClass="modern-input"/>
+                    <TextField fx:id="tfEtat" promptText="État actuel" styleClass="modern-input"/>
+                    <DatePicker fx:id="dpDate" promptText="Date prévue" styleClass="modern-input"/>
+                    <TextField fx:id="tfHeure" promptText="Heure (HH:MM:SS)" styleClass="modern-input"/>
+                    <TextField fx:id="tfLampadaireId" promptText="ID du Lampadaire" styleClass="modern-input"/>
+                    <TextField fx:id="tfTechnicienId" promptText="ID du Technicien" styleClass="modern-input"/>
+                    <TextField fx:id="tfReclamationId" promptText="ID Réclamation liée" styleClass="modern-input"/>
+
+                    <HBox spacing="15" styleClass="action-buttons">
+                        <Button text="Ajouter" onAction="#handleAdd" styleClass="action-button add">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-plus-circle" iconSize="16"/>
+                            </graphic>
+                        </Button>
+                        <Button text="Modifier" onAction="#handleUpdate" styleClass="action-button edit">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-edit" iconSize="16"/>
+                            </graphic>
+                        </Button>
+                        <Button text="Supprimer" onAction="#handleDelete" styleClass="action-button delete">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-trash-alt" iconSize="16"/>
+                            </graphic>
+                        </Button>
+                        <Button text="Réinitialiser" onAction="#handleClear" styleClass="action-button reset">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-undo" iconSize="16"/>
+                            </graphic>
+                        </Button>
+                    </HBox>
+                </VBox>
+            </VBox>
+
+            <ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER"
+                        styleClass="card-scroll">
+                <FlowPane fx:id="cardContainer" hgap="25" vgap="25" style="-fx-padding: 20;"/>
+            </ScrollPane>
+        </HBox>
     </center>
 </BorderPane>

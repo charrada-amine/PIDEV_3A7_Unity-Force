@@ -1,65 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<BorderPane xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="tn.esprit.controllers.GestionReclamationController">
-    <padding>
-        <Insets top="10" right="10" bottom="10" left="10"/>
-    </padding>
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx/fxml/1"
+            fx:controller="tn.esprit.controllers.GestionReclamationController"
+            stylesheets="@styles/style.css">
 
-    <top>
-        <VBox spacing="20">
-            <Label text="Gestion des Réclamations" style="-fx-font-size: 24; -fx-font-weight: bold;"/>
-
-            <GridPane vgap="10" hgap="15" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8;">
-                <columnConstraints>
-                    <ColumnConstraints minWidth="100" prefWidth="120"/>
-                    <ColumnConstraints minWidth="200" prefWidth="250"/>
-                </columnConstraints>
-
-                <Label text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                <TextField fx:id="tfDescription" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-
-                <Label text="Date:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                <DatePicker fx:id="dpDate" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-
-                <Label text="Heure (HH:mm:ss):" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                <TextField fx:id="tfHeure" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-
-                <Label text="Statut:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-                <ComboBox fx:id="cbStatut" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-
-                <Label text="Lampadaire ID:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
-                <TextField fx:id="tfLampadaireId" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
-
-                <Label text="Citoyen ID:" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
-                <TextField fx:id="tfCitoyenId" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
-
-                <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="6">
-                    <Button text="Ajouter" onAction="#handleAdd"
-                            style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
-                    <Button text="enregistrer les modifications" onAction="#handleUpdate"
-                            style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>
-                    <Button text="Supprimer" onAction="#handleDelete"
-                            style="-fx-background-color: #f44336; -fx-text-fill: white;"/>
-                    <Button text="Vider" onAction="#handleClear"
-                            style="-fx-background-color: #9e9e9e; -fx-text-fill: white;"/>
-                </HBox>
-            </GridPane>
+    <left>
+        <VBox prefWidth="240" styleClass="nav-bar">
+            <Label text="Gestion Urbaine" styleClass="nav-title"/>
+            <Button text="Réclamations" styleClass="nav-button" onAction="#handleShowReclamations">
+                <graphic>
+                    <FontIcon iconLiteral="fas-exclamation-circle" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Interventions" styleClass="nav-button" onAction="#handleNavigateToInterventions">
+                <graphic>
+                    <FontIcon iconLiteral="fas-tools" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Retour" styleClass="nav-button" onAction="#handleBack">
+                <graphic>
+                    <FontIcon iconLiteral="fas-arrow-left" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
         </VBox>
-    </top>
+    </left>
 
     <center>
-        <ScrollPane fx:id="scrollPane" fitToWidth="true" style="-fx-background: transparent;">
-            <FlowPane fx:id="cardContainer" hgap="20" vgap="20">
-                <padding>
-                    <Insets top="20" right="20" bottom="20" left="20"/>
-                </padding>
-            </FlowPane>
-        </ScrollPane>
+        <HBox spacing="30" style="-fx-padding: 25;">
+            <VBox spacing="20" styleClass="form-card" prefWidth="380">
+                <Label text="Gestion des Réclamations" styleClass="form-title"/>
+
+                <VBox spacing="15">
+                    <TextField fx:id="tfDescription" promptText="Description" styleClass="modern-input"/>
+                    <DatePicker fx:id="dpDate" promptText="Date de réclamation" styleClass="modern-input"/>
+                    <TextField fx:id="tfHeure" promptText="Heure (HH:MM:SS)" styleClass="modern-input"/>
+                    <ComboBox fx:id="cbStatut" promptText="Statut actuel" styleClass="modern-input"/>
+                    <TextField fx:id="tfLampadaireId" promptText="ID du Lampadaire" styleClass="modern-input"/>
+                    <TextField fx:id="tfCitoyenId" promptText="ID du Citoyen" styleClass="modern-input"/>
+
+                    <HBox spacing="15" styleClass="action-buttons">
+                        <Button text="Ajouter" onAction="#handleAdd" styleClass="action-button add">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-plus-circle" iconSize="16"/>
+                            </graphic>
+                        </Button>
+                        <Button text="Modifier" onAction="#handleUpdate" styleClass="action-button edit">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-edit" iconSize="16"/>
+                            </graphic>
+                        </Button>
+                        <Button text="Supprimer" onAction="#handleDelete" styleClass="action-button delete">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-trash-alt" iconSize="16"/>
+                            </graphic>
+                        </Button>
+                        <Button text="Réinitialiser" onAction="#handleClear" styleClass="action-button reset">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-undo" iconSize="16"/>
+                            </graphic>
+                        </Button>
+                    </HBox>
+                </VBox>
+            </VBox>
+
+            <ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER"
+                        styleClass="card-scroll">
+                <FlowPane fx:id="cardContainer" hgap="25" vgap="25" style="-fx-padding: 20;"/>
+            </ScrollPane>
+        </HBox>
     </center>
 </BorderPane>
