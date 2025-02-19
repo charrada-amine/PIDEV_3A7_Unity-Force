@@ -251,7 +251,7 @@ public class SourceController implements Initializable {
         content.getChildren().addAll(
                 createInfoRow(FontAwesomeSolid.TAG, "Type : " + source.getType().toString()),
                 createInfoRow(FontAwesomeSolid.BOLT, "Capacité : " + source.getCapacite() + " W"),
-                createInfoRow(FontAwesomeSolid.BOLT, "Rendement : " + source.getCapacite() + " %"),
+                createInfoRow(FontAwesomeSolid.BOLT, "Rendement : " + source.getRendement() + " %"),
 
                 createInfoRow(FontAwesomeSolid.POWER_OFF, "État : " + source.getEtat().toString()),
                 createInfoRow(FontAwesomeSolid.CALENDAR, "Installation : " + source.getDateInstallation())
