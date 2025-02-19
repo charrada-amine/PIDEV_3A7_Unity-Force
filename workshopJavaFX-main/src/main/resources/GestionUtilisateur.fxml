@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.collections.ObservableList?>
+<?import java.lang.String?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.GestionUtilisateurController" stylesheets="@styles/style.css">
+
+    <!-- Barre d'actions supérieure -->
+    <top>
+        <HBox spacing="10" style="-fx-background-color: #f5f5f5; -fx-padding: 10;">
+            <!-- Barre supérieure vide ou pour un autre contenu -->
+        </HBox>
+    </top>
+    <left>
+        <VBox prefWidth="240" styleClass="nav-bar">
+            <Label text="Gestion utilisateur" styleClass="nav-title"/>
+            <Button text="Responsable" styleClass="nav-button" onAction="#filterByResponsable">
+                <graphic>
+                    <FontIcon iconLiteral="fas-user-tie" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Citoyen" styleClass="nav-button" onAction="#filterByCitoyen">
+                <graphic>
+                    <FontIcon iconLiteral="fas-user" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Technicien" styleClass="nav-button" onAction="#filterByTechnicien">
+                <graphic>
+                    <FontIcon iconLiteral="fas-tools" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Retour" styleClass="nav-button" onAction="#filterByAccueil">
+                <graphic>
+                    <FontIcon iconLiteral="fas-tools" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+        </VBox>
+    </left>
+
+
+    <!-- Conteneur principal -->
+    <center>
+        <HBox spacing="30" style="-fx-padding: 20;">
+            <!-- Colonne gauche : rôles -->
+
+
+            <!-- Formulaire d'utilisateur -->
+            <VBox spacing="20" styleClass="card" prefWidth="380">
+                <Label text="Gestion des Utilisateurs" style="-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #202124;"/>
+
+                <VBox spacing="10" style="-fx-padding: 20;"> <!-- Marges internes -->
+                    <TextField fx:id="idField" visible="false" promptText="Entrez l'ID de l'utilisateur à modifier" />
+
+                    <TextField fx:id="nameField" promptText="Nom" styleClass="modern-input"/>
+                    <TextField fx:id="prenomField" promptText="Prénom" styleClass="modern-input"/>
+                    <TextField fx:id="emailField" promptText="Email" styleClass="modern-input"/>
+                    <PasswordField fx:id="passwordField" promptText="Mot de passe" styleClass="modern-input"/>
+                    <VBox spacing="10">
+                        <!-- HBox pour le rôle -->
+                        <HBox spacing="10">
+                            <Label text="Rôle :" />
+                            <ComboBox fx:id="roleComboBox" styleClass="modern-input">
+                                <items>
+                                    <FXCollections fx:factory="observableArrayList">
+                                        <String fx:value="Citoyen" />
+                                        <String fx:value="Responsable" />
+                                        <String fx:value="Technicien" />
+                                    </FXCollections>
+                                </items>
+                            </ComboBox>
+                        </HBox>
+
+                        <!-- Champ Zone ID (Visible uniquement si Citoyen est sélectionné) -->
+                        <HBox fx:id="zoneIdBox" spacing="10" visible="false">
+                            <Label text="Zone ID :" />
+                            <TextField fx:id="zoneIdField" />
+                        </HBox>
+
+                        <!-- ComboBox Spécialité (Visible uniquement si Technicien est sélectionné) -->
+                        <HBox fx:id="specialiteBox" spacing="10" visible="false">
+                            <Label text="Spécialité :" />
+                            <ComboBox fx:id="specialiteComboBox">
+                                <items>
+                                    <FXCollections fx:factory="observableArrayList">
+                                        <String fx:value="Maintenance" />
+                                        <String fx:value="Électricité" />
+                                        <String fx:value="Autre" />
+                                    </FXCollections>
+                                </items>
+                            </ComboBox>
+                        </HBox>
+
+                        <!-- Champ Modules (Visible uniquement si Responsable est sélectionné) -->
+                        <HBox fx:id="modulesBox" spacing="10" visible="false">
+                            <Label text="Modules :" />
+                            <TextField fx:id="modulesField" promptText="Séparez par des virgules" />
+                        </HBox>
+                    </VBox>
+
+
+
+
+
+                    <!-- Boutons d'action spécifiques au formulaire -->
+                    <HBox spacing="10" alignment="CENTER" style="-fx-padding: 10;">
+                        <Button text="Ajouter" onAction="#handleAddUser" styleClass="action-button,add">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-plus-circle" iconSize="16" iconColor="#ffffff"/>
+                            </graphic>
+                        </Button>
+                        <Button text="Modifier" onAction="#handleUpdateUser" styleClass="action-button,edit">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-edit" iconSize="16" iconColor="#ffffff"/>
+                            </graphic>
+                        </Button>
+                        <Button text="Supprimer" onAction="#handleDeleteUser" styleClass="action-button,delete">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-trash-alt" iconSize="16" iconColor="#ffffff"/>
+                            </graphic>
+                        </Button>
+                        <Button text="Réinitialiser" onAction="#handleClear" styleClass="action-button,reset">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
+                            </graphic>
+                        </Button>
+                    </HBox>
+                </VBox>
+            </VBox>
+
+            <!-- Colonne droite : liste des utilisateurs -->
+            <ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                        style="-fx-background: transparent; -fx-padding: 10;">
+                <FlowPane fx:id="userFlowPane" orientation="VERTICAL" hgap="20" vgap="20" style="-fx-padding: 10;"/>
+            </ScrollPane>
+        </HBox>
+    </center>
+
+    <!-- Pied de page -->
+    <bottom>
+
+        <Label text="© 2025 Gestion des utilisateurs - Tous droits réservés" style="-fx-font-size: 12px; -fx-text-fill: #888888; -fx-padding: 10;" alignment="CENTER"/>
+    </bottom>
+
+</BorderPane>
