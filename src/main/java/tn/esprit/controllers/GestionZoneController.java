@@ -1,0 +1,289 @@
+package tn.esprit.controllers;
+
+import javafx.event.ActionEvent;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import java.io.IOException;
+import javafx.animation.Timeline;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.scene.control.*;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.scene.text.Font;
+import javafx.stage.StageStyle;
+import javafx.util.Duration;
+import tn.esprit.models.Zone;
+import tn.esprit.services.ServiceZone;
+import java.net.URL;
+import java.util.ResourceBundle;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
+import org.kordamp.ikonli.javafx.FontIcon;
+
+public class GestionZoneController implements Initializable {
+
+    @FXML private TextField tfNom;
+    @FXML private TextField tfDescription;
+    @FXML private TextField tfSurface;
+    @FXML private TextField tfNombreLampadaires;
+    @FXML private TextField tfNombreCitoyens;
+    @FXML private FlowPane cardContainer;
+    private Zone selectedZone;
+    private final ServiceZone serviceZone = new ServiceZone();
+    private final ObservableList<Zone> zones = FXCollections.observableArrayList();
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        cardContainer.setHgap(20);
+        cardContainer.setVgap(20);
+        cardContainer.setPadding(new Insets(20));
+        loadData();
+    }
+
+    private void loadData() {
+        zones.setAll(serviceZone.getAll());
+        cardContainer.getChildren().clear();
+        zones.forEach(zone -> cardContainer.getChildren().add(createZoneCard(zone)));
+    }
+
+    private VBox createZoneCard(Zone zone) {
+        VBox card = new VBox(15);
+        card.getStyleClass().add("card");
+
+        // En-tête avec icône
+        HBox header = new HBox(10);
+        FontIcon icon = new FontIcon(FontAwesomeSolid.MAP_MARKER);
+        icon.setIconSize(24);
+        icon.setIconColor(Color.web("#1a73e8"));
+
+        Label title = new Label("Zone #" + zone.getIdZone());
+        title.setStyle("-fx-font-size: 18; -fx-text-fill: #202124;");
+
+        header.getChildren().addAll(icon, title);
+
+        // Contenu
+        VBox content = new VBox(8);
+        content.getChildren().addAll(
+                createInfoRow(FontAwesomeSolid.SIGNATURE, "Nom : " + zone.getNom()),
+                createInfoRow(FontAwesomeSolid.INFO_CIRCLE, "Description : " + zone.getDescription()),
+                createInfoRow(FontAwesomeSolid.EXPAND, "Surface : " + zone.getSurface() + " m²"),
+                createInfoRow(FontAwesomeSolid.LIGHTBULB, "Lampadaires : " + zone.getNombreLampadaires()),
+                createInfoRow(FontAwesomeSolid.USERS, "Citoyens : " + zone.getNombreCitoyens())
+        );
+
+        // Boutons d'action
+        HBox buttons = new HBox(10);
+        Button btnModifier = createIconButton("Modifier", FontAwesomeSolid.PENCIL_ALT, "#4361ee");
+        Button btnSupprimer = createIconButton("Supprimer", FontAwesomeSolid.TRASH, "#ef476f");
+
+        btnModifier.setOnAction(e -> fillForm(zone));
+        btnSupprimer.setOnAction(e -> handleDeleteZone(zone));
+
+        buttons.getChildren().addAll(btnModifier, btnSupprimer);
+        card.getChildren().addAll(header, new Separator(), content, buttons);
+
+        // Style
+        card.setStyle("-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16;");
+        card.setEffect(new DropShadow(10, Color.gray(0.3)));
+        return card;
+    }
+
+    private HBox createInfoRow(FontAwesomeSolid iconType, String text) {
+        FontIcon icon = new FontIcon(iconType);
+        icon.setIconSize(16);
+        icon.setIconColor(Color.web("#5f6368"));
+
+        Label label = new Label(text);
+        label.setStyle("-fx-text-fill: #5f6368;");
+        return new HBox(10, icon, label);
+    }
+
+    private Button createIconButton(String text, FontAwesomeSolid iconType, String color) {
+        FontIcon icon = new FontIcon(iconType);
+        icon.setIconSize(16);
+        icon.setIconColor(Color.WHITE);
+
+        Button button = new Button(text, icon);
+        button.setStyle("-fx-background-color: " + color + "; -fx-text-fill: white;");
+        button.setContentDisplay(ContentDisplay.LEFT);
+        button.setGraphicTextGap(8);
+        return button;
+    }
+
+    private void handleDeleteZone(Zone zone) {
+        if (showConfirmation("Confirmation", "Supprimer cette zone ?")) {
+            try {
+                serviceZone.delete(zone);
+                loadData();
+                showSuccessFeedback();
+            } catch (Exception e) {
+                showAlert("Erreur", "Échec de la suppression : " + e.getMessage());
+            }
+        }
+    }
+
+    @FXML
+    private void handleAdd() {
+        try {
+            validateInputs();
+            Zone zone = new Zone();
+            updateZoneFromForm(zone);
+            serviceZone.add(zone);
+            loadData();
+            clearForm();
+            showSuccessFeedback();
+        } catch (Exception e) {
+            showAlert("Erreur d'ajout", e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleUpdate() {
+        if (selectedZone == null) {
+            showAlert("Erreur", "Veuillez sélectionner une zone à modifier");
+            return;
+        }
+        try {
+            validateInputs();
+            updateZoneFromForm(selectedZone);
+            serviceZone.update(selectedZone);
+            loadData();
+            clearForm();
+            showSuccessFeedback();
+        } catch (Exception e) {
+            showAlert("Erreur de modification", e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleDelete() {
+        if (selectedZone == null) {
+            showAlert("Erreur", "Veuillez sélectionner une zone à supprimer");
+            return;
+        }
+        handleDeleteZone(selectedZone);
+    }
+
+    @FXML
+    private void handleClear() {
+        clearForm();
+    }
+
+    private void updateZoneFromForm(Zone zone) {
+        zone.setNom(tfNom.getText());
+        zone.setDescription(tfDescription.getText());
+        zone.setSurface(Float.parseFloat(tfSurface.getText()));
+        zone.setNombreLampadaires(Integer.parseInt(tfNombreLampadaires.getText()));
+        zone.setNombreCitoyens(Integer.parseInt(tfNombreCitoyens.getText()));
+    }
+
+    private void fillForm(Zone zone) {
+        selectedZone = zone;
+        tfNom.setText(zone.getNom());
+        tfDescription.setText(zone.getDescription());
+        tfSurface.setText(String.valueOf(zone.getSurface()));
+        tfNombreLampadaires.setText(String.valueOf(zone.getNombreLampadaires()));
+        tfNombreCitoyens.setText(String.valueOf(zone.getNombreCitoyens()));
+    }
+
+    private void clearForm() {
+        tfNom.clear();
+        tfDescription.clear();
+        tfSurface.clear();
+        tfNombreLampadaires.clear();
+        tfNombreCitoyens.clear();
+        selectedZone = null;
+    }
+
+    private void validateInputs() throws Exception {
+        if (tfNom.getText().isEmpty() || tfDescription.getText().isEmpty()
+                || tfSurface.getText().isEmpty() || tfNombreLampadaires.getText().isEmpty()
+                || tfNombreCitoyens.getText().isEmpty()) {
+            throw new Exception("Tous les champs doivent être remplis");
+        }
+        try {
+            Float.parseFloat(tfSurface.getText());
+            Integer.parseInt(tfNombreLampadaires.getText());
+            Integer.parseInt(tfNombreCitoyens.getText());
+        } catch (NumberFormatException e) {
+            throw new Exception("Format de données invalide");
+        }
+    }
+
+    // Méthodes de feedback communes (identique à GestionLampadaireController)
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.initStyle(StageStyle.TRANSPARENT);
+        alert.getDialogPane().getScene().getRoot().setStyle("-fx-background-color: rgba(255,255,255,0.95);-fx-background-radius: 16;-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 16, 0, 4, 4);");
+        alert.getDialogPane().setOpacity(0);
+        Timeline fadeIn = new Timeline(new KeyFrame(Duration.millis(200), new KeyValue(alert.getDialogPane().opacityProperty(), 1)));
+        fadeIn.play();
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private boolean showConfirmation(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.initStyle(StageStyle.TRANSPARENT);
+        alert.getDialogPane().getScene().getRoot().setStyle("-fx-background-color: rgba(255,255,255,0.95);-fx-background-radius: 16;-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 16, 0, 4, 4);");
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        return alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK;
+    }
+
+    private void showSuccessFeedback() {
+        Pane root = (Pane) cardContainer.getParent();
+        Label feedback = new Label("✓ Opération réussie !");
+        feedback.setStyle("-fx-background-color: linear-gradient(to right, #34a853, #2d8a4a); -fx-text-fill: white; -fx-padding: 12 24; -fx-background-radius: 24; -fx-font-weight: 700;");
+        feedback.setTranslateY(-50);
+        feedback.setOpacity(0);
+        root.getChildren().add(feedback);
+        Timeline animation = new Timeline(
+                new KeyFrame(Duration.millis(300), new KeyValue(feedback.translateYProperty(), 20), new KeyValue(feedback.opacityProperty(), 1)),
+                new KeyFrame(Duration.millis(2000), new KeyValue(feedback.opacityProperty(), 0))
+        );
+        animation.setOnFinished(e -> root.getChildren().remove(feedback));
+        animation.play();
+    }
+
+    // Navigation (gardé inchangé)
+    @FXML
+    private void handleBack(ActionEvent event) throws IOException {
+        Parent root = FXMLLoader.load(getClass().getResource("/MainMenu.fxml"));
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage.setScene(new Scene(root));
+        stage.show();
+    }
+    @FXML
+    private void handleNavigateToLampadaire(ActionEvent event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/GestionLampadaire.fxml"));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger la gestion des zones");
+        }
+    }
+    @FXML
+    private void handleNavigateToLampadaires(ActionEvent event) throws IOException {
+        Parent root = FXMLLoader.load(getClass().getResource("/GestionLampadaire.fxml"));
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage.setScene(new Scene(root));
+        stage.show();
+    }
+}

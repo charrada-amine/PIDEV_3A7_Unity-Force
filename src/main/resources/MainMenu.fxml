@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/MedRayenSansa/GestionInfrastructure
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.text.Text?>
+<<<<<<< HEAD
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <VBox alignment="CENTER" spacing="40" xmlns="http://javafx.com/javafx/17"
@@ -53,3 +58,17 @@
 
 
 </VBox>
+=======
+
+<VBox alignment="CENTER" spacing="50" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.MainMenuController" style="-fx-background-color: #F5F7FA;">
+    <padding>
+        <Insets top="50" right="50" bottom="50" left="50"/>
+    </padding>
+    <Text text="Gestion Éclairage Urbain" style="-fx-font-size: 32px; -fx-fill: #2A7FFF; -fx-font-weight: 800;"/>
+    <VBox alignment="CENTER" spacing="20">
+        <Button text="Gestion Lampadaires" onAction="#navigateToLampadaires" style="-fx-background-color: #4361ee; -fx-text-fill: white; -fx-font-size: 16px; -fx-pref-width: 250px; -fx-padding: 15;"/>
+        <Button text="Gestion Zones" onAction="#navigateToZones" style="-fx-background-color: #06d6a0; -fx-text-fill: white; -fx-font-size: 16px; -fx-pref-width: 250px; -fx-padding: 15;"/>
+    </VBox>
+</VBox>
+
+>>>>>>> origin/MedRayenSansa/GestionInfrastructure

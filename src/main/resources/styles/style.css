@@ -212,7 +212,10 @@
     -fx-padding: 25 0 0 0;
     -fx-alignment: center;
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/MedRayenSansa/GestionInfrastructure
 }
 /* Error styling */
 .error-field {
@@ -223,5 +226,8 @@
     -fx-text-fill: #ef4444;
     -fx-font-size: 12px;
     -fx-padding: 2 0 0 5;
+<<<<<<< HEAD
 >>>>>>> origin/AzizBenAmmar/GestionInterventions_Reclamations
+=======
+>>>>>>> origin/MedRayenSansa/GestionInfrastructure
 }
