@@ -6,12 +6,16 @@
       <list>
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> origin/MedRayenSansa/GestionInfrastructure
+=======
+>>>>>>> origin/aminecharrada/GestionEnergie
         <option value="$PROJECT_DIR$/pom.xml" />
       </list>
     </option>
   </component>
+<<<<<<< HEAD
   <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="jbr-17" project-jdk-type="JavaSDK">
 <<<<<<< HEAD
 =======
@@ -23,6 +27,9 @@
 >>>>>>> origin/MedYoussefMellouli/GestionUtilisateur
 =======
 >>>>>>> origin/MedRayenSansa/GestionInfrastructure
+=======
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_23" default="true" project-jdk-name="jbr-17" project-jdk-type="JavaSDK">
+>>>>>>> origin/aminecharrada/GestionEnergie
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>

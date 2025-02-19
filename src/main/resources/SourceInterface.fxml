@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx/fxml/1"
+            fx:controller="tn.esprit.controller.SourceController"
+            stylesheets="@styles/style.css">
+
+    <!-- Barre de navigation latérale -->
+    <left>
+        <VBox prefWidth="240" styleClass="nav-bar">
+            <Label text="Gestion Urbaine" styleClass="nav-title"/>
+            <Button  fx:id="btnprofile" text="Profile" styleClass="nav-button" onAction="#handleShowSources">
+                <graphic>
+                    <FontIcon iconLiteral="far-lightbulb" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button fx:id="btnBack" text="Retour" styleClass="nav-button" onAction="#handleBack">
+                <graphic>
+                    <FontIcon iconLiteral="fas-arrow-left" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+
+        </VBox>
+    </left>
+
+    <!-- Contenu principal -->
+    <center>
+        <HBox spacing="30" style="-fx-padding: 25;">
+            <!-- Formulaire modernisé -->
+            <VBox spacing="20" styleClass="card" prefWidth="380">
+                <Label text="Gestion des Sources" style="-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #202124;"/>
+
+                <VBox spacing="20">
+                    <!-- Type de source -->
+                    <ComboBox fx:id="cbType" promptText="Type" styleClass="modern-input"/>
+
+                    <!-- Capacité -->
+                    <TextField fx:id="tfCapacite" promptText="Capacité (kWh)" styleClass="modern-input"/>
+
+                    <!-- Rendement -->
+                    <TextField fx:id="tfRendement" promptText="Rendement (%)" styleClass="modern-input"/>
+
+                    <!-- État -->
+                    <ComboBox fx:id="cbEtat" promptText="État" styleClass="modern-input"/>
+
+                    <!-- Date d'installation -->
+
+                    <!-- Boutons modernisés -->
+                    <HBox spacing="15" styleClass="button-container">
+                        <Button text="Ajouter" onAction="#handleAdd" styleClass="action-button,add">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-plus-circle" iconSize="16" iconColor="white"/>
+                            </graphic>
+                        </Button>
+                        <Button text="Modifier" onAction="#handleUpdate" styleClass="action-button,edit">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-edit" iconSize="16" iconColor="white"/>
+                            </graphic>
+                        </Button>
+
+                        <Button text="Réinitialiser" onAction="#handleClear" styleClass="action-button,reset">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
+                            </graphic>
+                        </Button>
+                    </HBox>
+                </VBox>
+            </VBox>
+
+            <!-- Zone des cartes de sources -->
+            <ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER"
+                        style="-fx-background: transparent; -fx-border-width: 0;"
+                        prefWidth="600">
+                <FlowPane fx:id="cardContainer" hgap="25" vgap="25" style="-fx-padding: 20;"/>
+            </ScrollPane>
+        </HBox>
+    </center>
+</BorderPane>

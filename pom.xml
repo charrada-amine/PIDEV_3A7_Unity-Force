@@ -6,10 +6,14 @@
 
     <groupId>tn.esprit</groupId>
 <<<<<<< HEAD
+<<<<<<< HEAD
     <artifactId>workshopJDBC3A15</artifactId>
 =======
     <artifactId>workshopReady</artifactId>
 >>>>>>> origin/MedRayenSansa/GestionInfrastructure
+=======
+    <artifactId>workshopJDBC3A15</artifactId>
+>>>>>>> origin/aminecharrada/GestionEnergie
     <version>1.0-SNAPSHOT</version>
 
     <properties>
@@ -21,14 +25,19 @@
     <dependencies>
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         <!-- Dépendances JavaFX -->
 =======
         <!-- JavaFX -->
 >>>>>>> origin/MedRayenSansa/GestionInfrastructure
+=======
+        <!-- Dépendances JavaFX -->
+>>>>>>> origin/aminecharrada/GestionEnergie
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>21.0.2</version>
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
         <!-- JavaFX 17 (version stable) -->
@@ -39,12 +48,17 @@
 >>>>>>> origin/AzizBenAmmar/GestionInterventions_Reclamations
 =======
 >>>>>>> origin/MedRayenSansa/GestionInfrastructure
+=======
+>>>>>>> origin/aminecharrada/GestionEnergie
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> origin/aminecharrada/GestionEnergie
             <version>21.0.2</version>
         </dependency>
 
@@ -52,6 +66,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+<<<<<<< HEAD
 =======
             <version>17.0.2</version>
         </dependency>
@@ -76,6 +91,11 @@
 
         <!-- Ikonli (icônes modernes) -->
 >>>>>>> origin/MedRayenSansa/GestionInfrastructure
+=======
+            <version>8.0.33</version>
+        </dependency>
+
+>>>>>>> origin/aminecharrada/GestionEnergie
         <dependency>
             <groupId>org.kordamp.ikonli</groupId>
             <artifactId>ikonli-core</artifactId>
@@ -93,6 +113,7 @@
         </dependency>
     </dependencies>
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 
 <<<<<<< HEAD
@@ -125,10 +146,16 @@
     <build>
         <plugins>
 >>>>>>> origin/MedRayenSansa/GestionInfrastructure
+=======
+    <build>
+        <plugins>
+            <!-- Plugin JavaFX -->
+>>>>>>> origin/aminecharrada/GestionEnergie
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
+<<<<<<< HEAD
 <<<<<<< HEAD
                 <configuration>
                     <mainClass>tn.esprit.test.MainFx</mainClass>
@@ -150,10 +177,15 @@
                 <configuration>
                     <mainClass>tn.esprit.test.MainFX</mainClass>
 >>>>>>> origin/MedRayenSansa/GestionInfrastructure
+=======
+                <configuration>
+                    <mainClass>tn.esprit.test.MainFX</mainClass>
+>>>>>>> origin/aminecharrada/GestionEnergie
                 </configuration>
             </plugin>
         </plugins>
     </build>
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 </project>
@@ -163,3 +195,6 @@
 =======
 </project>
 >>>>>>> origin/MedRayenSansa/GestionInfrastructure
+=======
+</project>
+>>>>>>> origin/aminecharrada/GestionEnergie

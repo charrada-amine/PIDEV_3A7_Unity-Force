@@ -9,6 +9,9 @@ public class MyDatabase {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> origin/aminecharrada/GestionEnergie
     private Connection cnx;
 
     private final String URL = "jdbc:mysql://localhost:3306/projetpi_3a";
@@ -28,6 +31,7 @@ public class MyDatabase {
         if (instance == null) {
             instance = new MyDatabase();
         }
+<<<<<<< HEAD
 =======
     private final String URL ="jdbc:mysql://127.0.0.1:3306/noorcity";
 =======
@@ -68,6 +72,8 @@ public class MyDatabase {
 >>>>>>> origin/AzizBenAmmar/GestionInterventions_Reclamations
 =======
 >>>>>>> origin/MedRayenSansa/GestionInfrastructure
+=======
+>>>>>>> origin/aminecharrada/GestionEnergie
         return instance;
     }
 
@@ -77,6 +83,9 @@ public class MyDatabase {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> origin/aminecharrada/GestionEnergie
 
     public void closeConnection() {
         try {
@@ -90,6 +99,7 @@ public class MyDatabase {
     }
 }
 
+<<<<<<< HEAD
 =======
 }
 >>>>>>> a3c932b0e96e26782012e7d55e0b3688bdf4452d
@@ -99,3 +109,5 @@ public class MyDatabase {
 =======
 }
 >>>>>>> origin/MedRayenSansa/GestionInfrastructure
+=======
+>>>>>>> origin/aminecharrada/GestionEnergie
