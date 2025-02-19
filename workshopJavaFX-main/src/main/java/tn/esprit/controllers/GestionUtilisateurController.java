@@ -57,6 +57,8 @@ public class GestionUtilisateurController {
     private Button technicienButton; // Bouton pour les Techniciens
     @FXML
     private Button responsableButton; // Bouton pour les Responsables
+    private Button AccueilButton;  // Bouton pour les Citoyens
+
 
     @FXML
     private ScrollPane scrollPane;
@@ -130,31 +132,94 @@ public class GestionUtilisateurController {
     public void filterByResponsable() {
         try {
             // Charger la vue GestionResponsable.fxml
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("GestionResponsable.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/GestionResponsable.fxml"));
             Parent root = loader.load();
 
             // Créer une nouvelle scène avec la vue chargée
-            Stage stage = (Stage) responsableButton.getScene().getWindow(); // Remplacez myButton par un vrai composant (par ex., un bouton)
-            stage.setScene(new Scene(root)); // Remplacer la scène actuelle par la nouvelle vue
-            stage.show();  // Afficher la nouvelle scène
-        } catch (Exception e) {
+            Stage stage = new Stage();
+            Scene scene = new Scene(root);
+
+            // Configurer la scène et la fenêtre
+            stage.setScene(scene);
+            stage.setTitle("Gestion des Responsables");
+
+            // Maximiser automatiquement la fenêtre
+            stage.setMaximized(true); // Maximiser la fenêtre
+
+            stage.show();  // Afficher la scène
+        } catch (IOException e) {
             e.printStackTrace();  // Afficher l'erreur en cas de problème
         }
     }
 
+
+
     // Méthode de filtrage pour les Citoyens
     @FXML
     public void filterByCitoyen() {
-        // Méthode vide pour filtrer les Citoyens
-        // Ajouter ici la logique de filtrage selon votre besoin
+        {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/GestionCitoyen.fxml"));
+                Parent root = loader.load();
+
+                Stage stage = new Stage();
+                Scene scene = new Scene(root);
+
+                stage.setScene(scene);
+                stage.setTitle("Gestion des Citoyens");
+
+                // Maximiser automatiquement
+                stage.setMaximized(true);
+
+                stage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     // Méthode de filtrage pour les Techniciens
     @FXML
     public void filterByTechnicien() {
-        // Méthode vide pour filtrer les Techniciens
-        // Ajouter ici la logique de filtrage selon votre besoin
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/GestionTechnicien.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            Scene scene = new Scene(root);
+
+            stage.setScene(scene);
+            stage.setTitle("Gestion des Techniciens");
+
+            // Maximiser automatiquement
+            stage.setMaximized(true);
+
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+    @FXML
+    public void filterByAccueil() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Accueil.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            Scene scene = new Scene(root);
+
+            stage.setScene(scene);
+            stage.setTitle("Gestion des utilisateurs");
+
+            // Maximiser automatiquement
+            stage.setMaximized(true);
+
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private VBox createUserCard(utilisateur user) {
         VBox card = new VBox(10);
         card.setStyle("-fx-border-color: #ddd; -fx-border-width: 1; -fx-padding: 10; -fx-background-color: #f9f9f9; -fx-alignment: center;");
@@ -626,7 +691,7 @@ public class GestionUtilisateurController {
         loadUsers(); // Recharge les utilisateurs filtrés
     }
 
-     private void loadUsers() {
+    private void loadUsers() {
         List<utilisateur> users = serviceUtilisateur.getAllUtilisateurs();
 
         // Filtrer les utilisateurs par rôle sélectionné

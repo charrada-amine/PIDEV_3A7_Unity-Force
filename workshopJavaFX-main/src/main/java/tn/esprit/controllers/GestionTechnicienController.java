@@ -3,8 +3,12 @@ package tn.esprit.controllers;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.stage.Stage;
 import tn.esprit.models.citoyen;
 import tn.esprit.models.technicien;
 import tn.esprit.models.Specialite;
@@ -17,6 +21,7 @@ import tn.esprit.services.ServiceUtilisateur;
 import tn.esprit.utils.MyDatabase;
 import tn.esprit.models.Role; // Adaptez le chemin selon votre projet.
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -310,6 +315,102 @@ public class GestionTechnicienController {
         passwordField.clear();
         specialiteComboBox.setValue(null); // Réinitialiser le ComboBox
     }
+    @FXML
+    public void handleClear() {
+        clearFields();
+    }
+    @FXML
+    public void filterByResponsable() {
+        try {
+            // Charger la vue GestionResponsable.fxml
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/GestionResponsable.fxml"));
+            Parent root = loader.load();
+
+            // Créer une nouvelle scène avec la vue chargée
+            Stage stage = new Stage();
+            Scene scene = new Scene(root);
+
+            // Configurer la scène et la fenêtre
+            stage.setScene(scene);
+            stage.setTitle("Gestion des Responsables");
+
+            // Maximiser automatiquement la fenêtre
+            stage.setMaximized(true); // Maximiser la fenêtre
+
+            stage.show();  // Afficher la scène
+        } catch (IOException e) {
+            e.printStackTrace();  // Afficher l'erreur en cas de problème
+        }
+    }
+
+
+
+    // Méthode de filtrage pour les Citoyens
+    @FXML
+    public void filterByCitoyen() {
+        {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/GestionCitoyen.fxml"));
+                Parent root = loader.load();
+
+                Stage stage = new Stage();
+                Scene scene = new Scene(root);
+
+                stage.setScene(scene);
+                stage.setTitle("Gestion des Citoyens");
+
+                // Maximiser automatiquement
+                stage.setMaximized(true);
+
+                stage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // Méthode de filtrage pour les Techniciens
+    @FXML
+    public void filterByUtilisateur() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/GestionUtilisateur.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            Scene scene = new Scene(root);
+
+            stage.setScene(scene);
+            stage.setTitle("Gestion des Techniciens");
+
+            // Maximiser automatiquement
+            stage.setMaximized(true);
+
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    @FXML
+    public void filterByAccueil() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Accueil.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            Scene scene = new Scene(root);
+
+            stage.setScene(scene);
+            stage.setTitle("Gestion des utilisateurs");
+
+            // Maximiser automatiquement
+            stage.setMaximized(true);
+
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @FXML
     private void handleDeleteTechnicien() {

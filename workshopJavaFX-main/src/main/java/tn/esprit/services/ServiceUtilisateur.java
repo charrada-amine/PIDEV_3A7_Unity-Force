@@ -310,51 +310,68 @@ public class ServiceUtilisateur {
             System.out.println("❌ Erreur : La valeur pour zoneId doit être un nombre valide.");
         }
     }
-    public void updateFieldResponsable(int idResponsable, String fieldName, String newValue) {
-        String qry = "UPDATE responsable SET " + fieldName + " = ? WHERE id_responsable = ?";
+    public void updateFieldResponsable(int id, String fieldName, String newValue) {
+        String qry;
+        boolean isModulesField = fieldName.equalsIgnoreCase("modules"); // Vérifier si le champ à modifier est `modules`
 
-        try (PreparedStatement pstm = cnx.prepareStatement(qry)) {
-            // Préparer et exécuter la requête
+        if (isModulesField) {
+            // Mise à jour des modules dans la table `responsable`
+            qry = "UPDATE responsable SET modules = ? WHERE id_responsable = ?";
+        } else {
+            // Mise à jour des autres informations dans la table `utilisateur`
+            qry = "UPDATE utilisateur SET " + fieldName + " = ? WHERE id_utilisateur = ?";
+        }
+
+        try {
+            PreparedStatement pstm = cnx.prepareStatement(qry);
+
+            // Vérifier si la mise à jour concerne les modules (champ texte)
             pstm.setString(1, newValue);
-            pstm.setInt(2, idResponsable);
+
+            pstm.setInt(2, id); // ID du responsable/utilisateur
 
             int affectedRows = pstm.executeUpdate();
 
             if (affectedRows > 0) {
-                System.out.println("✅ " + fieldName + " mis à jour avec succès pour le responsable ID " + idResponsable);
+                System.out.println("✅ " + fieldName + " mis à jour avec succès pour l'utilisateur/responsable ID " + id);
             } else {
-                System.out.println("❌ Aucun responsable trouvé avec l'ID " + idResponsable);
+                System.out.println("❌ Aucun enregistrement trouvé avec l'ID " + id);
             }
+
         } catch (SQLException e) {
             System.out.println("❌ Erreur SQL lors de la mise à jour : " + e.getMessage());
         }
     }
 
-    public void updateFieldTechnicien(int idTechnicien, String fieldName, String newValue) {
 
-        String qry = "UPDATE technicien SET " + fieldName + " = ? WHERE id_technicien = ?";
+    public void updateFieldTechnicien(int id, String fieldName, String newValue) {
+        String qry;
+        boolean isSpecialiteField = fieldName.equalsIgnoreCase("specialite"); // Vérifier si le champ à modifier est `specialite`
 
-        try (PreparedStatement pstm = cnx.prepareStatement(qry)) {
-            // Conversion spéciale pour le champ "specialite"
-            if (fieldName.equalsIgnoreCase("specialite")) {
-                try {
-                    Specialite selectedSpecialite = Specialite.valueOf(newValue); // Valider et convertir en Enum
-                    pstm.setString(1, selectedSpecialite.name()); // Utiliser le nom Enum en base de données
-                } catch (IllegalArgumentException e) {
-                    throw new IllegalArgumentException("Spécialité invalide : " + newValue);
-                }
-            } else {
-                pstm.setString(1, newValue); // Autres champs comme String
-            }
+        if (isSpecialiteField) {
+            // Mise à jour de la spécialité dans la table `technicien`
+            qry = "UPDATE technicien SET specialite = ? WHERE id_technicien = ?";
+        } else {
+            // Mise à jour des autres informations dans la table `utilisateur`
+            qry = "UPDATE utilisateur SET " + fieldName + " = ? WHERE id_utilisateur = ?";
+        }
 
-            pstm.setInt(2, idTechnicien); // ID du technicien
+        try {
+            PreparedStatement pstm = cnx.prepareStatement(qry);
+
+            // Vérifier si la mise à jour concerne la spécialité (champ texte)
+            pstm.setString(1, newValue);
+
+            pstm.setInt(2, id); // ID du technicien/utilisateur
+
             int affectedRows = pstm.executeUpdate();
 
             if (affectedRows > 0) {
-                System.out.println("✅ " + fieldName + " mis à jour avec succès pour le technicien ID " + idTechnicien);
+                System.out.println("✅ " + fieldName + " mis à jour avec succès pour l'utilisateur/technicien ID " + id);
             } else {
-                System.out.println("❌ Aucun technicien trouvé avec l'ID " + idTechnicien);
+                System.out.println("❌ Aucun enregistrement trouvé avec l'ID " + id);
             }
+
         } catch (SQLException e) {
             System.out.println("❌ Erreur SQL lors de la mise à jour : " + e.getMessage());
         }

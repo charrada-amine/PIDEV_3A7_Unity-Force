@@ -34,6 +34,11 @@
                     <FontIcon iconLiteral="fas-tools" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
+            <Button text="Retour" styleClass="nav-button" onAction="#filterByAccueil">
+                <graphic>
+                    <FontIcon iconLiteral="fas-tools" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
         </VBox>
     </left>
 
@@ -137,6 +142,7 @@
 
     <!-- Pied de page -->
     <bottom>
+
         <Label text="© 2025 Gestion des utilisateurs - Tous droits réservés" style="-fx-font-size: 12px; -fx-text-fill: #888888; -fx-padding: 10;" alignment="CENTER"/>
     </bottom>
 
