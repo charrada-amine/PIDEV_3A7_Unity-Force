@@ -17,17 +17,17 @@
     <left>
         <VBox prefWidth="240" styleClass="nav-bar">
             <Label text="Gestion utilisateur" styleClass="nav-title"/>
-            <Button text="Responsable" styleClass="nav-button" onAction="#filterByTechnicien">
+            <Button text="Technicien" styleClass="nav-button" onAction="#filterByTechnicien">
                 <graphic>
                     <FontIcon iconLiteral="fas-user-tie" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-            <Button text="Citoyen" styleClass="nav-button" onAction="#filterByResponsable">
+            <Button text="Responsable" styleClass="nav-button" onAction="#filterByResponsable">
                 <graphic>
                     <FontIcon iconLiteral="fas-user" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-            <Button text="Technicien" styleClass="nav-button" onAction="#filterByUtilisateur">
+            <Button text="Utilisateur" styleClass="nav-button" onAction="#filterByUtilisateur">
                 <graphic>
                     <FontIcon iconLiteral="fas-tools" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
@@ -82,7 +82,10 @@
                         style="-fx-background: transparent; -fx-padding: 10;">
                 <FlowPane fx:id="citoyenFlowPane" orientation="VERTICAL" hgap="20" vgap="20" style="-fx-padding: 10;"/>
             </ScrollPane>
+            <!-- ScrollPane pour affichage horizontal sous toute l'interface -->
+
         </HBox>
+
     </center>
 
     <!-- Pied de page -->

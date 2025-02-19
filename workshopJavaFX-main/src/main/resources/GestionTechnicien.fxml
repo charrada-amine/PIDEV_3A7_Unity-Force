@@ -29,7 +29,7 @@
                     <FontIcon iconLiteral="fas-user" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-            <Button text="Technicien" styleClass="nav-button" onAction="#filterByUtilisateur">
+            <Button text="Utilisateur" styleClass="nav-button" onAction="#filterByUtilisateur">
                 <graphic>
                     <FontIcon iconLiteral="fas-tools" iconSize="16" iconColor="#ffffff"/>
                 </graphic>

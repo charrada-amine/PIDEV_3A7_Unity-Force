@@ -69,7 +69,6 @@ public class GestionUtilisateurController {
     @FXML
     public void initialize() {
         loadUsers();
-        displayUsers(users);  // Appeler la méthode pour afficher les utilisateurs, en passant la liste des utilisateurs
 
         // Remplir les ComboBox avec des valeurs prédéfinies pour les rôles et spécialités
         roleComboBox.setItems(FXCollections.observableArrayList("Citoyen", "Responsable", "Technicien"));
@@ -78,10 +77,7 @@ public class GestionUtilisateurController {
         // Cacher les champs spécifiques selon le rôle sélectionné
         roleComboBox.setOnAction(e -> handleRoleChange());
     }
-    private void displayUsers(List<utilisateur> users) {
-        // Appeler handleDisplayUsers pour afficher les utilisateurs
-        handleDisplayUsers(users);
-    }
+
     public boolean emailExists(String email) {
         String query = "SELECT COUNT(*) FROM utilisateur WHERE email = ?";
         PreparedStatement preparedStatement = null;
@@ -295,34 +291,6 @@ public class GestionUtilisateurController {
         return card;
     }
 
-    @FXML
-    private void handleDisplayUsers(List<utilisateur> users) {
-        // Créer une VBox pour contenir toutes les lignes de cartes
-        VBox userCardsContainer = new VBox(10);
-
-        // Créer une HBox pour chaque ligne de cartes (2 cartes par ligne)
-        HBox row = new HBox(10);
-        row.setAlignment(Pos.CENTER);
-
-        // Ajouter chaque carte utilisateur dans la ligne (2 par ligne)
-        for (int i = 0; i < users.size(); i++) {
-            utilisateur user = users.get(i);
-            VBox userCard = createUserCard(user);
-
-            // Ajouter la carte à la ligne
-            row.getChildren().add(userCard);
-
-            // Si deux cartes sont ajoutées, ajouter la ligne à la VBox principale et créer une nouvelle ligne
-            if ((i + 1) % 2 == 0 || i == users.size() - 1) {
-                userCardsContainer.getChildren().add(row);
-                row = new HBox(10); // Créer une nouvelle ligne pour les cartes suivantes
-                row.setAlignment(Pos.CENTER);
-            }
-        }
-
-        // Ajouter le conteneur principal à l'interface utilisateur
-        userFlowPane.getChildren().add(userCardsContainer);
-    }
 
     @FXML
     public void handleAddUser() {
