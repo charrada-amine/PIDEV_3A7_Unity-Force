@@ -19,6 +19,17 @@ public class profile {
         this.sourceId = sourceId;
         this.lampadaireId = lampadaireId;
     }
+    // No-argument constructor
+    public profile() {
+        // Optionally, set default values if needed
+        this.consommationJour = "";
+        this.consommationMois = "";
+        this.coutEstime = "";
+        this.dureeActivite = "";
+        this.sourceId = 0;
+        this.lampadaireId = 0;
+    }
+
 
     // Constructeur
     public profile( String consommationJour, String consommationMois, String coutEstime, String dureeActivite, int sourceId, int lampadaireId) {

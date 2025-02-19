@@ -1,243 +1,349 @@
 package tn.esprit.controller;
 
-import javafx.fxml.FXML;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import java.io.IOException;
+import javafx.animation.Timeline;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.scene.control.*;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.scene.text.Font;
+import javafx.stage.StageStyle;
+import javafx.util.Duration;
 import tn.esprit.models.Source;
 import tn.esprit.Enumerations.EnumEtat;
 import tn.esprit.Enumerations.EnumType;
 import tn.esprit.services.ServiceSource;
-
-import java.io.IOException;
+import java.net.URL;
 import java.time.LocalDate;
-import java.util.List;
+import java.time.format.DateTimeFormatter;
+import java.util.ResourceBundle;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
+import org.kordamp.ikonli.javafx.FontIcon;
 
-public class SourceController {
+public class SourceController implements Initializable {
 
+
+    @FXML private Button btnBack;
+    @FXML private Button btnprofile;
+
+    @FXML private ComboBox<EnumType> cbType; // Utilisation d'un ComboBox pour le type
+    @FXML private TextField tfCapacite;
+    @FXML private TextField tfRendement;
+    @FXML private ComboBox<EnumEtat> cbEtat;
+    @FXML private FlowPane cardContainer;
+    @FXML private ScrollPane scrollPane;
     private final ServiceSource serviceSource = new ServiceSource();
+    private final ObservableList<Source> sources = FXCollections.observableArrayList();
+    private Source selectedSource;
 
-    // Composants pour l'affichage des sources
-    @FXML
-    private FlowPane flowPaneSources;
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        cbType.setItems(FXCollections.observableArrayList(EnumType.values())); // Initialisation du ComboBox pour le type
+        cbEtat.setItems(FXCollections.observableArrayList(EnumEtat.values()));
+        scrollPane.setFitToWidth(true);
+        cardContainer.setHgap(20);
+        cardContainer.setVgap(20);
+        cardContainer.setPadding(new Insets(20));
+        Font.loadFont(getClass().getResourceAsStream("/fonts/Roboto-Regular.ttf"), 14);
 
-    @FXML
-    private Button btnAddSource;
-
-    @FXML
-    private Button btnBack;
-
-    // Composants pour l'ajout de source
-    @FXML
-    private ComboBox<EnumType> comboType;
-
-    @FXML
-    private TextField txtCapacite;
-
-    @FXML
-    private TextField txtRendement;
-
-    @FXML
-    private ComboBox<EnumEtat> comboEtat;
-
-    @FXML
-    private Button btnAdd;
-
-    @FXML
-    private Button btnCancel;
-
-    @FXML
-    private void initialize() {
-        // Initialisation des ComboBox pour l'ajout de source
-        comboType.getItems().setAll(EnumType.values());
-        comboEtat.getItems().setAll(EnumEtat.values());
-
-        // Affichage des sources existantes
-        afficherSources();
+        loadData();
     }
 
-    // Méthode pour afficher les sources
-    private void afficherSources() {
-        List<Source> sources = serviceSource.getAll();
-        flowPaneSources.getChildren().clear();
+    private void loadData() {
+        sources.setAll(serviceSource.getAll());
+        cardContainer.getChildren().clear();
+        sources.forEach(source -> cardContainer.getChildren().add(createSourceCard(source)));
+    }
 
-        for (Source source : sources) {
-            VBox card = new VBox();
-            card.setSpacing(10);
-            card.setAlignment(Pos.CENTER);
-            card.setPadding(new Insets(15));
-            card.setPrefWidth(220);
-            card.setStyle(
-                    "-fx-border-color: #333;" +
-                            "-fx-border-width: 2;" +
-                            "-fx-border-radius: 15;" +
-                            "-fx-background-color: linear-gradient(to bottom, #ffffff, #e6e6e6);" +
-                            "-fx-background-radius: 15;" +
-                            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 8, 0.5, 0, 3);"
-            );
+    private Button createStyledButton(String text, String color) {
+        Button button = new Button(text);
+        button.setStyle("-fx-background-color: " + color + ";-fx-text-fill: white;-fx-background-radius: 8;-fx-padding: 8 16;");
+        return button;
+    }
 
-            Label labelId = new Label("🆔 ID: " + source.getIdSource());
-            labelId.setStyle("-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: #2c3e50;");
-            Label labelType = new Label("🔌 Type: " + source.getType());
-            Label labelCapacite = new Label("⚡ Capacité: " + source.getCapacite() + " kWh");
-            Label labelRendement = new Label("📈 Rendement: " + source.getRendement() + " %");
-            Label labelEtat = new Label("📌 État: " + source.getEtat());
-            Label labelDate = new Label("📅 Installé le: " + source.getDateInstallation());
+    private Text createInfoText(String label, String value) {
+        Text text = new Text(label + ": " + value);
+        text.setFont(Font.font("Roboto", 14));
+        return text;
+    }
 
-            labelType.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
-            labelCapacite.setStyle("-fx-font-size: 13px;");
-            labelRendement.setStyle("-fx-font-size: 13px;");
-            labelEtat.setStyle("-fx-font-size: 13px;");
-            labelDate.setStyle("-fx-font-size: 13px;");
-
-            Button btnUpdate = new Button("✏ Modifier");
-            btnUpdate.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 13px; -fx-background-radius: 10;");
-            btnUpdate.setOnMouseEntered(e -> btnUpdate.setStyle("-fx-background-color: #2980b9; -fx-text-fill: white; -fx-background-radius: 10;"));
-            btnUpdate.setOnMouseExited(e -> btnUpdate.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-background-radius: 10;"));
-            btnUpdate.setOnAction(event -> prefillForm(source)); // Pré-remplir le formulaire
-
-            Button btnDelete = new Button("🗑 Supprimer");
-            btnDelete.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 13px; -fx-background-radius: 10;");
-            btnDelete.setOnMouseEntered(e -> btnDelete.setStyle("-fx-background-color: #c0392b; -fx-text-fill: white; -fx-background-radius: 10;"));
-            btnDelete.setOnMouseExited(e -> btnDelete.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 10;"));
-            btnDelete.setOnAction(event -> {
+    private void handleDeleteSource(Source source) {
+        if (showConfirmation("Confirmation", "Supprimer cette source ?")) {
+            try {
                 serviceSource.delete(source.getIdSource());
-                afficherSources();
-            });
-
-            card.getChildren().addAll(labelId, labelType, labelCapacite, labelRendement, labelEtat, labelDate, btnUpdate, btnDelete);
-            flowPaneSources.getChildren().add(card);
+                loadData();
+                showSuccessFeedback();
+            } catch (Exception e) {
+                showAlert("Erreur", "Échec de la suppression : " + e.getMessage());
+            }
         }
     }
 
-    // Méthode pour pré-remplir les champs du formulaire
-    private void prefillForm(Source source) {
-        comboType.setValue(source.getType());
-        txtCapacite.setText(String.valueOf(source.getCapacite()));
-        txtRendement.setText(String.valueOf(source.getRendement()));
-        comboEtat.setValue(source.getEtat());
+    private void fillForm(Source source) {
+        selectedSource = source;
+        cbType.setValue(source.getType());
+        tfCapacite.setText(String.valueOf(source.getCapacite()));
+        tfRendement.setText(String.valueOf(source.getRendement()));
+        cbEtat.setValue(source.getEtat());
 
-        // Changer le texte du bouton "Ajouter" en "Modifier"
-        btnAdd.setText("Modifier");
-
-        // Stocker l'ID de la source à modifier dans le bouton
-        btnAdd.setUserData(source.getIdSource());
-
-        // Changer l'action du bouton pour appeler handleModify au lieu de handleAdd
-        btnAdd.setOnAction(event -> handleModify());
     }
 
-    // Méthode pour ajouter une source
+
+
+    private void clearForm() {
+        cbType.getSelectionModel().clearSelection();
+        tfCapacite.clear();
+        tfRendement.clear();
+        cbEtat.getSelectionModel().clearSelection();
+        //dpDateInstallation.setValue(null);
+        //dpDateInstallation.setDisable(false); // Re-enable the DatePicker for new entry
+        selectedSource = null;
+    }
+
+
+
     @FXML
+
     private void handleAdd() {
         try {
-            EnumType type = comboType.getValue();
-            float capacite = Float.parseFloat(txtCapacite.getText());
-            float rendement = Float.parseFloat(txtRendement.getText());
-            EnumEtat etat = comboEtat.getValue();
-            LocalDate dateInstallation = LocalDate.now();
-
-            if (type == null || etat == null) {
-                showAlert("Veuillez sélectionner un type et un état.");
-                return;
-            }
-
-            Source source = new Source(type, capacite, rendement, etat, dateInstallation);
+            validateInputs();
+            Source source = new Source();
+            source.setType(cbType.getValue());
+            source.setCapacite(Float.parseFloat(tfCapacite.getText()));
+            source.setRendement(Float.parseFloat(tfRendement.getText()));
+            source.setEtat(cbEtat.getValue());
+            source.setDateInstallation(LocalDate.now()); // Automatically set to current date
             serviceSource.add(source);
-
-            showAlert("✅ Source ajoutée avec succès !");
-            afficherSources(); // Rafraîchir l'affichage des sources
-        } catch (NumberFormatException e) {
-            showAlert("❌ Veuillez entrer des valeurs valides pour la capacité et le rendement.");
+            loadData();
+            clearForm();
+            showSuccessFeedback();
+        } catch (Exception e) {
+            showAlert("Erreur d'ajout", e.getMessage());
         }
     }
 
-    // Méthode pour modifier une source
-    private void handleModify() {
-        try {
-            // Récupérer l'ID de la source à modifier
-            int sourceId = (int) btnAdd.getUserData();
 
-            // Récupérer les nouvelles valeurs du formulaire
-            EnumType type = comboType.getValue();
-            float capacite = Float.parseFloat(txtCapacite.getText());
-            float rendement = Float.parseFloat(txtRendement.getText());
-            EnumEtat etat = comboEtat.getValue();
 
-            if (type == null || etat == null) {
-                showAlert("Veuillez sélectionner un type et un état.");
-                return;
-            }
 
-            // Créer un objet Source avec les nouvelles valeurs
-            Source updatedSource = new Source(sourceId, type, capacite, rendement, etat, LocalDate.now());
 
-            // Mettre à jour la source dans la base de données
-            serviceSource.update(updatedSource);
-
-            showAlert("✅ Source modifiée avec succès !");
-            afficherSources(); // Rafraîchir l'affichage des sources
-
-            // Réinitialiser le bouton "Modifier" à "Ajouter"
-            btnAdd.setText("Ajouter");
-            btnAdd.setOnAction(event -> handleAdd());
-        } catch (NumberFormatException e) {
-            showAlert("❌ Veuillez entrer des valeurs valides pour la capacité et le rendement.");
-        }
-    }
-
-    // Méthode pour annuler l'ajout et revenir à l'interface principale
     @FXML
-    private void handleCancel() {
-        switchScene("/SourceInterface.fxml", btnCancel);
-    }
-
-    // Méthode pour revenir au menu principal
-    @FXML
-    private void handleBack() {
-        switchScene("/Menu.fxml", btnBack);
-    }
-
-    // Méthode pour changer de scène
-    private void switchScene(String fxmlPath, Button button) {
+    private void handleUpdate() {
+        if (selectedSource == null) {
+            showAlert("Erreur", "Veuillez sélectionner une source à modifier");
+            return;
+        }
         try {
-            // Récupère la fenêtre actuelle
-            Stage stage = (Stage) button.getScene().getWindow();
+            validateInputs();
+            selectedSource.setType(cbType.getValue());
+            selectedSource.setCapacite(Float.parseFloat(tfCapacite.getText()));
+            selectedSource.setRendement(Float.parseFloat(tfRendement.getText()));
+            selectedSource.setEtat(cbEtat.getValue());
 
-            // Sauvegarde la taille actuelle
-            double currentWidth = stage.getWidth();
-            double currentHeight = stage.getHeight();
+            // Ne pas modifier la date d'installation
+            // selectedSource.setDateInstallation reste inchangé
 
-            // Charge la nouvelle scène
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = loader.load();
-
-            // Crée une nouvelle scène avec la taille actuelle
-            Scene scene = new Scene(root, currentWidth, currentHeight);
-
-            // Applique la scène et fixe la taille
-            stage.setScene(scene);
-            stage.setResizable(false);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            showAlert("❌ Impossible de charger la vue demandée.");
+            serviceSource.update(selectedSource);
+            loadData();
+            clearForm();
+            showSuccessFeedback();
+        } catch (Exception e) {
+            showAlert("Erreur de modification", e.getMessage());
         }
     }
 
 
-    // Méthode pour afficher une alerte
-    private void showAlert(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Information");
+
+
+    //@FXML
+    /*private void handleShowSources() {
+        try {
+            clearForm();
+            sources.setAll(serviceSource.getAll());
+            cardContainer.getChildren().clear();
+            sources.forEach(s -> cardContainer.getChildren().add(createSourceCard(s)));
+            showSuccessFeedback();
+        } catch (Exception e) {
+            showAlert("Erreur", "Impossible de charger les sources : " + e.getMessage());
+        }
+    }*/
+
+    @FXML
+    private void handleClear() {
+        clearForm();
+    }
+
+    private void validateInputs() throws Exception {
+        if (cbType.getValue() == null || tfCapacite.getText().isEmpty() || tfRendement.getText().isEmpty() || cbEtat.getValue() == null) {
+            throw new Exception("Veuillez remplir tous les champs.");
+        }
+    }
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.initStyle(StageStyle.TRANSPARENT);
+        alert.getDialogPane().getScene().getRoot().setStyle("-fx-background-color: rgba(255,255,255,0.95);-fx-background-radius: 16;-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 16, 0, 4, 4);");
+        alert.getDialogPane().setOpacity(0);
+        Timeline fadeIn = new Timeline(new KeyFrame(Duration.millis(200), new KeyValue(alert.getDialogPane().opacityProperty(), 1)));
+        fadeIn.play();
+        alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
     }
+
+    private boolean showConfirmation(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.initStyle(StageStyle.TRANSPARENT);
+        alert.getDialogPane().getScene().getRoot().setStyle("-fx-background-color: rgba(255,255,255,0.95);-fx-background-radius: 16;-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 16, 0, 4, 4);");
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        return alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK;
+    }
+
+    private void showSuccessFeedback() {
+        Pane root = (Pane) cardContainer.getParent();
+        Label feedback = new Label("✓ Opération réussie !");
+        feedback.setStyle("-fx-background-color: linear-gradient(to right, #34a853, #2d8a4a); " +
+                "-fx-text-fill: white; -fx-padding: 12 24; -fx-background-radius: 24; " +
+                "-fx-font-weight: 700;");
+        feedback.setTranslateY(-50);
+        feedback.setOpacity(0);
+        root.getChildren().add(feedback);
+        Timeline animation = new Timeline(
+                new KeyFrame(Duration.millis(300), new KeyValue(feedback.translateYProperty(), 20), new KeyValue(feedback.opacityProperty(), 1)),
+                new KeyFrame(Duration.millis(2000), new KeyValue(feedback.opacityProperty(), 0))
+        );
+        animation.setOnFinished(e -> root.getChildren().remove(feedback));
+        animation.play();
+    }
+
+    private VBox createSourceCard(Source source) {
+        VBox card = new VBox(15);
+        card.getStyleClass().add("card");
+
+        // En-tête avec icône
+        HBox header = new HBox(10);
+        FontIcon icon = new FontIcon(FontAwesomeSolid.BOLT);
+        icon.setIconSize(24);
+        icon.setIconColor(Color.web("#1a73e8"));
+
+        Label title = new Label("Source #" + source.getIdSource());
+        title.setStyle("-fx-font-size: 18; -fx-text-fill: #202124;");
+
+        header.getChildren().addAll(icon, title);
+
+        // Contenu
+        VBox content = new VBox(8);
+        content.getChildren().addAll(
+                createInfoRow(FontAwesomeSolid.TAG, "Type : " + source.getType().toString()),
+                createInfoRow(FontAwesomeSolid.BOLT, "Capacité : " + source.getCapacite() + " W"),
+                createInfoRow(FontAwesomeSolid.BOLT, "Rendement : " + source.getCapacite() + " %"),
+
+                createInfoRow(FontAwesomeSolid.POWER_OFF, "État : " + source.getEtat().toString()),
+                createInfoRow(FontAwesomeSolid.CALENDAR, "Installation : " + source.getDateInstallation())
+        );
+
+        // Boutons d'action
+        HBox buttons = new HBox(10);
+
+        // Bouton Modifier
+        Button btnModifier = createIconButton("Modifier", FontAwesomeSolid.PENCIL_ALT, "-secondary");
+        btnModifier.setOnAction(e -> fillForm(source));
+
+        // Bouton Supprimer
+        Button btnSupprimer = createIconButton("Supprimer", FontAwesomeSolid.TRASH, "#ea4335");
+        btnSupprimer.setOnAction(e -> handleDeleteSource(source));
+
+        buttons.getChildren().addAll(btnModifier, btnSupprimer);
+
+        card.getChildren().addAll(header, new Separator(), content, buttons);
+        card.setStyle("-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16;");
+        card.setEffect(new DropShadow(10, Color.gray(0.3)));
+
+        return card;
+    }
+
+    private HBox createInfoRow(FontAwesomeSolid iconType, String text) {
+        FontIcon icon = new FontIcon(iconType);
+        icon.setIconSize(16);
+        icon.setIconColor(Color.web("#5f6368"));
+
+        Label label = new Label(text);
+        label.setStyle("-fx-text-fill: #5f6368;");
+
+        return new HBox(10, icon, label);
+    }
+
+    private Button createIconButton(String text, FontAwesomeSolid iconType, String color) {
+        FontIcon icon = new FontIcon(iconType);
+        icon.setIconSize(16);
+        icon.setIconColor(Color.WHITE);
+
+        Button button = new Button(text, icon);
+        button.setStyle("-fx-background-color: " + color + "; -fx-text-fill: white;");
+        button.setContentDisplay(ContentDisplay.LEFT);
+        button.setGraphicTextGap(8);
+        return button;
+    }
+
+
+    @FXML
+    private void handleShowSources() {
+        switchScene("/ProfileInterface.fxml",btnprofile);
+
+    }
+
+    @FXML
+    private void handleBack(ActionEvent event) {
+        switchScene("/Menu.fxml",btnBack);
+    }
+
+
+
+
+
+
+
+
+    private void switchScene(String fxmlPath, Button button) {
+        try {
+            // Charger le fichier FXML
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+
+            // Obtenir le stage actuel (fenêtre)
+            Stage stage = (Stage) button.getScene().getWindow();
+
+            // Garder la taille actuelle de la fenêtre
+            double width = stage.getWidth();
+            double height = stage.getHeight();
+
+            // Appliquer la nouvelle scène et conserver la taille de la fenêtre
+            stage.setScene(new Scene(root, width, height));
+
+            // Permettre le redimensionnement de la fenêtre
+            stage.setResizable(true);
+
+            // Afficher la nouvelle scène
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 }

@@ -1,81 +1,86 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.FlowPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.GridPane?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="tn.esprit.controller.SourceController"
-      spacing="10" alignment="CENTER"
-      style="-fx-background-color: linear-gradient(to bottom, #e3f2fd, #bbdefb);
-             -fx-padding: 20; -fx-alignment: center;">
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx/fxml/1"
+            fx:controller="tn.esprit.controller.SourceController"
+            stylesheets="@styles/style.css">
 
-    <!-- Titre principal -->
-    <Label text="Gestion des Sources"
-           style="-fx-font-size: 24px; -fx-font-weight: bold;
-                  -fx-text-fill: #004d99; -fx-padding: 10;"/>
+    <!-- Barre de navigation latérale -->
+    <left>
+        <VBox prefWidth="240" styleClass="nav-bar">
+            <Label text="Gestion Urbaine" styleClass="nav-title"/>
+            <Button  fx:id="btnprofile" text="Profile" styleClass="nav-button" onAction="#handleShowSources">
+                <graphic>
+                    <FontIcon iconLiteral="far-lightbulb" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
 
-    <!-- Section d'ajout/modification de source (en haut) -->
-    <VBox spacing="10" alignment="CENTER"
-          style="-fx-background-color: white; -fx-padding: 20px;
-                 -fx-border-color: #2980b9; -fx-border-radius: 15;
-                 -fx-background-radius: 15;
-                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0.5, 0, 8);">
+            <Button fx:id="btnBack" text="Retour" styleClass="nav-button" onAction="#handleBack">
+                <graphic>
+                    <FontIcon iconLiteral="fas-arrow-left" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
 
-        <Label text="Ajouter/Modifier une Source"
-               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
 
-        <!-- Formulaire d'ajout/modification (disposition deux par deux) -->
-        <GridPane hgap="10" vgap="10" alignment="CENTER" style="-fx-padding: 10;">
-            <!-- Type de source -->
-            <Label text="Type :" style="-fx-font-size: 14px; -fx-text-fill: #34495e; -fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-            <ComboBox fx:id="comboType" prefWidth="200" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+        </VBox>
+    </left>
 
-            <!-- Capacité -->
-            <Label text="Capacité (kWh) :" style="-fx-font-size: 14px; -fx-text-fill: #34495e; -fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-            <TextField fx:id="txtCapacite" prefWidth="200" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+    <!-- Contenu principal -->
+    <center>
+        <HBox spacing="30" style="-fx-padding: 25;">
+            <!-- Formulaire modernisé -->
+            <VBox spacing="20" styleClass="card" prefWidth="380">
+                <Label text="Gestion des Sources" style="-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #202124;"/>
 
-            <!-- Rendement -->
-            <Label text="Rendement (%) :" style="-fx-font-size: 14px; -fx-text-fill: #34495e; -fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
-            <TextField fx:id="txtRendement" prefWidth="200" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+                <VBox spacing="20">
+                    <!-- Type de source -->
+                    <ComboBox fx:id="cbType" promptText="Type" styleClass="modern-input"/>
 
-            <!-- État -->
-            <Label text="État :" style="-fx-font-size: 14px; -fx-text-fill: #34495e; -fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
-            <ComboBox fx:id="comboEtat" prefWidth="200" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
-        </GridPane>
+                    <!-- Capacité -->
+                    <TextField fx:id="tfCapacite" promptText="Capacité (kWh)" styleClass="modern-input"/>
 
-        <!-- Boutons Ajouter/Modifier, Annuler et Retour -->
-        <HBox spacing="15" alignment="CENTER" style="-fx-padding: 10;">
-            <Button fx:id="btnAdd" text="Ajouter" onAction="#handleAdd"
-                    style="-fx-background-color: #27ae60; -fx-text-fill: white;
-                           -fx-font-weight: bold; -fx-padding: 8px 15px; -fx-background-radius: 8; -fx-font-size: 14px;"/>
-            <Button fx:id="btnCancel" text="Annuler" onAction="#handleCancel"
-                    style="-fx-background-color: #e74c3c; -fx-text-fill: white;
-                           -fx-font-weight: bold; -fx-padding: 8px 15px; -fx-background-radius: 8; -fx-font-size: 14px;"/>
-            <Button fx:id="btnBack" text="Retour" onAction="#handleBack"
-                    style="-fx-background-color: #ff4d4d; -fx-text-fill: white;
-                                                     -fx-font-weight: bold; -fx-padding: 8px 15px; -fx-background-radius: 8; -fx-font-size: 14px;"/>
+                    <!-- Rendement -->
+                    <TextField fx:id="tfRendement" promptText="Rendement (%)" styleClass="modern-input"/>
 
+                    <!-- État -->
+                    <ComboBox fx:id="cbEtat" promptText="État" styleClass="modern-input"/>
+
+                    <!-- Date d'installation -->
+
+                    <!-- Boutons modernisés -->
+                    <HBox spacing="15" styleClass="button-container">
+                        <Button text="Ajouter" onAction="#handleAdd" styleClass="action-button,add">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-plus-circle" iconSize="16" iconColor="white"/>
+                            </graphic>
+                        </Button>
+                        <Button text="Modifier" onAction="#handleUpdate" styleClass="action-button,edit">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-edit" iconSize="16" iconColor="white"/>
+                            </graphic>
+                        </Button>
+
+                        <Button text="Réinitialiser" onAction="#handleClear" styleClass="action-button,reset">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
+                            </graphic>
+                        </Button>
+                    </HBox>
+                </VBox>
+            </VBox>
+
+            <!-- Zone des cartes de sources -->
+            <ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER"
+                        style="-fx-background: transparent; -fx-border-width: 0;"
+                        prefWidth="600">
+                <FlowPane fx:id="cardContainer" hgap="25" vgap="25" style="-fx-padding: 20;"/>
+            </ScrollPane>
         </HBox>
-    </VBox>
-
-    <!-- Section d'affichage des sources (en bas) -->
-    <VBox spacing="12" alignment="CENTER" style="-fx-padding: 8; -fx-max-height: 700px; -fx-flex-grow: 1;">
-        <Label text="Liste des Sources"
-               style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-
-        <!-- Zone de défilement pour afficher les sources -->
-        <ScrollPane fitToWidth="true" style="-fx-border-color: transparent; -fx-max-height: 650px;">
-            <FlowPane fx:id="flowPaneSources" hgap="12" vgap="12"
-                      style="-fx-padding: 10; -fx-alignment: center;"/>
-        </ScrollPane>
-    </VBox>
-
-</VBox>
+    </center>
+</BorderPane>
