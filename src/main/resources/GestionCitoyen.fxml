@@ -4,10 +4,8 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
-<?import java.lang.String?>
-<?import javafx.collections.FXCollections?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.GestionResponsableController" stylesheets="@styles/style.css">
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.GestionCitoyenController" stylesheets="@styles/style.css">
 
     <!-- Barre d'actions supérieure -->
     <top>
@@ -24,7 +22,7 @@
                     <FontIcon iconLiteral="fas-user-tie" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-            <Button text="Citoyen" styleClass="nav-button" onAction="#filterByCitoyen">
+            <Button text="Responsable" styleClass="nav-button" onAction="#filterByResponsable">
                 <graphic>
                     <FontIcon iconLiteral="fas-user" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
@@ -45,35 +43,26 @@
     <!-- Conteneur principal -->
     <center>
         <HBox spacing="30" style="-fx-padding: 20;">
-            <!-- Formulaire de gestion des responsables -->
+            <!-- Formulaire d'utilisateur -->
             <VBox spacing="20" styleClass="card" prefWidth="400">
-                <Label text="Gestion des Responsables" style="-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #202124;"/>
+                <Label text="Gestion des Citoyens" style="-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #202124;"/>
 
                 <VBox spacing="10" style="-fx-padding: 20;"> <!-- Marges internes -->
-                    <TextField fx:id="idField" promptText="ID" styleClass="modern-input"/>
+                    <TextField fx:id="idField" promptText="ID"  styleClass="modern-input"/>
                     <TextField fx:id="nameField" promptText="Nom" styleClass="modern-input"/>
                     <TextField fx:id="prenomField" promptText="Prénom" styleClass="modern-input"/>
                     <TextField fx:id="emailField" promptText="Email" styleClass="modern-input"/>
                     <PasswordField fx:id="passwordField" promptText="Mot de passe" styleClass="modern-input"/>
-
-
-
-                    <HBox spacing="10">
-                        <!-- Label pour les modules -->
-                        <Label text="Modules :" />
-
-                        <!-- TextField pour les modules -->
-                        <TextField fx:id="modulesField" promptText="Modules" styleClass="modern-input"/>
-                    </HBox>
+                    <TextField fx:id="zoneIdField" promptText="Zone ID" styleClass="modern-input"/>
 
                     <!-- Boutons d'action -->
                     <HBox spacing="10" alignment="CENTER" style="-fx-padding: 10;">
-                        <Button text="Modifier" onAction="#handleUpdateResponsable" styleClass="action-button,edit">
+                        <Button text="Modifier" onAction="#handleUpdateCitoyen" styleClass="action-button,edit">
                             <graphic>
                                 <FontIcon iconLiteral="fas-edit" iconSize="16" iconColor="#ffffff"/>
                             </graphic>
                         </Button>
-                        <Button text="Supprimer" onAction="#handleDeleteResponsable" styleClass="action-button,delete">
+                        <Button text="Supprimer" onAction="#handleDeleteCitoyen" styleClass="action-button,delete">
                             <graphic>
                                 <FontIcon iconLiteral="fas-trash-alt" iconSize="16" iconColor="#ffffff"/>
                             </graphic>
@@ -83,21 +72,25 @@
                                 <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
                             </graphic>
                         </Button>
+
                     </HBox>
                 </VBox>
             </VBox>
 
-            <!-- Liste des responsables -->
-            <ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+            <!-- Liste des citoyens -->
+            <ScrollPane fx:id="scrollPane" fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="scroll-pane"
                         style="-fx-background: transparent; -fx-padding: 10;">
-                <FlowPane fx:id="responsableFlowPane" orientation="VERTICAL" hgap="20" vgap="20" style="-fx-padding: 10;"/>
+                <FlowPane fx:id="citoyenFlowPane" orientation="VERTICAL" hgap="20" vgap="20" style="-fx-padding: 10;"/>
             </ScrollPane>
+            <!-- ScrollPane pour affichage horizontal sous toute l'interface -->
+
         </HBox>
+
     </center>
 
     <!-- Pied de page -->
     <bottom>
-        <Label text="© 2025 Gestion des responsables - Tous droits réservés" style="-fx-font-size: 12px; -fx-text-fill: #888888; -fx-padding: 10;" alignment="CENTER"/>
+        <Label text="© 2025 Gestion des citoyens - Tous droits réservés" style="-fx-font-size: 12px; -fx-text-fill: #888888; -fx-padding: 10;" alignment="CENTER"/>
     </bottom>
 
 </BorderPane>
