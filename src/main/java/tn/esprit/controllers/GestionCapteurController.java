@@ -1,6 +1,7 @@
 package tn.esprit.controllers;
 
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
@@ -40,7 +41,7 @@ public class GestionCapteurController implements Initializable {
     private TextField lampadaireIdField;
 
     @FXML
-    private VBox capteurCardContainer;
+    private FlowPane capteurCardContainer;
 
 
 
@@ -64,16 +65,24 @@ public class GestionCapteurController implements Initializable {
 
     private void loadCapteurs() {
         capteurCardContainer.getChildren().clear();
+        System.out.println("Nombre de capteurs récupérés : " + serviceCapteur.getAll().size()); // Debug
+
         for (Capteur capteur : serviceCapteur.getAll()) {
             VBox card = createCapteurCard(capteur);
             capteurCardContainer.getChildren().add(card);
+            System.out.println("Carte ajoutée : " + capteur.getType() + " - " + capteur.getEtat()); // Debug
         }
+
+        System.out.println("Total cartes affichées : " + capteurCardContainer.getChildren().size()); // Debug
     }
+
 
     private VBox createCapteurCard(Capteur capteur) {
         VBox card = new VBox();
         card.setSpacing(5);
         card.setPadding(new Insets(10));
+        card.setPrefWidth(200); // Ajoute une largeur
+        card.setPrefHeight(100); // Ajoute une hauteur
         card.setStyle("-fx-border-color: gray; -fx-background-color: white; -fx-background-radius: 5; -fx-border-radius: 5;");
 
         Label idLabel = new Label("ID: " + capteur.getId());
@@ -82,11 +91,18 @@ public class GestionCapteurController implements Initializable {
         Label dateLabel = new Label("Date d'installation: " + capteur.getDateinstallation());
         Label lampadaireIdLabel = new Label("Lampadaire ID: " + capteur.getLampadaireId());
 
+        idLabel.setStyle("-fx-text-fill: black;");  // Force la couleur du texte
+        typeLabel.setStyle("-fx-text-fill: black;");
+        etatLabel.setStyle("-fx-text-fill: black;");
+        dateLabel.setStyle("-fx-text-fill: black;");
+        lampadaireIdLabel.setStyle("-fx-text-fill: black;");
+
         card.setOnMouseClicked(event -> selectCapteur(capteur));
 
         card.getChildren().addAll(idLabel, typeLabel, etatLabel, dateLabel, lampadaireIdLabel);
         return card;
     }
+
 
     private void selectCapteur(Capteur capteur) {
         selectedCapteur = capteur;
@@ -238,19 +254,85 @@ public class GestionCapteurController implements Initializable {
         }
     }
 
+
+
     @FXML
-    private void handleShowCapteurs() {
-        System.out.println("Affichage des capteurs...");
+    private void handleGestionCapteur(ActionEvent event) {
+        switchScene(event, "/GestionCapteur.fxml");
     }
 
     @FXML
-    private void handleNavigateToLampadaires() {
-        System.out.println("Navigation vers Lampadaires...");
+    private void handleGestionCitoyen(ActionEvent event) {
+        switchScene(event, "/GestionCitoyen.fxml");
+    }
+
+    @FXML
+    private void handleGestionDonnee(ActionEvent event) {
+        switchScene(event, "/GestionDonnee.fxml");
+    }
+
+    @FXML
+    private void handleGestionIntervention(ActionEvent event) {
+        switchScene(event, "/GestionIntervention.fxml");
+    }
+
+    @FXML
+    private void handleGestionLampadaire(ActionEvent event) {
+        switchScene(event, "/GestionLampadaire.fxml");
+    }
+
+    @FXML
+    private void handleGestionReclamation(ActionEvent event) {
+        switchScene(event, "/GestionReclamation.fxml");
+    }
+
+    @FXML
+    private void handleGestionResponsable(ActionEvent event) {
+        switchScene(event, "/GestionResponsable.fxml");
+    }
+
+    @FXML
+    private void handleGestionTechnicien(ActionEvent event) {
+        switchScene(event, "/GestionTechnicien.fxml");
+    }
+
+    @FXML
+    private void handleGestionUtilisateur(ActionEvent event) {
+        switchScene(event, "/GestionUtilisateur.fxml");
+    }
+
+    @FXML
+    private void handleGestionZone(ActionEvent event) {
+        switchScene(event, "/GestionZone.fxml");
+    }
+
+    @FXML
+    private void handleProfileInterface(ActionEvent event) {
+        switchScene(event, "/ProfileInterface.fxml");
+    }
+
+    @FXML
+    private void handleSourceInterface(ActionEvent event) {
+        switchScene(event, "/SourceInterface.fxml");
     }
 
     @FXML
     private void handleBack() {
-        System.out.println("Retour à l'écran précédent...");
+        // Logique pour revenir à la page précédente
+        System.out.println("Retour à la page précédente");
+    }
+
+    private void switchScene(ActionEvent event, String fxmlPath) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+
+            // Récupère la scène actuelle et met à jour son contenu
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

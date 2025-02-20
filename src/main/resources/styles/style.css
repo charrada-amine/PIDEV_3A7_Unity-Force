@@ -211,28 +211,24 @@
     -fx-spacing: 15;
     -fx-padding: 25 0 0 0;
     -fx-alignment: center;
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> origin/MedRayenSansa/GestionInfrastructure
 }
-/* Error styling */
-.error-field {
-    -fx-border-color: #ef4444 !important;
-}
-
-.error-message {
-    -fx-text-fill: #ef4444;
-    -fx-font-size: 12px;
-    -fx-padding: 2 0 0 5;
-<<<<<<< HEAD
->>>>>>> origin/AzizBenAmmar/GestionInterventions_Reclamations
-=======
->>>>>>> origin/MedRayenSansa/GestionInfrastructure
-}
-=======
+.donnee-card {
+    -fx-border-color: #4a90e2;
+    -fx-border-radius: 8px;
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 5, 0, 0, 3);
+    -fx-transition: all 0.3s ease-in-out;
 }
 
->>>>>>> origin/aminecharrada/GestionEnergie
+.donnee-card:hover {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #2a6fdb;
+}
+
+.donnee-label {
+    -fx-text-fill: black; /* Texte en noir */
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}

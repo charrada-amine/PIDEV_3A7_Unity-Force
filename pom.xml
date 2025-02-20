@@ -5,15 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>tn.esprit</groupId>
-<<<<<<< HEAD
-<<<<<<< HEAD
     <artifactId>workshopJDBC3A15</artifactId>
-=======
-    <artifactId>workshopReady</artifactId>
->>>>>>> origin/MedRayenSansa/GestionInfrastructure
-=======
-    <artifactId>workshopJDBC3A15</artifactId>
->>>>>>> origin/aminecharrada/GestionEnergie
     <version>1.0-SNAPSHOT</version>
 
     <properties>
@@ -23,42 +15,15 @@
     </properties>
 
     <dependencies>
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
         <!-- Dépendances JavaFX -->
-=======
-        <!-- JavaFX -->
->>>>>>> origin/MedRayenSansa/GestionInfrastructure
-=======
-        <!-- Dépendances JavaFX -->
->>>>>>> origin/aminecharrada/GestionEnergie
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>21.0.2</version>
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-        <!-- JavaFX 17 (version stable) -->
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-controls</artifactId>
-            <version>17.0.2</version>
->>>>>>> origin/AzizBenAmmar/GestionInterventions_Reclamations
-=======
->>>>>>> origin/MedRayenSansa/GestionInfrastructure
-=======
->>>>>>> origin/aminecharrada/GestionEnergie
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> origin/aminecharrada/GestionEnergie
             <version>21.0.2</version>
         </dependency>
 
@@ -66,36 +31,9 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-<<<<<<< HEAD
-=======
-            <version>17.0.2</version>
-        </dependency>
-
-=======
-            <version>21.0.2</version>
-        </dependency>
-
->>>>>>> origin/MedRayenSansa/GestionInfrastructure
-        <!-- MySQL -->
-        <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-<<<<<<< HEAD
->>>>>>> origin/AzizBenAmmar/GestionInterventions_Reclamations
             <version>8.0.33</version>
         </dependency>
 
-=======
-            <version>8.0.33</version>
-        </dependency>
-
-        <!-- Ikonli (icônes modernes) -->
->>>>>>> origin/MedRayenSansa/GestionInfrastructure
-=======
-            <version>8.0.33</version>
-        </dependency>
-
->>>>>>> origin/aminecharrada/GestionEnergie
         <dependency>
             <groupId>org.kordamp.ikonli</groupId>
             <artifactId>ikonli-core</artifactId>
@@ -113,88 +51,19 @@
         </dependency>
     </dependencies>
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 
-<<<<<<< HEAD
 
     <build>
         <plugins>
             <!-- Plugin JavaFX -->
-=======
-    <build>
-        <plugins>
->>>>>>> origin/AzizBenAmmar/GestionInterventions_Reclamations
-=======
-    <repositories>
-        <!-- Repository Maven Central -->
-        <repository>
-            <id>central</id>
-            <url>https://repo.maven.apache.org/maven2</url>
-        </repository>
-        <repository>
-            <id>kordamp</id>
-            <url>https://kordamp.org/releases</url> <!-- ✅ URL mise à jour -->
-        </repository>
-        <!-- Repository Gluon -->
-        <repository>
-            <id>gluon-releases</id>
-            <url>https://nexus.gluonhq.com/nexus/content/repositories/releases/</url>
-        </repository>
-    </repositories>
-
-    <build>
-        <plugins>
->>>>>>> origin/MedRayenSansa/GestionInfrastructure
-=======
-    <build>
-        <plugins>
-            <!-- Plugin JavaFX -->
->>>>>>> origin/aminecharrada/GestionEnergie
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
-<<<<<<< HEAD
-<<<<<<< HEAD
                 <configuration>
                     <mainClass>tn.esprit.test.MainFx</mainClass>
-<<<<<<< HEAD
-=======
-                    <options>
-                        <option>--add-opens</option>
-                        <option>javafx.graphics/com.sun.javafx.application=ALL-UNNAMED</option>
-                    </options>
->>>>>>> origin/AzizBenAmmar/GestionInterventions_Reclamations
-=======
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <mainClass>tn.esprit.test.MainFX</mainClass>
->>>>>>> origin/MedRayenSansa/GestionInfrastructure
-=======
-                <configuration>
-                    <mainClass>tn.esprit.test.MainFX</mainClass>
->>>>>>> origin/aminecharrada/GestionEnergie
                 </configuration>
             </plugin>
         </plugins>
     </build>
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 </project>
-=======
-</project>
->>>>>>> origin/AzizBenAmmar/GestionInterventions_Reclamations
-=======
-</project>
->>>>>>> origin/MedRayenSansa/GestionInfrastructure
-=======
-</project>
->>>>>>> origin/aminecharrada/GestionEnergie

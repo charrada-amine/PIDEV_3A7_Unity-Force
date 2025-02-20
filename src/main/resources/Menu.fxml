@@ -5,23 +5,73 @@
 <?import javafx.scene.layout.VBox?>
 
 <VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="tn.esprit.controller.MenuController"
+      fx:controller="tn.esprit.controllers.MenuController"
       spacing="20" alignment="CENTER"
       style="-fx-padding: 30; -fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-border-width: 2; -fx-border-radius: 15; -fx-background-radius: 15;">
 
     <!-- Titre -->
-    <Label text="Menu Principal"
+    <Label text="Menu de Navigation"
            style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
 
-    <!-- Boutons -->
-    <Button text="Manipulation Profile"
-            fx:id="btnProfile"
-            onAction="#handleProfile"
+    <!-- Boutons de navigation -->
+    <Button text="Gestion Capteur"
+            fx:id="btnGestionCapteur"
+            onAction="#handleGestionCapteur"
             style="-fx-font-size: 16px; -fx-pref-width: 250px; -fx-pref-height: 50px; -fx-background-color: #0073e6; -fx-text-fill: white; -fx-background-radius: 10;"/>
 
-    <Button text="Manipulation Source"
-            fx:id="btnSource"
-            onAction="#handleSource"
+    <Button text="Gestion Citoyen"
+            fx:id="btnGestionCitoyen"
+            onAction="#handleGestionCitoyen"
             style="-fx-font-size: 16px; -fx-pref-width: 250px; -fx-pref-height: 50px; -fx-background-color: #00b33c; -fx-text-fill: white; -fx-background-radius: 10;"/>
+
+    <Button text="Gestion Donnée"
+            fx:id="btnGestionDonnee"
+            onAction="#handleGestionDonnee"
+            style="-fx-font-size: 16px; -fx-pref-width: 250px; -fx-pref-height: 50px; -fx-background-color: #ff6600; -fx-text-fill: white; -fx-background-radius: 10;"/>
+
+    <Button text="Gestion Intervention"
+            fx:id="btnGestionIntervention"
+            onAction="#handleGestionIntervention"
+            style="-fx-font-size: 16px; -fx-pref-width: 250px; -fx-pref-height: 50px; -fx-background-color: #cc0000; -fx-text-fill: white; -fx-background-radius: 10;"/>
+
+    <Button text="Gestion Lampadaire"
+            fx:id="btnGestionLampadaire"
+            onAction="#handleGestionLampadaire"
+            style="-fx-font-size: 16px; -fx-pref-width: 250px; -fx-pref-height: 50px; -fx-background-color: #6600cc; -fx-text-fill: white; -fx-background-radius: 10;"/>
+
+    <Button text="Gestion Réclamation"
+            fx:id="btnGestionReclamation"
+            onAction="#handleGestionReclamation"
+            style="-fx-font-size: 16px; -fx-pref-width: 250px; -fx-pref-height: 50px; -fx-background-color: #ff3399; -fx-text-fill: white; -fx-background-radius: 10;"/>
+
+    <Button text="Gestion Responsable"
+            fx:id="btnGestionResponsable"
+            onAction="#handleGestionResponsable"
+            style="-fx-font-size: 16px; -fx-pref-width: 250px; -fx-pref-height: 50px; -fx-background-color: #009999; -fx-text-fill: white; -fx-background-radius: 10;"/>
+
+    <Button text="Gestion Technicien"
+            fx:id="btnGestionTechnicien"
+            onAction="#handleGestionTechnicien"
+            style="-fx-font-size: 16px; -fx-pref-width: 250px; -fx-pref-height: 50px; -fx-background-color: #996633; -fx-text-fill: white; -fx-background-radius: 10;"/>
+
+    <Button text="Gestion Utilisateur"
+            fx:id="btnGestionUtilisateur"
+            onAction="#handleGestionUtilisateur"
+            style="-fx-font-size: 16px; -fx-pref-width: 250px; -fx-pref-height: 50px; -fx-background-color: #333399; -fx-text-fill: white; -fx-background-radius: 10;"/>
+
+    <Button text="Gestion Zone"
+            fx:id="btnGestionZone"
+            onAction="#handleGestionZone"
+            style="-fx-font-size: 16px; -fx-pref-width: 250px; -fx-pref-height: 50px; -fx-background-color: #9933ff; -fx-text-fill: white; -fx-background-radius: 10;"/>
+
+    <Button text="Profile Interface"
+            fx:id="btnProfileInterface"
+            onAction="#handleProfileInterface"
+            style="-fx-font-size: 16px; -fx-pref-width: 250px; -fx-pref-height: 50px; -fx-background-color: #ffcc00; -fx-text-fill: white; -fx-background-radius: 10;"/>
+
+    <Button text="Source Interface"
+            fx:id="btnSourceInterface"
+            onAction="#handleSourceInterface"
+            style="-fx-font-size: 16px; -fx-pref-width: 250px; -fx-pref-height: 50px; -fx-background-color: #00cc99; -fx-text-fill: white; -fx-background-radius: 10;"/>
 
 </VBox>

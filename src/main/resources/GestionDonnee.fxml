@@ -1,69 +1,156 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.DatePicker?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<ScrollPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx/fxml/1"
             fx:controller="tn.esprit.controllers.GestionDonneesController"
-            fitToWidth="true"
-            stylesheets="@styles.css">
-    <content>
-        <VBox spacing="10" alignment="CENTER" styleClass="vbox">
-            <padding>
-                <Insets top="10" right="10" bottom="10" left="10"/>
-            </padding>
+            stylesheets="@styles/style.css">
 
-            <!-- Titre -->
-            <Label text="Gestion des Données" styleClass="title-label">
-                <font>
-                    <Font size="20"/>
-                </font>
-            </Label>
+    <!-- Barre de navigation latérale -->
+    <left>
+        <VBox prefWidth="240" styleClass="nav-bar">
+            <Label text="Gestion Urbaine" styleClass="nav-title"/>
 
-            <!-- Sélection du type de capteur -->
-            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="hbox">
-                <Label text="Type de capteur:" styleClass="label"/>
-                <ComboBox fx:id="typeCapteurComboBox" promptText="Sélectionnez un type" onAction="#updateValeurIndication" styleClass="combo-box"/>
-            </HBox>
+            <!-- Boutons de navigation -->
+            <Button text="Capteurs" styleClass="nav-button" onAction="#handleGestionCapteur">
+                <graphic>
+                    <FontIcon iconLiteral="fas-microchip" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
 
-            <!-- Formulaire pour ajouter/modifier des données -->
-            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="hbox">
-                <Label text="Date de collecte:" styleClass="label"/>
-                <DatePicker fx:id="dateCollectePicker" styleClass="text-field"/>
+            <Button text="Citoyens" styleClass="nav-button" onAction="#handleGestionCitoyen">
+                <graphic>
+                    <FontIcon iconLiteral="fas-users" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
 
-                <Label text="Heure de collecte:" styleClass="label"/>
-                <TextField fx:id="heureCollecteField" promptText="HH:MM:SS" styleClass="text-field"/>
+            <Button text="Données" styleClass="nav-button" onAction="#handleGestionDonnee">
+                <graphic>
+                    <FontIcon iconLiteral="fas-database" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
 
-                <Label text="ID du capteur:" styleClass="label"/>
-                <ComboBox fx:id="capteurIdComboBox" promptText="Sélectionnez un ID" styleClass="combo-box"/>
-            </HBox>
+            <Button text="Interventions" styleClass="nav-button" onAction="#handleGestionIntervention">
+                <graphic>
+                    <FontIcon iconLiteral="fas-tools" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
 
-            <!-- Valeur avec indication dynamique -->
-            <VBox spacing="5" alignment="CENTER_LEFT" styleClass="vbox">
-                <Label text="Valeur:" styleClass="label"/>
-                <TextField fx:id="valeurField" promptText="Valeur" styleClass="text-field"/>
-                <Label fx:id="valeurIndicationLabel" text="Sélectionnez un type de capteur" style="-fx-font-size: 12px; -fx-text-fill: grey;"/>
+            <Button text="Lampadaires" styleClass="nav-button" onAction="#handleGestionLampadaire">
+                <graphic>
+                    <FontIcon iconLiteral="fas-lightbulb" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Réclamations" styleClass="nav-button" onAction="#handleGestionReclamation">
+                <graphic>
+                    <FontIcon iconLiteral="fas-exclamation-circle" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Responsables" styleClass="nav-button" onAction="#handleGestionResponsable">
+                <graphic>
+                    <FontIcon iconLiteral="fas-user-tie" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Techniciens" styleClass="nav-button" onAction="#handleGestionTechnicien">
+                <graphic>
+                    <FontIcon iconLiteral="fas-user-cog" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Utilisateurs" styleClass="nav-button" onAction="#handleGestionUtilisateur">
+                <graphic>
+                    <FontIcon iconLiteral="fas-user" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Zones" styleClass="nav-button" onAction="#handleGestionZone">
+                <graphic>
+                    <FontIcon iconLiteral="fas-map-marked-alt" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Profil" styleClass="nav-button" onAction="#handleProfileInterface">
+                <graphic>
+                    <FontIcon iconLiteral="fas-user-circle" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Sources" styleClass="nav-button" onAction="#handleSourceInterface">
+                <graphic>
+                    <FontIcon iconLiteral="fas-code-branch" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Retour" styleClass="nav-button" onAction="#handleBack">
+                <graphic>
+                    <FontIcon iconLiteral="fas-arrow-left" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+        </VBox>
+    </left>
+
+    <!-- Contenu principal -->
+    <center>
+        <HBox spacing="30" style="-fx-padding: 25;">
+            <!-- Formulaire de gestion des données -->
+            <VBox spacing="20" styleClass="card" prefWidth="380">
+                <Label text="Gestion des Données" style="-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #202124;"/>
+
+                <VBox spacing="10">
+                    <ComboBox fx:id="typeCapteurComboBox" promptText="Type de capteur" styleClass="modern-input" onAction="#updateValeurIndication"/>
+                    <Label fx:id="lblTypeError" styleClass="error-message" visible="false"/>
+
+                    <DatePicker fx:id="dateCollectePicker" promptText="Date de collecte" styleClass="modern-input"/>
+                    <Label fx:id="lblDateError" styleClass="error-message" visible="false"/>
+
+                    <TextField fx:id="heureCollecteField" promptText="Heure de collecte (HH:MM:SS)" styleClass="modern-input"/>
+                    <Label fx:id="lblHeureError" styleClass="error-message" visible="false"/>
+
+                    <ComboBox fx:id="capteurIdComboBox" promptText="ID du capteur" styleClass="modern-input"/>
+                    <Label fx:id="lblCapteurError" styleClass="error-message" visible="false"/>
+
+                    <TextField fx:id="valeurField" promptText="Valeur" styleClass="modern-input"/>
+                    <Label fx:id="valeurIndicationLabel" text="Sélectionnez un type de capteur" style="-fx-font-size: 12px; -fx-text-fill: grey;"/>
+                </VBox>
+
+                <!-- Boutons CRUD -->
+                <HBox spacing="15" styleClass="button-container">
+                    <Button text="Ajouter" onAction="#handleAddDonnee" styleClass="action-button,add">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-plus-circle" iconSize="16" iconColor="white"/>
+                        </graphic>
+                    </Button>
+                    <Button text="Modifier" onAction="#handleUpdateDonnee" styleClass="action-button,edit">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-edit" iconSize="16" iconColor="white"/>
+                        </graphic>
+                    </Button>
+                    <Button text="Supprimer" onAction="#handleDeleteDonnee" styleClass="action-button,delete">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-trash-alt" iconSize="16" iconColor="white"/>
+                        </graphic>
+                    </Button>
+                    <Button text="Réinitialiser" onAction="#handleRefresh" styleClass="action-button,reset">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
+                        </graphic>
+                    </Button>
+                </HBox>
             </VBox>
 
-            <!-- Boutons pour les opérations CRUD -->
-            <HBox spacing="10" alignment="CENTER" styleClass="hbox">
-                <Button text="Ajouter" onAction="#handleAddDonnee" styleClass="button"/>
-                <Button text="Modifier" onAction="#handleUpdateDonnee" styleClass="button"/>
-                <Button text="Supprimer" onAction="#handleDeleteDonnee" styleClass="button"/>
-                <Button text="Rafraîchir" onAction="#handleRefresh" styleClass="button"/>
-                <Button text="Aller à GestionCapteur" onAction="#handleGoToGestionCapteur" styleClass="button"/>
-            </HBox>
-
-            <!-- VBox pour afficher les données sous forme de cartes -->
-            <VBox fx:id="donneeCardContainer" spacing="10" alignment="TOP_CENTER" styleClass="vbox"/>
-        </VBox>
-    </content>
-</ScrollPane>
+            <!-- Zone des cartes des données -->
+            <ScrollPane fx:id="donneeScrollPane" fitToWidth="true" hbarPolicy="NEVER"
+                        style="-fx-background: transparent; -fx-border-width: 0;"
+                        prefWidth="600">
+                <FlowPane fx:id="donneeCardContainer" hgap="25" vgap="25" style="-fx-padding: 20;"/>
+            </ScrollPane>
+        </HBox>
+    </center>
+</BorderPane>

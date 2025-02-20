@@ -1,52 +1,20 @@
-/* Style général pour les boutons */
-.button {
-    -fx-background-color: linear-gradient(to bottom, #2196F3, #4CAF50); /* Bleu à vert */
-    -fx-text-fill: white;
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-    -fx-padding: 10px 20px;
-    -fx-border-radius: 5px;
-    -fx-background-radius: 5px;
-    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 5, 0, 0, 2);
-}
-
-.button:hover {
-    -fx-background-color: linear-gradient(to bottom, #1976D2, #388E3C); /* Teinte plus foncée */
-}
-
-/* Style pour les conteneurs avec bordures */
-.hbox, .vbox, .scroll-pane {
-    -fx-background-color: linear-gradient(to bottom, #E3F2FD, #E8F5E9); /* Bleu clair à vert clair */
-    -fx-padding: 10px;
-    -fx-spacing: 10px;
-    -fx-border-color: #1E88E5; /* Bleu intense */
-    -fx-border-width: 3px;
-    -fx-border-style: solid;
-    -fx-border-radius: 10px;
-    -fx-background-radius: 10px;
-    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 8, 0, 0, 3);
-}
-
-/* Style pour les labels */
-.label {
-    -fx-text-fill: #1976D2; /* Bleu foncé */
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-}
-
-/* Style pour le titre */
-.title-label {
-    -fx-text-fill: #1B5E20; /* Vert foncé */
-    -fx-font-size: 22px;
-    -fx-font-weight: bold;
-    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 5, 0, 0, 2);
-}
-
-/* Style pour les champs de texte et les ComboBox */
-.text-field, .combo-box {
+.donnee-card {
+    -fx-border-color: #4a90e2;
+    -fx-border-radius: 8px;
     -fx-background-color: white;
-    -fx-border-color: #64B5F6; /* Bleu */
-    -fx-border-width: 1px;
-    -fx-border-radius: 3px;
-    -fx-padding: 5px;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 5, 0, 0, 3);
+    -fx-transition: all 0.3s ease-in-out;
+}
+
+.donnee-card:hover {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #2a6fdb;
+}
+
+.donnee-label {
+    -fx-text-fill: black; /* Texte en noir */
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
 }

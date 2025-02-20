@@ -83,28 +83,44 @@ public class ServiceTechnicien {
 */
 
     public void deleteById(int id) {
-        // Suppression dans la table `technicien` en utilisant l'ID
+        String getIdUtilisateurQry = "SELECT id_technicien FROM technicien WHERE id_technicien = ?";
+
+        // Requête pour supprimer le technicien
         String qryTechnicien = "DELETE FROM technicien WHERE id_technicien = ?";
 
+        // Requête pour supprimer l'utilisateur
+        String qryUtilisateur = "DELETE FROM utilisateur WHERE id_utilisateur = ?";
+
         try {
-            // Suppression dans la table technicien
-            PreparedStatement pstmTechnicien = cnx.prepareStatement(qryTechnicien);
-            pstmTechnicien.setInt(1, id);
-            int affectedRowsTechnicien = pstmTechnicien.executeUpdate();
+            // Étape 1 : Vérifiez que l'ID du technicien existe
+            PreparedStatement getIdUtilisateurStmt = cnx.prepareStatement(getIdUtilisateurQry);
+            getIdUtilisateurStmt.setInt(1, id);
+            ResultSet rs = getIdUtilisateurStmt.executeQuery();
 
-            if (affectedRowsTechnicien > 0) {
-                System.out.println("✅ Technicien avec l'ID " + id + " supprimé de la table 'technicien'.");
+            if (rs.next()) {
+                int idUtilisateur = rs.getInt("id_technicien"); // ID utilisateur est le même que l'ID technicien
+                System.out.println("🔍 ID utilisateur associé au technicien : " + idUtilisateur);
 
-                // Si le technicien est supprimé, supprimer aussi l'utilisateur de la table `utilisateur`
-                String qryUtilisateur = "DELETE FROM utilisateur WHERE id_utilisateur = ?";
-                PreparedStatement pstmUtilisateur = cnx.prepareStatement(qryUtilisateur);
-                pstmUtilisateur.setInt(1, id);
-                int affectedRowsUtilisateur = pstmUtilisateur.executeUpdate();
+                // Étape 2 : Supprimer le technicien
+                PreparedStatement pstmTechnicien = cnx.prepareStatement(qryTechnicien);
+                pstmTechnicien.setInt(1, id);
+                int affectedRowsTechnicien = pstmTechnicien.executeUpdate();
 
-                if (affectedRowsUtilisateur > 0) {
-                    System.out.println("✅ Utilisateur avec l'ID " + id + " supprimé de la table 'utilisateur' !");
+                if (affectedRowsTechnicien > 0) {
+                    System.out.println("✅ Technicien avec l'ID " + id + " supprimé de la table 'technicien'.");
+
+                    // Étape 3 : Supprimer l'utilisateur associé au technicien
+                    PreparedStatement pstmUtilisateur = cnx.prepareStatement(qryUtilisateur);
+                    pstmUtilisateur.setInt(1, idUtilisateur);
+                    int affectedRowsUtilisateur = pstmUtilisateur.executeUpdate();
+
+                    if (affectedRowsUtilisateur > 0) {
+                        System.out.println("✅ Utilisateur avec l'ID " + idUtilisateur + " supprimé de la table 'utilisateur'.");
+                    } else {
+                        System.out.println("⚠️ Aucun utilisateur trouvé avec l'ID " + idUtilisateur + " dans la table 'utilisateur'.");
+                    }
                 } else {
-                    System.out.println("⚠️ Aucun utilisateur trouvé avec l'ID " + id + " dans la table 'utilisateur'.");
+                    System.out.println("⚠️ Aucun technicien trouvé avec l'ID " + id + " dans la table 'technicien'.");
                 }
             } else {
                 System.out.println("⚠️ Aucun technicien trouvé avec l'ID " + id + " dans la table 'technicien'.");
@@ -113,6 +129,7 @@ public class ServiceTechnicien {
             System.out.println("❌ Erreur SQL lors de la suppression : " + e.getMessage());
         }
     }
+
 
     public List<technicien> getAllTechniciens() {
         List<technicien> techniciens = new ArrayList<>();
@@ -186,28 +203,66 @@ public class ServiceTechnicien {
 
 
 
-    public void updateSpecialite(int id, Specialite newSpecialite) {
-        String qryTechnicien = "UPDATE technicien SET specialite = ? WHERE id_technicien = ?"; // Requête pour technicien
+    public boolean isEmailExists(String email) {
+        String url = "jdbc:mysql://localhost:3306/pi3a7";
+        String username = "root"; // Remplacez par votre nom d'utilisateur
+        String password = ""; // Remplacez par votre mot de passe
+
+        String query = "SELECT COUNT(*) FROM utilisateur WHERE email = ?";
+
+        try (Connection connection = DriverManager.getConnection(url, username, password);
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setString(1, email);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur lors de la vérification de l'email : " + e.getMessage());
+        }
+        return false;
+    }
+
+
+    public technicien getTechnicienById(int idTechnicien) {
+        technicien technicien = null;
+
+        // Requête SQL pour récupérer un technicien
+        String qry = "SELECT t.id_technicien, u.nom, u.prenom, u.email, u.motdepasse,u.dateInscription, t.specialite " +
+                "FROM utilisateur u " +
+                "JOIN technicien t ON u.id_utilisateur = t.id_technicien " +
+                "WHERE t.id_technicien = ?";
 
         try {
-            // Préparer la mise à jour pour le technicien
-            PreparedStatement pstmTechnicien = cnx.prepareStatement(qryTechnicien);
-            pstmTechnicien.setString(1, newSpecialite.toString()); // Convertir l'énumération en chaîne de caractères
-            pstmTechnicien.setInt(2, id);
+            PreparedStatement pstm = cnx.prepareStatement(qry);
+            pstm.setInt(1, idTechnicien);
+            ResultSet rs = pstm.executeQuery();
 
-            // Exécuter la mise à jour du technicien
-            int affectedRowsTechnicien = pstmTechnicien.executeUpdate();
+            if (rs.next()) {
+                // Construction de l'objet technicien avec les données récupérées
+                technicien = new technicien(
+                        rs.getString("nom"),
+                        rs.getString("prenom"),
+                        rs.getString("email"),
+                        rs.getString("motdepasse"),
+                        rs.getDate("dateInscription"),
 
-            if (affectedRowsTechnicien > 0) {
-                System.out.println("✅ Spécialité mise à jour pour le technicien avec l'ID " + id);
+                        Specialite.valueOf(rs.getString("specialite")) // Convertir le texte en enum
+                );
             } else {
-                System.out.println("❌ Aucun technicien trouvé avec l'ID " + id);
+                System.out.println("⚠️ Technicien avec l'ID " + idTechnicien + " introuvable.");
             }
-
         } catch (SQLException e) {
-            System.out.println("❌ Erreur SQL lors de la mise à jour de la spécialité : " + e.getMessage());
+            System.out.println("❌ Erreur SQL lors de la récupération du technicien : " + e.getMessage());
         }
+
+        return technicien;
     }
+
+
 
 
 

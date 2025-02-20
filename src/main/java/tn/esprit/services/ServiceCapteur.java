@@ -1,13 +1,10 @@
 package tn.esprit.services;
 
-<<<<<<< HEAD
-import tn.esprit.utils.MyDatabase2;
-=======
 import tn.esprit.utils.MyDatabase;
->>>>>>> a3c932b0e96e26782012e7d55e0b3688bdf4452d
 import tn.esprit.models.Capteur;
 import tn.esprit.models.Capteur.TypeCapteur; // Importer l'énumération avec le préfixe Capteur
 import tn.esprit.models.Capteur.EtatCapteur; // Importer l'énumération avec le préfixe Capteur
+import tn.esprit.utils.MyDatabase2;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -20,11 +17,7 @@ public class ServiceCapteur {
     private Connection connection;
 
     public ServiceCapteur() {
-<<<<<<< HEAD
         this.connection = new MyDatabase2().getCnx();
-=======
-        this.connection = new MyDatabase().getCnx();
->>>>>>> a3c932b0e96e26782012e7d55e0b3688bdf4452d
     }
 
     // 🔹 Ajouter un capteur

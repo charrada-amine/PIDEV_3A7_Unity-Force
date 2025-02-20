@@ -1,16 +1,5 @@
 package tn.esprit.models;
 
-<<<<<<< HEAD
-import java.time.LocalDate;
-
-public class Lampadaire {
-    private int id_lamp;
-    private String typeLampadaire;
-    private float puissance;
-    private EtatLampadaire etat;
-    private LocalDate dateInstallation;
-    private int id_zone;
-=======
 import javafx.beans.property.*;
 import java.time.LocalDate;
 
@@ -21,20 +10,11 @@ public class Lampadaire {
     private final ObjectProperty<EtatLampadaire> etat = new SimpleObjectProperty<>();
     private final ObjectProperty<LocalDate> dateInstallation = new SimpleObjectProperty<>();
     private final IntegerProperty idZone = new SimpleIntegerProperty();
->>>>>>> origin/MedRayenSansa/GestionInfrastructure
 
     public Lampadaire() {}
 
     public Lampadaire(int id_lamp, String typeLampadaire, float puissance,
                       EtatLampadaire etat, LocalDate dateInstallation, int id_zone) {
-<<<<<<< HEAD
-        this.id_lamp = id_lamp;
-        this.typeLampadaire = typeLampadaire;
-        this.puissance = puissance;
-        this.etat = etat;
-        this.dateInstallation = dateInstallation;
-        this.id_zone = id_zone;
-=======
         this.idLamp.set(id_lamp);
         this.typeLampadaire.set(typeLampadaire);
         this.puissance.set(puissance);
@@ -44,7 +24,9 @@ public class Lampadaire {
     }
 
     public Lampadaire(String text, float v, EtatLampadaire value, LocalDate value1, int i) {
->>>>>>> origin/MedRayenSansa/GestionInfrastructure
+    }
+
+    public void setEtat(tn.esprit.models.EtatLampadaire value) {
     }
 
     // Enum avec gestion des anciennes valeurs
@@ -78,21 +60,6 @@ public class Lampadaire {
         }
     }
 
-<<<<<<< HEAD
-    // Getters/Setters
-    public int getIdLamp() { return id_lamp; }
-    public void setIdLamp(int id_lamp) { this.id_lamp = id_lamp; }
-    public String getTypeLampadaire() { return typeLampadaire; }
-    public void setTypeLampadaire(String typeLampadaire) { this.typeLampadaire = typeLampadaire; }
-    public float getPuissance() { return puissance; }
-    public void setPuissance(float puissance) { this.puissance = puissance; }
-    public EtatLampadaire getEtat() { return etat; }
-    public void setEtat(EtatLampadaire etat) { this.etat = etat; }
-    public LocalDate getDateInstallation() { return dateInstallation; }
-    public void setDateInstallation(LocalDate dateInstallation) { this.dateInstallation = dateInstallation; }
-    public int getIdZone() { return id_zone; }
-    public void setIdZone(int id_zone) { this.id_zone = id_zone; }
-=======
     // Getters pour les propriétés
     public IntegerProperty idLampProperty() { return idLamp; }
     public StringProperty typeLampadaireProperty() { return typeLampadaire; }
@@ -116,22 +83,10 @@ public class Lampadaire {
     public void setEtat(EtatLampadaire etat) { this.etat.set(etat); }
     public void setDateInstallation(LocalDate dateInstallation) { this.dateInstallation.set(dateInstallation); }
     public void setIdZone(int id_zone) { this.idZone.set(id_zone); }
->>>>>>> origin/MedRayenSansa/GestionInfrastructure
 
     @Override
     public String toString() {
         return "Lampadaire{" +
-<<<<<<< HEAD
-                "id_lamp=" + id_lamp +
-                ", typeLampadaire='" + typeLampadaire + '\'' +
-                ", puissance=" + puissance +
-                ", etat=" + etat +
-                ", dateInstallation=" + dateInstallation +
-                ", id_zone=" + id_zone +
-                '}';
-    }
-}
-=======
                 "id_lamp=" + idLamp.get() +
                 ", typeLampadaire='" + typeLampadaire.get() + '\'' +
                 ", puissance=" + puissance.get() +
@@ -141,4 +96,3 @@ public class Lampadaire {
                 '}';
     }
 }
->>>>>>> origin/MedRayenSansa/GestionInfrastructure

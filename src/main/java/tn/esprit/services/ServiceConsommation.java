@@ -1,11 +1,8 @@
 package tn.esprit.services;
 
-<<<<<<< HEAD
-import tn.esprit.utils.MyDatabase2;
-=======
 import tn.esprit.utils.MyDatabase;
->>>>>>> a3c932b0e96e26782012e7d55e0b3688bdf4452d
 import tn.esprit.models.DonneeConsommation;
+import tn.esprit.utils.MyDatabase2;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -17,11 +14,7 @@ public class ServiceConsommation {
     private Connection connection;
 
     public ServiceConsommation() {
-<<<<<<< HEAD
         this.connection = new MyDatabase2().getCnx();
-=======
-        this.connection = new MyDatabase().getCnx();
->>>>>>> a3c932b0e96e26782012e7d55e0b3688bdf4452d
     }
 
     // 🔹 Ajouter une donnée de consommation

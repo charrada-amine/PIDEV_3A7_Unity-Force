@@ -286,4 +286,82 @@ public class GestionZoneController implements Initializable {
         stage.setScene(new Scene(root));
         stage.show();
     }
+    @FXML
+    private void handleGestionCapteur(ActionEvent event) {
+        switchScene(event, "/GestionCapteur.fxml");
+    }
+
+    @FXML
+    private void handleGestionCitoyen(ActionEvent event) {
+        switchScene(event, "/GestionCitoyen.fxml");
+    }
+
+    @FXML
+    private void handleGestionDonnee(ActionEvent event) {
+        switchScene(event, "/GestionDonnee.fxml");
+    }
+
+    @FXML
+    private void handleGestionIntervention(ActionEvent event) {
+        switchScene(event, "/GestionIntervention.fxml");
+    }
+
+    @FXML
+    private void handleGestionLampadaire(ActionEvent event) {
+        switchScene(event, "/GestionLampadaire.fxml");
+    }
+
+    @FXML
+    private void handleGestionReclamation(ActionEvent event) {
+        switchScene(event, "/GestionReclamation.fxml");
+    }
+
+    @FXML
+    private void handleGestionResponsable(ActionEvent event) {
+        switchScene(event, "/GestionResponsable.fxml");
+    }
+
+    @FXML
+    private void handleGestionTechnicien(ActionEvent event) {
+        switchScene(event, "/GestionTechnicien.fxml");
+    }
+
+    @FXML
+    private void handleGestionUtilisateur(ActionEvent event) {
+        switchScene(event, "/GestionUtilisateur.fxml");
+    }
+
+    @FXML
+    private void handleGestionZone(ActionEvent event) {
+        switchScene(event, "/GestionZone.fxml");
+    }
+
+    @FXML
+    private void handleProfileInterface(ActionEvent event) {
+        switchScene(event, "/ProfileInterface.fxml");
+    }
+
+    @FXML
+    private void handleSourceInterface(ActionEvent event) {
+        switchScene(event, "/SourceInterface.fxml");
+    }
+
+    @FXML
+    private void handleBack() {
+        // Logique pour revenir à la page précédente
+        System.out.println("Retour à la page précédente");
+    }
+
+    private void switchScene(ActionEvent event, String fxmlPath) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+
+            // Récupère la scène actuelle et met à jour son contenu
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

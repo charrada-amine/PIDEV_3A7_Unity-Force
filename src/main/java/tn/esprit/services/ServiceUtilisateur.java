@@ -242,35 +242,200 @@ public class ServiceUtilisateur {
         return utilisateurs;
     }
 
+    public void update(utilisateur user) {
+        String sql = "UPDATE utilisateurs SET nom = ?, prenom = ?, email = ?, motdepasse = ? WHERE id_utilisateur = ?";
 
+        try (Connection connection = MyDatabase.getConnection(); // Assurez-vous que DatabaseConnection est bien votre gestionnaire de connexion
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
 
+            // Paramètres de la requête
+            stmt.setString(1, user.getNom());
+            stmt.setString(2, user.getPrenom());
+            stmt.setString(3, user.getEmail());
+            stmt.setString(4, user.getMotdepasse());
+            stmt.setInt(6, user.getId_utilisateur());
 
-    public void updateField(int id, String fieldName, String newValue) {
-        // Vérifier que la nouvelle valeur n'est pas vide
-        if (newValue == null || newValue.trim().isEmpty()) {
-            System.out.println("❌ La nouvelle valeur pour le champ " + fieldName + " ne peut pas être vide !");
-            return;
-        }
+            // Exécution de la mise à jour
+            int rowsUpdated = stmt.executeUpdate();
 
-        // Construction de la requête dynamique en fonction du champ choisi
-        String qry = "UPDATE utilisateur SET " + fieldName + " = ? WHERE id_utilisateur = ?";
-
-        try {
-            PreparedStatement pstm = cnx.prepareStatement(qry);
-            pstm.setString(1, newValue);  // On met à jour la nouvelle valeur pour le champ choisi
-            pstm.setInt(2, id);  // L'ID de l'utilisateur à mettre à jour
-
-            int affectedRows = pstm.executeUpdate();
-
-            if (affectedRows > 0) {
-                System.out.println("✅ " + fieldName + " mis à jour avec succès pour l'utilisateur ID " + id);
+            if (rowsUpdated > 0) {
+                System.out.println("Utilisateur mis à jour avec succès.");
             } else {
-                System.out.println("❌ Aucun utilisateur trouvé avec l'ID " + id);
+                System.out.println("Aucun utilisateur trouvé avec cet ID.");
             }
+
         } catch (SQLException e) {
-            System.out.println("❌ Erreur SQL : " + e.getMessage());
+            e.printStackTrace();
+            System.out.println("Erreur lors de la mise à jour de l'utilisateur.");
         }
     }
 
 
+
+    public void updateField(int id, String fieldName, String newValue) {
+        String qry;
+        boolean isZoneField = fieldName.equalsIgnoreCase("zoneId"); // Vérifier si le champ à modifier est `zoneId`
+
+        if (isZoneField) {
+            // Mise à jour de la zone dans la table `citoyen`
+            qry = "UPDATE citoyen SET zoneId = ? WHERE id_citoyen = ?";
+        } else {
+            // Mise à jour des autres informations dans la table `utilisateur`
+            qry = "UPDATE utilisateur SET " + fieldName + " = ? WHERE id_utilisateur = ?";
+        }
+
+        try {
+            PreparedStatement pstm = cnx.prepareStatement(qry);
+
+            // Vérifier si la valeur à modifier est un entier (zoneId)
+            if (isZoneField) {
+                pstm.setInt(1, Integer.parseInt(newValue)); // Convertir en entier pour zoneId
+            } else {
+                pstm.setString(1, newValue); // Insérer en tant que String pour les autres champs
+            }
+
+            pstm.setInt(2, id); // ID du citoyen/utilisateur
+
+            int affectedRows = pstm.executeUpdate();
+
+            if (affectedRows > 0) {
+                System.out.println("✅ " + fieldName + " mis à jour avec succès pour l'utilisateur/citoyen ID " + id);
+            } else {
+                System.out.println("❌ Aucun enregistrement trouvé avec l'ID " + id);
+            }
+
+        } catch (SQLException e) {
+            System.out.println("❌ Erreur SQL lors de la mise à jour : " + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.out.println("❌ Erreur : La valeur pour zoneId doit être un nombre valide.");
+        }
+    }
+    public void updateFieldResponsable(int id, String fieldName, String newValue) {
+        String qry;
+        boolean isModulesField = fieldName.equalsIgnoreCase("modules"); // Vérifier si le champ à modifier est `modules`
+
+        if (isModulesField) {
+            // Mise à jour des modules dans la table `responsable`
+            qry = "UPDATE responsable SET modules = ? WHERE id_responsable = ?";
+        } else {
+            // Mise à jour des autres informations dans la table `utilisateur`
+            qry = "UPDATE utilisateur SET " + fieldName + " = ? WHERE id_utilisateur = ?";
+        }
+
+        try {
+            PreparedStatement pstm = cnx.prepareStatement(qry);
+
+            // Vérifier si la mise à jour concerne les modules (champ texte)
+            pstm.setString(1, newValue);
+
+            pstm.setInt(2, id); // ID du responsable/utilisateur
+
+            int affectedRows = pstm.executeUpdate();
+
+            if (affectedRows > 0) {
+                System.out.println("✅ " + fieldName + " mis à jour avec succès pour l'utilisateur/responsable ID " + id);
+            } else {
+                System.out.println("❌ Aucun enregistrement trouvé avec l'ID " + id);
+            }
+
+        } catch (SQLException e) {
+            System.out.println("❌ Erreur SQL lors de la mise à jour : " + e.getMessage());
+        }
+    }
+
+
+    public void updateFieldTechnicien(int id, String fieldName, String newValue) {
+        String qry;
+        boolean isSpecialiteField = fieldName.equalsIgnoreCase("specialite"); // Vérifier si le champ à modifier est `specialite`
+
+        if (isSpecialiteField) {
+            // Mise à jour de la spécialité dans la table `technicien`
+            qry = "UPDATE technicien SET specialite = ? WHERE id_technicien = ?";
+        } else {
+            // Mise à jour des autres informations dans la table `utilisateur`
+            qry = "UPDATE utilisateur SET " + fieldName + " = ? WHERE id_utilisateur = ?";
+        }
+
+        try {
+            PreparedStatement pstm = cnx.prepareStatement(qry);
+
+            // Vérifier si la mise à jour concerne la spécialité (champ texte)
+            pstm.setString(1, newValue);
+
+            pstm.setInt(2, id); // ID du technicien/utilisateur
+
+            int affectedRows = pstm.executeUpdate();
+
+            if (affectedRows > 0) {
+                System.out.println("✅ " + fieldName + " mis à jour avec succès pour l'utilisateur/technicien ID " + id);
+            } else {
+                System.out.println("❌ Aucun enregistrement trouvé avec l'ID " + id);
+            }
+
+        } catch (SQLException e) {
+            System.out.println("❌ Erreur SQL lors de la mise à jour : " + e.getMessage());
+        }
+    }
+
+
+
+
+
+    // Méthode pour récupérer un utilisateur par son ID
+        public utilisateur getUtilisateurById(int userId) {
+            utilisateur user = null;
+
+            String query = "SELECT * FROM utilisateur WHERE id_utilisateur = ?";
+
+            try (Connection connection = MyDatabase.getConnection();
+                 PreparedStatement stmt = connection.prepareStatement(query)) {
+
+                stmt.setInt(1, userId); // Set l'ID dans la requête
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        // Si un utilisateur est trouvé
+                        user = new utilisateur();
+                        user.setId_utilisateur(rs.getInt("id_utilisateur"));
+                        user.setNom(rs.getString("nom"));
+                        user.setEmail(rs.getString("email"));
+                        // Ajouter d'autres champs si nécessaire
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                // Gérer les exceptions ici (par exemple, afficher un message d'erreur)
+            }
+
+            return user; // Retourner l'utilisateur trouvé ou null s'il n'existe pas
+        }/*
+    public boolean isEmailExists(String email) {
+        // Connexion à la base de données
+        try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/pi3a7")) {
+            // Requête SQL pour vérifier si l'email existe
+            String query = "SELECT COUNT(*) FROM utilisateur WHERE email = ?";
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setString(1, email);
+
+                // Exécuter la requête
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (resultSet.next()) {
+                        // Si le résultat est supérieur à 0, l'email existe déjà
+                        return resultSet.getInt(1) > 0;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // Gérer l'exception ou afficher une alerte si nécessaire
+        }
+
+        return false; // Si une erreur se produit, supposez que l'email n'existe pas
+    }*/
+
+    public void updateSpecialite(int idUtilisateur, Specialite selectedSpecialite) {
+    }
+
 }
+
+

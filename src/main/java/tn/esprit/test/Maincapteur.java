@@ -1,11 +1,8 @@
 package tn.esprit.test;
 
 import tn.esprit.models.Capteur;
-<<<<<<< HEAD
-=======
 import tn.esprit.models.Capteur.TypeCapteur; // Importer les énumérations
 import tn.esprit.models.Capteur.EtatCapteur; // Importer les énumérations
->>>>>>> a3c932b0e96e26782012e7d55e0b3688bdf4452d
 import tn.esprit.services.ServiceCapteur;
 
 import java.time.LocalDate;

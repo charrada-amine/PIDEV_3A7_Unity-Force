@@ -6,7 +6,8 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="workshopReady" />
+        <module name="WorkshopJDBC3A15" />
+        <module name="workshopJDBC3A15" />
       </profile>
     </annotationProcessing>
   </component>

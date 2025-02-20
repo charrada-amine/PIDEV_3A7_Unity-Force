@@ -24,7 +24,7 @@ import javafx.scene.text.Font;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import tn.esprit.models.Lampadaire;
-import tn.esprit.models.Lampadaire.EtatLampadaire;
+import tn.esprit.models.EtatLampadaire;
 import tn.esprit.models.Zone;
 import tn.esprit.services.ServiceLampadaire;
 import tn.esprit.services.ServiceZone;
@@ -38,12 +38,14 @@ public class GestionLampadaireController implements Initializable {
 
     @FXML private TextField tfType;
     @FXML private TextField tfPuissance;
-    @FXML private ComboBox<EtatLampadaire> cbEtat;
+
     @FXML private DatePicker dpDateInstallation;
     @FXML private TextField tfIdZone;
     @FXML private FlowPane cardContainer;
     @FXML private ScrollPane scrollPane;
     @FXML private Label lblZoneError;
+    @FXML
+    private ComboBox<Lampadaire.EtatLampadaire> cbEtat;
 
     private final ServiceLampadaire serviceLampadaire = new ServiceLampadaire();
     private final ServiceZone serviceZone = new ServiceZone();
@@ -52,7 +54,7 @@ public class GestionLampadaireController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        cbEtat.setItems(FXCollections.observableArrayList(EtatLampadaire.values()));
+        cbEtat.setItems(FXCollections.observableArrayList());
         scrollPane.setFitToWidth(true);
         cardContainer.setHgap(20);
         cardContainer.setVgap(20);
@@ -116,7 +118,6 @@ public class GestionLampadaireController implements Initializable {
         dpDateInstallation.setValue(lampadaire.getDateInstallation());
         tfIdZone.setText(String.valueOf(lampadaire.getIdZone()));
     }
-
     private void clearForm() {
         tfType.clear();
         tfPuissance.clear();
@@ -424,5 +425,83 @@ public class GestionLampadaireController implements Initializable {
         button.setContentDisplay(ContentDisplay.LEFT);
         button.setGraphicTextGap(8);
         return button;
+    }
+    @FXML
+    private void handleGestionCapteur(ActionEvent event) {
+        switchScene(event, "/GestionCapteur.fxml");
+    }
+
+    @FXML
+    private void handleGestionCitoyen(ActionEvent event) {
+        switchScene(event, "/GestionCitoyen.fxml");
+    }
+
+    @FXML
+    private void handleGestionDonnee(ActionEvent event) {
+        switchScene(event, "/GestionDonnee.fxml");
+    }
+
+    @FXML
+    private void handleGestionIntervention(ActionEvent event) {
+        switchScene(event, "/GestionIntervention.fxml");
+    }
+
+    @FXML
+    private void handleGestionLampadaire(ActionEvent event) {
+        switchScene(event, "/GestionLampadaire.fxml");
+    }
+
+    @FXML
+    private void handleGestionReclamation(ActionEvent event) {
+        switchScene(event, "/GestionReclamation.fxml");
+    }
+
+    @FXML
+    private void handleGestionResponsable(ActionEvent event) {
+        switchScene(event, "/GestionResponsable.fxml");
+    }
+
+    @FXML
+    private void handleGestionTechnicien(ActionEvent event) {
+        switchScene(event, "/GestionTechnicien.fxml");
+    }
+
+    @FXML
+    private void handleGestionUtilisateur(ActionEvent event) {
+        switchScene(event, "/GestionUtilisateur.fxml");
+    }
+
+    @FXML
+    private void handleGestionZone(ActionEvent event) {
+        switchScene(event, "/GestionZone.fxml");
+    }
+
+    @FXML
+    private void handleProfileInterface(ActionEvent event) {
+        switchScene(event, "/ProfileInterface.fxml");
+    }
+
+    @FXML
+    private void handleSourceInterface(ActionEvent event) {
+        switchScene(event, "/SourceInterface.fxml");
+    }
+
+    @FXML
+    private void handleBack() {
+        // Logique pour revenir à la page précédente
+        System.out.println("Retour à la page précédente");
+    }
+
+    private void switchScene(ActionEvent event, String fxmlPath) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+
+            // Récupère la scène actuelle et met à jour son contenu
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
