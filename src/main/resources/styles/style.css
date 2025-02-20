@@ -221,4 +221,10 @@
     -fx-text-fill: #ef4444;
     -fx-font-size: 12px;
     -fx-padding: 2 0 0 5;
-}
+}.modern-input {
+     -fx-padding: 8 12;
+     -fx-background-radius: 8;
+     -fx-border-radius: 8;
+     -fx-border-color: #dfe1e5;
+     -fx-font-family: 'Roboto';
+ }

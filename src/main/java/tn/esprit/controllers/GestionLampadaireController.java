@@ -23,6 +23,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.Font;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+import javafx.util.StringConverter;
 import tn.esprit.models.Lampadaire;
 import tn.esprit.models.Lampadaire.EtatLampadaire;
 import tn.esprit.models.Zone;
@@ -40,10 +41,15 @@ public class GestionLampadaireController implements Initializable {
     @FXML private TextField tfPuissance;
     @FXML private ComboBox<EtatLampadaire> cbEtat;
     @FXML private DatePicker dpDateInstallation;
-    @FXML private TextField tfIdZone;
+    @FXML private ComboBox<Zone> cbZone;
     @FXML private FlowPane cardContainer;
     @FXML private ScrollPane scrollPane;
     @FXML private Label lblZoneError;
+    @FXML private Label lblTypeError;
+    @FXML private Label lblPuissanceError;
+    @FXML private Label lblEtatError;
+    @FXML private Label lblDateError;
+    @FXML private TextField tfNomZone;
 
     private final ServiceLampadaire serviceLampadaire = new ServiceLampadaire();
     private final ServiceZone serviceZone = new ServiceZone();
@@ -57,22 +63,31 @@ public class GestionLampadaireController implements Initializable {
         cardContainer.setHgap(20);
         cardContainer.setVgap(20);
         cardContainer.setPadding(new Insets(20));
-        Font.loadFont(getClass().getResourceAsStream("/fonts/Roboto-Regular.ttf"), 14);
 
-        // Reset error style on text change
-        tfIdZone.textProperty().addListener((observable, oldValue, newValue) -> {
-            tfIdZone.getStyleClass().remove("error-field");
-            lblZoneError.setVisible(false);
-            tfType.textProperty().addListener((obs, oldVal, newVal) -> resetFieldError(tfType, lblTypeError));
-            tfPuissance.textProperty().addListener((obs, oldVal, newVal) -> resetFieldError(tfPuissance, lblPuissanceError));
-            cbEtat.valueProperty().addListener((obs, oldVal, newVal) -> resetFieldError(cbEtat, lblEtatError));
-            dpDateInstallation.valueProperty().addListener((obs, oldVal, newVal) -> resetFieldError(dpDateInstallation, lblDateError));
-            tfIdZone.textProperty().addListener((obs, oldVal, newVal) -> resetFieldError(tfIdZone, lblZoneError));
+        // Charger les zones
+        cbZone.setItems(FXCollections.observableArrayList(serviceZone.getAll()));
+        cbZone.setConverter(new StringConverter<Zone>() {
+            @Override
+            public String toString(Zone zone) {
+                return (zone != null) ? zone.getNom() : "";
+            }
 
+            @Override
+            public Zone fromString(String string) {
+                return null;
+            }
         });
+
+        // Listeners pour erreurs
+        tfType.textProperty().addListener((obs, oldVal, newVal) -> resetFieldError(tfType, lblTypeError));
+        tfPuissance.textProperty().addListener((obs, oldVal, newVal) -> resetFieldError(tfPuissance, lblPuissanceError));
+        cbEtat.valueProperty().addListener((obs, oldVal, newVal) -> resetFieldError(cbEtat, lblEtatError));
+        dpDateInstallation.valueProperty().addListener((obs, oldVal, newVal) -> resetFieldError(dpDateInstallation, lblDateError));
+        cbZone.valueProperty().addListener((obs, oldVal, newVal) -> resetFieldError(cbZone, lblZoneError));
 
         loadData();
     }
+
     private void resetFieldError(Control field, Label errorLabel) {
         field.getStyleClass().remove("error-field");
         errorLabel.setVisible(false);
@@ -114,7 +129,12 @@ public class GestionLampadaireController implements Initializable {
         tfPuissance.setText(String.valueOf(lampadaire.getPuissance()));
         cbEtat.setValue(lampadaire.getEtat());
         dpDateInstallation.setValue(lampadaire.getDateInstallation());
-        tfIdZone.setText(String.valueOf(lampadaire.getIdZone()));
+
+        // Sélectionner la zone correspondante
+        cbZone.getItems().stream()
+                .filter(z -> z.getIdZone() == lampadaire.getIdZone())
+                .findFirst()
+                .ifPresent(cbZone::setValue);
     }
 
     private void clearForm() {
@@ -122,7 +142,7 @@ public class GestionLampadaireController implements Initializable {
         tfPuissance.clear();
         cbEtat.getSelectionModel().clearSelection();
         dpDateInstallation.setValue(null);
-        tfIdZone.clear();
+        cbZone.getSelectionModel().clearSelection();
         selectedLampadaire = null;
     }
 
@@ -135,19 +155,13 @@ public class GestionLampadaireController implements Initializable {
             lampadaire.setPuissance(Float.parseFloat(tfPuissance.getText()));
             lampadaire.setEtat(cbEtat.getValue());
             lampadaire.setDateInstallation(dpDateInstallation.getValue());
-            lampadaire.setIdZone(Integer.parseInt(tfIdZone.getText()));
+            lampadaire.setIdZone(cbZone.getValue().getIdZone());
             serviceLampadaire.add(lampadaire);
             loadData();
             clearForm();
             showSuccessFeedback();
         } catch (Exception e) {
-            if (e.getMessage().startsWith("La zone avec l'ID")) {
-                tfIdZone.getStyleClass().add("error-field");
-                lblZoneError.setText(e.getMessage());
-                lblZoneError.setVisible(true);
-            } else {
-                showAlert("Erreur d'ajout", e.getMessage());
-            }
+            showAlert("Erreur d'ajout", e.getMessage());
         }
     }
 
@@ -189,25 +203,15 @@ public class GestionLampadaireController implements Initializable {
             selectedLampadaire.setPuissance(Float.parseFloat(tfPuissance.getText()));
             selectedLampadaire.setEtat(cbEtat.getValue());
             selectedLampadaire.setDateInstallation(dpDateInstallation.getValue());
-            selectedLampadaire.setIdZone(Integer.parseInt(tfIdZone.getText()));
+            selectedLampadaire.setIdZone(cbZone.getValue().getIdZone());
             serviceLampadaire.update(selectedLampadaire);
             loadData();
             clearForm();
             showSuccessFeedback();
         } catch (Exception e) {
-            if (e.getMessage().startsWith("La zone avec l'ID")) {
-                tfIdZone.getStyleClass().add("error-field");
-                lblZoneError.setText(e.getMessage());
-                lblZoneError.setVisible(true);
-            } else {
-                showAlert("Erreur de modification", e.getMessage());
-            }
+            showAlert("Erreur de modification", e.getMessage());
         }
     }
-    @FXML private Label lblTypeError;
-    @FXML private Label lblPuissanceError;
-    @FXML private Label lblEtatError;
-    @FXML private Label lblDateError;
 
     @FXML
     private void handleDelete() {
@@ -244,19 +248,16 @@ public class GestionLampadaireController implements Initializable {
     private void handleClear() {
         clearForm();
     }
+
     private void validateInputs() throws Exception {
         boolean hasError = false;
-
-        // Réinitialiser les erreurs
         resetErrorStyles();
 
-        // Vérification du champ Type
         if (tfType.getText().isEmpty()) {
             showError(tfType, lblTypeError, "Le type est requis");
             hasError = true;
         }
 
-        // Vérification du champ Puissance
         try {
             Float.parseFloat(tfPuissance.getText());
         } catch (NumberFormatException e) {
@@ -264,29 +265,18 @@ public class GestionLampadaireController implements Initializable {
             hasError = true;
         }
 
-        // Vérification de l'état
         if (cbEtat.getValue() == null) {
             showError(cbEtat, lblEtatError, "Sélectionnez un état");
             hasError = true;
         }
 
-        // Vérification de la date
         if (dpDateInstallation.getValue() == null) {
             showError(dpDateInstallation, lblDateError, "Sélectionnez une date");
             hasError = true;
         }
 
-        // Vérification de l'ID de la zone
-        try {
-            int idZone = Integer.parseInt(tfIdZone.getText());
-            if (serviceZone.getById(idZone) == null) {
-                throw new Exception("La zone avec l'ID " + idZone + " n'existe pas");
-            }
-        } catch (NumberFormatException e) {
-            showError(tfIdZone, lblZoneError, "L'ID de la zone doit être un nombre entier");
-            hasError = true;
-        } catch (Exception e) {
-            showError(tfIdZone, lblZoneError, e.getMessage());
+        if (cbZone.getValue() == null) {
+            showError(cbZone, lblZoneError, "Sélectionnez une zone");
             hasError = true;
         }
 
@@ -294,6 +284,7 @@ public class GestionLampadaireController implements Initializable {
             throw new Exception("Corrigez les erreurs avant de continuer");
         }
     }
+
     private void showError(Control field, Label errorLabel, String message) {
         if (!field.getStyleClass().contains("error-field")) {
             field.getStyleClass().add("error-field");
@@ -303,21 +294,18 @@ public class GestionLampadaireController implements Initializable {
     }
 
     private void resetErrorStyles() {
-        // Supprimer les styles d'erreur de tous les champs
         tfType.getStyleClass().remove("error-field");
         tfPuissance.getStyleClass().remove("error-field");
         cbEtat.getStyleClass().remove("error-field");
         dpDateInstallation.getStyleClass().remove("error-field");
-        tfIdZone.getStyleClass().remove("error-field");
+        cbZone.getStyleClass().remove("error-field");
 
-        // Cacher les labels d'erreur
         lblTypeError.setVisible(false);
         lblPuissanceError.setVisible(false);
         lblEtatError.setVisible(false);
         lblDateError.setVisible(false);
         lblZoneError.setVisible(false);
     }
-
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -352,8 +340,11 @@ public class GestionLampadaireController implements Initializable {
         feedback.setOpacity(0);
         root.getChildren().add(feedback);
         Timeline animation = new Timeline(
-                new KeyFrame(Duration.millis(300), new KeyValue(feedback.translateYProperty(), 20), new KeyValue(feedback.opacityProperty(), 1)),
-                new KeyFrame(Duration.millis(2000), new KeyValue(feedback.opacityProperty(), 0))
+                new KeyFrame(Duration.millis(300),
+                        new KeyValue(feedback.translateYProperty(), 20),
+                        new KeyValue(feedback.opacityProperty(), 1)),
+                new KeyFrame(Duration.millis(2000),
+                        new KeyValue(feedback.opacityProperty(), 0))
         );
         animation.setOnFinished(e -> root.getChildren().remove(feedback));
         animation.play();
@@ -379,11 +370,16 @@ public class GestionLampadaireController implements Initializable {
                 : "N/A";
 
         VBox content = new VBox(8);
+
+        // Récupérer le nom de la zone
+        Zone zone = serviceZone.getById(lampadaire.getIdZone());
+        String zoneName = (zone != null) ? zone.getNom() : "Inconnue";
+
         content.getChildren().addAll(
                 createInfoRow(FontAwesomeSolid.TAG, "Type : " + lampadaire.getTypeLampadaire()),
                 createInfoRow(FontAwesomeSolid.BOLT, "Puissance : " + lampadaire.getPuissance() + " W"),
                 createInfoRow(FontAwesomeSolid.POWER_OFF, "État : " + lampadaire.getEtat().toString()),
-                createInfoRow(FontAwesomeSolid.MAP_MARKER, "Zone ID : " + lampadaire.getIdZone()),
+                createInfoRow(FontAwesomeSolid.MAP_MARKER, "Zone : " + zoneName),
                 createInfoRow(FontAwesomeSolid.CALENDAR, "Installation : " + dateFormatted)
         );
 

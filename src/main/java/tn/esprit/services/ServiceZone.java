@@ -116,7 +116,24 @@ public class ServiceZone implements IService<Zone> {
             System.err.println("❌ Erreur de mise à jour: " + e.getMessage());
         }
     }
-
+    public Zone getByName(String nomZone) throws SQLException {
+        String qry = "SELECT * FROM zones WHERE nom = ?";
+        try (PreparedStatement pstm = cnx.prepareStatement(qry)) {
+            pstm.setString(1, nomZone.trim()); // Gestion des espaces
+            ResultSet rs = pstm.executeQuery();
+            if (rs.next()) {
+                return new Zone(
+                        rs.getInt("id_zone"),
+                        rs.getString("nom"),
+                        rs.getString("description"),
+                        rs.getFloat("surface"),
+                        rs.getInt("nombreLampaddress"),
+                        rs.getInt("nombreCitycens")
+                );
+            }
+            return null;
+        }
+    }
     // AJOUT DE LA VÉRIFICATION DE SUPPRESSION
     @Override
     public void delete(Zone zone) {

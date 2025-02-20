@@ -52,7 +52,7 @@
                     <DatePicker fx:id="dpDateInstallation" promptText="Date Installation" styleClass="modern-input"/>
                     <Label fx:id="lblDateError" styleClass="error-message" visible="false"/>
 
-                    <TextField fx:id="tfIdZone" promptText="ID Zone" styleClass="modern-input"/>
+                    <ComboBox fx:id="cbZone" promptText="Nom de la Zone" styleClass="modern-input"/>
                     <Label fx:id="lblZoneError" styleClass="error-message" visible="false"/>
                 </VBox>
 
