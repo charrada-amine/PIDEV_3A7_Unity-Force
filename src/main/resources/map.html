@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+    <style>
+        #map {
+            height: 400px;
+            width: 600px;
+            background: #f8f9fa; /* Fond de secours */
+        }
+        .loading {
+            text-align: center;
+            padding: 180px 0;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+<div id="map">
+    <p class="loading">Chargement de la carte...</p>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+    let map;
+    let circle;
+    let isMapInitialized = false;
+
+    function initMap() {
+        if (isMapInitialized) return;
+
+        map = L.map('map', {
+            preferCanvas: true,
+            zoomControl: false,
+            attributionControl: false
+        }).setView([36.8, 10.2], 12); // Position par défaut (Tunis)
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19
+        }).addTo(map);
+
+        L.control.zoom({ position: 'topright' }).addTo(map);
+        isMapInitialized = true;
+        console.log("Carte initialisée");
+    }
+
+    function showZone(lat, lng, surface) {
+        if (!isMapInitialized) return;
+
+        // Conversion surface en mètres carrés ➔ rayon en mètres
+        const radius = Math.sqrt(surface / Math.PI);
+
+        if (circle) map.removeLayer(circle);
+
+        circle = L.circle([lat, lng], {
+            radius: radius,
+            color: '#1a73e8',
+            fillColor: '#1a73e8',
+            fillOpacity: 0.3,
+            stroke: false // Supprimer la bordure pour plus de précision
+        }).addTo(map);
+
+        // Ajustement de la vue avec zoom dynamique
+        const zoomLevel = radius > 1000 ? 12 : 15; // Zoom plus proche pour petites surfaces
+        map.setView([lat, lng], zoomLevel);
+    }
+
+    // Initialisation différée
+    setTimeout(initMap, 500);
+</script>
+</body>
+</html>

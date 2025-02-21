@@ -228,3 +228,8 @@
      -fx-border-color: #dfe1e5;
      -fx-font-family: 'Roboto';
  }
+#map {
+    height: 100%;
+    width: 100%;
+    background: #e8e9eb; /* Couleur de fond pendant le chargement */
+}

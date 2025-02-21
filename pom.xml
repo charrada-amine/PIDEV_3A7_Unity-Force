@@ -11,6 +11,7 @@
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>  <!-- ✅ Évite les erreurs avec Java 17 -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -24,6 +25,11 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
+            <version>21.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId> <!-- ✅ Ajout pour WebView -->
             <version>21.0.2</version>
         </dependency>
 
@@ -47,8 +53,13 @@
         </dependency>
         <dependency>
             <groupId>org.kordamp.ikonli</groupId>
-            <artifactId>ikonli-fontawesome5-pack</artifactId> <!-- Ajoutez "5" -->
+            <artifactId>ikonli-fontawesome5-pack</artifactId>
             <version>12.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20231013</version>
         </dependency>
     </dependencies>
 
@@ -58,11 +69,7 @@
             <id>central</id>
             <url>https://repo.maven.apache.org/maven2</url>
         </repository>
-        <repository>
-            <id>kordamp</id>
-            <url>https://kordamp.org/releases</url> <!-- ✅ URL mise à jour -->
-        </repository>
-        <!-- Repository Gluon -->
+        <!-- Repository Gluon pour JavaFX -->
         <repository>
             <id>gluon-releases</id>
             <url>https://nexus.gluonhq.com/nexus/content/repositories/releases/</url>
@@ -74,7 +81,7 @@
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
-                <version>0.0.8</version>
+                <version>0.0.8</version>  <!-- ✅ Mis à jour pour éviter les problèmes -->
                 <executions>
                     <execution>
                         <goals>

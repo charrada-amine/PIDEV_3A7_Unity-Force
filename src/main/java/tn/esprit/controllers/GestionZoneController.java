@@ -1,4 +1,5 @@
 package tn.esprit.controllers;
+import java.util.Locale; // <-- Ajoutez cette ligne
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
@@ -29,8 +30,11 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
-
+import javafx.scene.web.WebView;
+import javafx.scene.web.WebEngine;
+import javafx.concurrent.Worker;
 public class GestionZoneController implements Initializable {
+    @FXML private WebView mapView; // Assurez-vous que cela correspond au FXML
 
     @FXML private TextField tfNom;
     @FXML private TextField tfDescription;
@@ -97,7 +101,39 @@ public class GestionZoneController implements Initializable {
         card.setEffect(new DropShadow(10, Color.gray(0.3)));
         return card;
     }
+    private void showZoneOnMap(Zone zone) {
+        WebEngine webEngine = mapView.getEngine();
+        webEngine.loadContent("");
 
+        webEngine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+            if (newState == Worker.State.SUCCEEDED) {
+                // Correction du constructeur Timeline
+                Timeline timeline = new Timeline(
+                        new KeyFrame(Duration.seconds(3), e -> {
+                            String script = String.format(Locale.US,
+                                    "if (typeof showZone === 'function') { " +
+                                            "showZone(%.6f, %.6f, %.2f); " +
+                                            "}",
+                                    zone.getLatitude(),
+                                    zone.getLongitude(),
+                                    zone.getSurface()
+                            );
+                            webEngine.executeScript(script);
+                        })
+                );
+                timeline.play();
+            }
+        });
+
+        try {
+            URL htmlUrl = getClass().getResource("/map.html");
+            if (htmlUrl != null) {
+                webEngine.load(htmlUrl.toString());
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur de chargement de la carte: " + e.getMessage());
+        }
+    }
     private HBox createInfoRow(FontAwesomeSolid iconType, String text) {
         FontIcon icon = new FontIcon(iconType);
         icon.setIconSize(16);
@@ -139,11 +175,20 @@ public class GestionZoneController implements Initializable {
             Zone zone = new Zone();
             updateZoneFromForm(zone);
             serviceZone.add(zone);
+
+            // Vérifier si les coordonnées sont valides
+            if (zone.getLatitude() == 0.0 && zone.getLongitude() == 0.0) {
+                showAlert("Erreur", "Le géocodage a échoué pour '" + zone.getNom() + "'. Veuillez vérifier le nom ou essayer un nom plus précis.");
+            } else {
+                showZoneOnMap(zone);
+            }
+
             loadData();
             clearForm();
             showSuccessFeedback();
+
         } catch (Exception e) {
-            showAlert("Erreur d'ajout", e.getMessage());
+            showAlert("Erreur", e.getMessage());
         }
     }
 
@@ -194,6 +239,8 @@ public class GestionZoneController implements Initializable {
         tfSurface.setText(String.valueOf(zone.getSurface()));
         tfNombreLampadaires.setText(String.valueOf(zone.getNombreLampadaires()));
         tfNombreCitoyens.setText(String.valueOf(zone.getNombreCitoyens()));
+        showZoneOnMap(zone); // Nouvel ajout
+
     }
 
     private void clearForm() {

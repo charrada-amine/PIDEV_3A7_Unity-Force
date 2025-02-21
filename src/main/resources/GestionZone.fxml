@@ -4,7 +4,7 @@
 <?import javafx.scene.text.*?>
 <?import javafx.geometry.Insets?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
-
+<?import javafx.scene.web.WebView?>
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx/fxml/1"
             fx:controller="tn.esprit.controllers.GestionZoneController"
@@ -78,6 +78,8 @@
                         prefWidth="600">
                 <FlowPane fx:id="cardContainer" hgap="25" vgap="25" style="-fx-padding: 20;"/>
             </ScrollPane>
+            <WebView fx:id="mapView" prefWidth="600" prefHeight="400"/>
+
         </HBox>
     </center>
 </BorderPane>
