@@ -115,11 +115,11 @@ public class ServiceZone implements IService<Zone> {
             e.printStackTrace(); // Stack trace pour débogage approfondi
         }
     }
-    // AJOUT DE LA GESTION DES RÉSULTATS VIDES
+    // Dans la méthode getAll()
     @Override
     public List<Zone> getAll() {
         List<Zone> zones = new ArrayList<>();
-        String qry = "SELECT * FROM zones";
+        String qry = "SELECT * FROM zones"; // Assurez-vous que la table contient les colonnes latitude/longitude
 
         try (Statement stm = cnx.createStatement();
              ResultSet rs = stm.executeQuery(qry)) {
@@ -133,11 +133,10 @@ public class ServiceZone implements IService<Zone> {
                         rs.getInt("nombreLampadaires"),
                         rs.getInt("nombreCitoyens")
                 );
+                // Ajouter ces lignes pour récupérer les coordonnées
+                z.setLatitude(rs.getDouble("latitude"));
+                z.setLongitude(rs.getDouble("longitude"));
                 zones.add(z);
-            }
-
-            if (zones.isEmpty()) {
-                System.out.println("ℹ️ Aucune zone trouvée dans la base");
             }
 
         } catch (SQLException e) {
@@ -145,7 +144,6 @@ public class ServiceZone implements IService<Zone> {
         }
         return zones;
     }
-
     // AMÉLIORATION DES MESSAGES DE MISE À JOUR
     @Override
     public void update(Zone zone) {

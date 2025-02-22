@@ -34,52 +34,61 @@
 
     <!-- Contenu principal -->
     <center>
-        <HBox spacing="30" style="-fx-padding: 25;">
-            <!-- Formulaire modernisé -->
-            <VBox spacing="20" styleClass="card" prefWidth="380">
-                <Label text="Gestion des Zones" style="-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #202124;"/>
+        <VBox spacing="20" style="-fx-padding: 25;">
+            <!-- Première ligne : Formulaire + Carte -->
+            <HBox spacing="30" VBox.vgrow="ALWAYS">
+                <!-- Formulaire -->
+                <VBox spacing="20" styleClass="card" prefWidth="380">
+                    <Label text="Gestion des Zones" style="-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #202124;"/>
 
-                <VBox spacing="20">
-                    <TextField fx:id="tfNom" promptText="Nom" styleClass="modern-input"/>
-                    <TextField fx:id="tfDescription" promptText="Description" styleClass="modern-input"/>
-                    <TextField fx:id="tfSurface" promptText="Surface (m²)" styleClass="modern-input"/>
-                    <TextField fx:id="tfNombreLampadaires" promptText="Nombre de Lampadaires" styleClass="modern-input"/>
-                    <TextField fx:id="tfNombreCitoyens" promptText="Nombre de Citoyens" styleClass="modern-input"/>
+                    <VBox spacing="20">
+                        <TextField fx:id="tfNom" promptText="Nom" styleClass="modern-input"/>
+                        <TextField fx:id="tfDescription" promptText="Description" styleClass="modern-input"/>
+                        <TextField fx:id="tfSurface" promptText="Surface (m²)" styleClass="modern-input"/>
+                        <TextField fx:id="tfNombreLampadaires" promptText="Nombre de Lampadaires" styleClass="modern-input"/>
+                        <TextField fx:id="tfNombreCitoyens" promptText="Nombre de Citoyens" styleClass="modern-input"/>
 
-                    <!-- Boutons modernisés -->
-                    <HBox spacing="15" styleClass="button-container">
-                        <Button text="Ajouter" onAction="#handleAdd" styleClass="action-button,add">
-                            <graphic>
-                                <FontIcon iconLiteral="fas-plus-circle" iconSize="16" iconColor="white"/>
-                            </graphic>
-                        </Button>
-                        <Button text="Modifier" onAction="#handleUpdate" styleClass="action-button,edit">
-                            <graphic>
-                                <FontIcon iconLiteral="fas-edit" iconSize="16" iconColor="white"/>
-                            </graphic>
-                        </Button>
-                        <Button text="Supprimer" onAction="#handleDelete" styleClass="action-button,delete">
-                            <graphic>
-                                <FontIcon iconLiteral="fas-trash-alt" iconSize="16" iconColor="white"/>
-                            </graphic>
-                        </Button>
-                        <Button text="Réinitialiser" onAction="#handleClear" styleClass="action-button,reset">
-                            <graphic>
-                                <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
-                            </graphic>
-                        </Button>
-                    </HBox>
+                        <HBox spacing="15" styleClass="button-container">
+                            <Button text="Ajouter" onAction="#handleAdd" styleClass="action-button,add">
+                                <graphic>
+                                    <FontIcon iconLiteral="fas-plus-circle" iconSize="16" iconColor="white"/>
+                                </graphic>
+                            </Button>
+                            <Button text="Modifier" onAction="#handleUpdate" styleClass="action-button,edit">
+                                <graphic>
+                                    <FontIcon iconLiteral="fas-edit" iconSize="16" iconColor="white"/>
+                                </graphic>
+                            </Button>
+                            <Button text="Supprimer" onAction="#handleDelete" styleClass="action-button,delete">
+                                <graphic>
+                                    <FontIcon iconLiteral="fas-trash-alt" iconSize="16" iconColor="white"/>
+                                </graphic>
+                            </Button>
+                            <Button text="Réinitialiser" onAction="#handleClear" styleClass="action-button,reset">
+                                <graphic>
+                                    <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
+                                </graphic>
+                            </Button>
+                        </HBox>
+                    </VBox>
                 </VBox>
+
+                <!-- Carte en plein écran -->
+                <StackPane styleClass="full-map-container" HBox.hgrow="ALWAYS">
+                    <WebView fx:id="mapView" minWidth="600" minHeight="400"
+                             StackPane.alignment="CENTER"/>
+                </StackPane>
+            </HBox>
+
+            <!-- Deuxième ligne : Liste des zones -->
+            <VBox spacing="15" VBox.vgrow="ALWAYS">
+                <Label text="Zones Urbaines" styleClass="section-title"/>
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER"
+                            styleClass="modern-scroll" VBox.vgrow="ALWAYS">
+                    <FlowPane fx:id="cardContainer" hgap="25" vgap="25"
+                              style="-fx-padding: 15;"/>
+                </ScrollPane>
             </VBox>
-
-            <!-- Zone des cartes de zones -->
-            <ScrollPane fitToWidth="true" hbarPolicy="NEVER"
-                        style="-fx-background: transparent; -fx-border-width: 0;"
-                        prefWidth="600">
-                <FlowPane fx:id="cardContainer" hgap="25" vgap="25" style="-fx-padding: 20;"/>
-            </ScrollPane>
-            <WebView fx:id="mapView" prefWidth="600" prefHeight="400"/>
-
-        </HBox>
+        </VBox>
     </center>
 </BorderPane>
