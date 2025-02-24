@@ -615,7 +615,14 @@ public class GestionLampadaireController implements Initializable {
             }
 
             WebEngine webEngine = globalMapView.getEngine();
-            webEngine.setOnAlert(event -> System.out.println("JavaScript Alert: " + event.getData()));
+            webEngine.setOnAlert(event -> {
+                String data = event.getData();
+                System.out.println("JavaScript Alert: " + data);
+                if (data.startsWith("LAMPADAIRE_DETAILS:")) {
+                    String jsonDetails = data.substring("LAMPADAIRE_DETAILS:".length());
+                    javafx.application.Platform.runLater(() -> showLampadaireDetails(jsonDetails));
+                }
+            });
             webEngine.setOnError(event -> System.out.println("JavaScript Error: " + event.getMessage()));
             webEngine.setJavaScriptEnabled(true);
             webEngine.loadContent(getGlobalMapHtml());
@@ -629,11 +636,6 @@ public class GestionLampadaireController implements Initializable {
                     for (Lampadaire lampadaire : lampadaires) {
                         double lat = lampadaire.getLatitude();
                         double lng = lampadaire.getLongitude();
-                        // Log pour débogage
-                        System.out.println("Lampadaire: " + lampadaire.getTypeLampadaire() + ", État: " + lampadaire.getEtat() + ", Color: " +
-                                (lampadaire.getEtat() == EtatLampadaire.EN_PANNE ? "#ea4335" :
-                                        lampadaire.getEtat() == EtatLampadaire.EN_MAINTENANCE ? "#fbbc04" :
-                                                lampadaire.getEtat() == EtatLampadaire.ACTIF ? "#34a853" : "#1a73e8"));
                         if (lat != 0 && lng != 0 && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
                             if (!first) markersJson.append(",");
                             first = false;
@@ -728,19 +730,95 @@ public class GestionLampadaireController implements Initializable {
                 "            });\n" +
                 "        }\n" +
                 "\n" +
-                "        function addMarker(lat, lng, title, content, color) {\n" +
+                "        function addMarker(lat, lng, title, content, color, details) {\n" +
                 "            var customIcon = createCustomIcon(color);\n" +
                 "            var marker = L.marker([lat, lng], {icon: customIcon}).addTo(map);\n" +
                 "            marker.bindPopup('<b>' + content + '</b>');\n" +
+                "            marker.on('click', function(e) {\n" +
+                "                alert('LAMPADAIRE_DETAILS:' + JSON.stringify(details));\n" +
+                "            });\n" +
                 "        }\n" +
                 "\n" +
                 "        function addMarkers(markers) {\n" +
                 "            markers.forEach(function(m) {\n" +
-                "                addMarker(m.lat, m.lng, m.title, m.content, m.color);\n" +
+                "                addMarker(m.lat, m.lng, m.title, m.content, m.color, {\n" +
+                "                    'lat': m.lat,\n" +
+                "                    'lng': m.lng,\n" +
+                "                    'title': m.title,\n" +
+                "                    'content': m.content,\n" +
+                "                    'color': m.color\n" +
+                "                });\n" +
                 "            });\n" +
                 "        }\n" +
                 "    </script>\n" +
                 "</body>\n" +
                 "</html>";
+    }
+    private void showLampadaireDetails(String jsonDetails) {
+        try {
+            JSONObject details = new JSONObject(jsonDetails);
+            double lat = details.getDouble("lat");
+            double lng = details.getDouble("lng");
+            String title = details.getString("title");
+            String content = details.getString("content");
+
+            System.out.println("Recherche lampadaire avec lat=" + lat + ", lng=" + lng + ", title=" + title);
+
+            // Tolérance pour les coordonnées flottantes
+            double tolerance = 0.000001; // Ajustez selon vos besoins
+
+            // Trouver le lampadaire correspondant dans la liste
+            Lampadaire lampadaire = lampadaires.stream()
+                    .filter(l -> Math.abs(l.getLatitude() - lat) < tolerance
+                            && Math.abs(l.getLongitude() - lng) < tolerance
+                            && l.getTypeLampadaire().equalsIgnoreCase(title))
+                    .findFirst()
+                    .orElse(null);
+
+            if (lampadaire == null) {
+                System.out.println("Aucun lampadaire trouvé pour lat=" + lat + ", lng=" + lng + ", title=" + title);
+                System.out.println("Contenu de lampadaires :");
+                lampadaires.forEach(l -> System.out.println("Lampadaire: lat=" + l.getLatitude() + ", lng=" + l.getLongitude() + ", title=" + l.getTypeLampadaire()));
+                showAlert("Erreur", "Lampadaire non trouvé dans les données.");
+                return;
+            }
+
+            System.out.println("Lampadaire trouvé : " + lampadaire.getTypeLampadaire());
+
+            // Créer une boîte de dialogue personnalisée
+            Dialog<Void> dialog = new Dialog<>();
+            dialog.initStyle(StageStyle.TRANSPARENT);
+            dialog.getDialogPane().setStyle("-fx-background-color: rgba(255,255,255,0.95); -fx-background-radius: 16; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 16, 0, 4, 4);");
+
+            VBox contentBox = new VBox(10);
+            contentBox.setPadding(new Insets(20));
+            contentBox.setStyle("-fx-background-color: white; -fx-background-radius: 12;");
+
+            Label titleLabel = new Label("Détails du Lampadaire");
+            titleLabel.setStyle("-fx-font-size: 18; -fx-font-weight: 700; -fx-text-fill: #202124;");
+
+            Zone zone = serviceZone.getById(lampadaire.getIdZone());
+            String zoneName = (zone != null) ? zone.getNom() : "Inconnue";
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            String dateFormatted = (lampadaire.getDateInstallation() != null) ? lampadaire.getDateInstallation().format(formatter) : "N/A";
+
+            contentBox.getChildren().addAll(
+                    titleLabel,
+                    new Label("Type: " + lampadaire.getTypeLampadaire()),
+                    new Label("Puissance: " + lampadaire.getPuissance() + " W"),
+                    new Label("État: " + lampadaire.getEtat().toString()),
+                    new Label("Zone: " + zoneName),
+                    new Label("Date d'installation: " + dateFormatted),
+                    new Label(String.format("Position: %.6f, %.6f", lampadaire.getLatitude(), lampadaire.getLongitude()))
+            );
+
+            dialog.getDialogPane().setContent(contentBox);
+            dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+            dialog.showAndWait();
+
+        } catch (Exception e) {
+            showAlert("Erreur", "Impossible d'afficher les détails : " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
