@@ -629,6 +629,11 @@ public class GestionLampadaireController implements Initializable {
                     for (Lampadaire lampadaire : lampadaires) {
                         double lat = lampadaire.getLatitude();
                         double lng = lampadaire.getLongitude();
+                        // Log pour débogage
+                        System.out.println("Lampadaire: " + lampadaire.getTypeLampadaire() + ", État: " + lampadaire.getEtat() + ", Color: " +
+                                (lampadaire.getEtat() == EtatLampadaire.EN_PANNE ? "#ea4335" :
+                                        lampadaire.getEtat() == EtatLampadaire.EN_MAINTENANCE ? "#fbbc04" :
+                                                lampadaire.getEtat() == EtatLampadaire.ACTIF ? "#34a853" : "#1a73e8"));
                         if (lat != 0 && lng != 0 && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
                             if (!first) markersJson.append(",");
                             first = false;
@@ -700,31 +705,24 @@ public class GestionLampadaireController implements Initializable {
                 "            height: 100%;\n" +
                 "        }\n" +
                 "        .lamp-pole {\n" +
-                "            stroke: #333; /* Default pole color (dark gray) */\n" +
+                "            stroke: #333;\n" +
                 "            stroke-width: 2;\n" +
-                "        }\n" +
-                "        .lamp-light {\n" +
-                "            fill: #34a853; /* Default light color (green for active) */\n" +
                 "        }\n" +
                 "    </style>\n" +
                 "</head>\n" +
                 "<body>\n" +
                 "    <div id=\"map\"></div>\n" +
                 "    <script>\n" +
-                "        var map = L.map('map').setView([36.8, 10.2], 13); // Coordonnées centrées sur la Tunisie\n" +
+                "        var map = L.map('map').setView([36.8, 10.2], 13);\n" +
                 "        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {\n" +
                 "            maxZoom: 19,\n" +
                 "            attribution: '© OpenStreetMap contributors'\n" +
                 "        }).addTo(map);\n" +
                 "\n" +
                 "        function createCustomIcon(color) {\n" +
-                "            let lightColor = '#34a853'; // Default: active (green)\n" +
-                "            if (color === '#ea4335') lightColor = '#ea4335'; // Broken (red)\n" +
-                "            else if (color === '#fbbc04') lightColor = '#fbbc04'; // Maintenance (yellow)\n" +
-                "\n" +
                 "            return L.divIcon({\n" +
                 "                className: 'custom-div-icon',\n" +
-                "                html: `<div class='marker-pin'><svg width='24' height='48' viewBox='0 0 24 48' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M12 2L12 20' class='lamp-pole'/><circle cx='12' cy='25' r='8' class='lamp-light' fill='${lightColor}'/><path d='M12 33L12 46' class='lamp-pole'/></svg></div>`,\n" +
+                "                html: `<div class='marker-pin'><svg width='24' height='48' viewBox='0 0 24 48' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M12 2L12 20' class='lamp-pole'/><circle cx='12' cy='25' r='8' class='lamp-light' fill='${color}'/><path d='M12 33L12 46' class='lamp-pole'/></svg></div>`,\n" +
                 "                iconSize: [30, 48],\n" +
                 "                iconAnchor: [15, 48]\n" +
                 "            });\n" +
