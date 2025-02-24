@@ -1,5 +1,6 @@
 package tn.esprit.controllers;
 
+import java.util.Locale;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -61,7 +62,8 @@ public class GestionLampadaireController implements Initializable {
     @FXML private Label lblEtatError;
     @FXML private Label lblDateError;
     @FXML private VBox mapContainer;      // Placeholder for the map
-
+    @FXML private WebView globalMapView;  // Déclaré dans le FXML
+    @FXML private VBox globalMapContainer;
     private final ServiceLampadaire serviceLampadaire = new ServiceLampadaire();
     private final ServiceZone serviceZone = new ServiceZone();
     private final ObservableList<Lampadaire> lampadaires = FXCollections.observableArrayList();
@@ -69,6 +71,7 @@ public class GestionLampadaireController implements Initializable {
     private WebView mapView;              // Dynamically created map
     private double latitude;              // Internal storage for latitude
     private double longitude;             // Internal storage for longitude
+    private boolean globalMapInitialized = false;
 
     // OpenCage API key (replace with your own key)
     private static final String OPENCAGE_API_KEY = "54e21fa99da1458b8ce623f0331efed6";
@@ -110,6 +113,11 @@ public class GestionLampadaireController implements Initializable {
         });
 
         loadData();
+        // On s'assure que le conteneur de la carte globale est visible
+        globalMapContainer.setVisible(true);
+        globalMapContainer.setManaged(true);
+        // On initialise la carte avec un délai pour s'assurer que tout est chargé
+        javafx.application.Platform.runLater(this::initializeGlobalMap);
     }
 
     private void showMapForZone(String zoneName) {
@@ -251,6 +259,11 @@ public class GestionLampadaireController implements Initializable {
         lampadaires.setAll(serviceLampadaire.getAll());
         cardContainer.getChildren().clear();
         lampadaires.forEach(lampadaire -> cardContainer.getChildren().add(createLampadaireCard(lampadaire)));
+
+        // Si la carte globale est déjà initialisée, réinitialisez-la
+        if (globalMapInitialized) {
+            javafx.application.Platform.runLater(this::initializeGlobalMap);
+        }
     }
 
     private void handleDeleteLampadaire(Lampadaire lampadaire) {
@@ -308,6 +321,7 @@ public class GestionLampadaireController implements Initializable {
             loadData();
             clearForm();
             showSuccessFeedback();
+            javafx.application.Platform.runLater(this::initializeGlobalMap);
         } catch (Exception e) {
             showAlert("Erreur d'ajout", e.getMessage());
         }
@@ -358,6 +372,7 @@ public class GestionLampadaireController implements Initializable {
             loadData();
             clearForm();
             showSuccessFeedback();
+            javafx.application.Platform.runLater(this::initializeGlobalMap);
         } catch (Exception e) {
             showAlert("Erreur de modification", e.getMessage());
         }
@@ -375,6 +390,7 @@ public class GestionLampadaireController implements Initializable {
                 loadData();
                 clearForm();
                 showSuccessFeedback();
+                javafx.application.Platform.runLater(this::initializeGlobalMap);
             } catch (Exception e) {
                 showAlert("Erreur de suppression", e.getMessage());
             }
@@ -388,6 +404,7 @@ public class GestionLampadaireController implements Initializable {
             lampadaires.setAll(serviceLampadaire.getAll());
             cardContainer.getChildren().clear();
             lampadaires.forEach(l -> cardContainer.getChildren().add(createLampadaireCard(l)));
+            javafx.application.Platform.runLater(this::initializeGlobalMap);
             showSuccessFeedback();
         } catch (Exception e) {
             showAlert("Erreur", "Impossible de charger les lampadaires : " + e.getMessage());
@@ -577,5 +594,155 @@ public class GestionLampadaireController implements Initializable {
         button.setContentDisplay(ContentDisplay.LEFT);
         button.setGraphicTextGap(8);
         return button;
+    }
+
+    // Helper method to escape JSON strings
+    private String escapeJsonString(String input) {
+        if (input == null) return "";
+        return input.replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r");
+    }
+
+    private void initializeGlobalMap() {
+        try {
+            if (globalMapView == null) {
+                globalMapView = new WebView();
+                globalMapView.setPrefHeight(600);
+                globalMapView.setPrefWidth(1200);
+                globalMapContainer.getChildren().add(globalMapView);
+            } else {
+                globalMapContainer.getChildren().clear();
+                globalMapContainer.getChildren().add(globalMapView);
+            }
+
+            WebEngine webEngine = globalMapView.getEngine();
+            webEngine.setOnAlert(event -> System.out.println("JavaScript Alert: " + event.getData()));
+            webEngine.setOnError(event -> System.out.println("JavaScript Error: " + event.getMessage()));
+            webEngine.setJavaScriptEnabled(true);
+            webEngine.loadContent(getGlobalMapHtml());
+
+            webEngine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+                if (newState == Worker.State.SUCCEEDED) {
+                    System.out.println("Carte globale chargée avec succès");
+
+                    StringBuilder markersJson = new StringBuilder("[");
+                    boolean first = true;
+                    for (Lampadaire lampadaire : lampadaires) {
+                        double lat = lampadaire.getLatitude();
+                        double lng = lampadaire.getLongitude();
+                        if (lat != 0 && lng != 0 && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+                            if (!first) markersJson.append(",");
+                            first = false;
+                            String title = escapeJsonString(lampadaire.getTypeLampadaire());
+                            String description = escapeJsonString("Puissance: " + lampadaire.getPuissance() + "W, État: " + lampadaire.getEtat().toString());
+                            Zone zone = serviceZone.getById(lampadaire.getIdZone());
+                            String zoneName = escapeJsonString((zone != null) ? zone.getNom() : "Inconnue");
+                            String color = lampadaire.getEtat() == EtatLampadaire.EN_PANNE ? "#ea4335" :
+                                    lampadaire.getEtat() == EtatLampadaire.EN_MAINTENANCE ? "#fbbc04" :
+                                            lampadaire.getEtat() == EtatLampadaire.ACTIF ? "#34a853" : "#1a73e8";
+                            markersJson.append(String.format(Locale.US,
+                                    "{\"lat\":%f,\"lng\":%f,\"title\":\"%s\",\"content\":\"%s - Zone: %s<br>%s\",\"color\":\"%s\"}",
+                                    lat, lng, title, title, zoneName, description, color
+                            ));
+                        }
+                    }
+                    markersJson.append("]");
+                    System.out.println("JSON des marqueurs : " + markersJson.toString());
+
+                    try {
+                        webEngine.executeScript("addMarkers(" + markersJson.toString() + ");");
+                        System.out.println("Marqueurs ajoutés avec succès");
+                    } catch (Exception e) {
+                        System.out.println("Erreur lors de l'ajout des marqueurs : " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                    globalMapInitialized = true;
+                }
+            });
+
+            globalMapContainer.setVisible(true);
+            globalMapContainer.setManaged(true);
+            System.out.println("Taille du conteneur : " + globalMapContainer.getWidth() + "x" + globalMapContainer.getHeight());
+        } catch (Exception e) {
+            System.out.println("Erreur lors de l'initialisation de la carte globale : " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private String getGlobalMapHtml() {
+        return "<!DOCTYPE html>\n" +
+                "<html>\n" +
+                "<head>\n" +
+                "    <title>Carte des Lampadaires</title>\n" +
+                "    <meta charset=\"utf-8\" />\n" +
+                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+                "    <link rel=\"stylesheet\" href=\"https://unpkg.com/leaflet@1.7.1/dist/leaflet.css\" />\n" +
+                "    <script src=\"https://unpkg.com/leaflet@1.7.1/dist/leaflet.js\"></script>\n" +
+                "    <style>\n" +
+                "        html, body, #map {\n" +
+                "            height: 100%;\n" +
+                "            width: 100%;\n" +
+                "            margin: 0;\n" +
+                "            padding: 0;\n" +
+                "        }\n" +
+                "        .custom-icon {\n" +
+                "            text-align: center;\n" +
+                "            display: flex;\n" +
+                "            align-items: center;\n" +
+                "            justify-content: center;\n" +
+                "        }\n" +
+                "        .marker-pin {\n" +
+                "            width: 30px;\n" +
+                "            height: 48px;\n" +
+                "            position: relative;\n" +
+                "        }\n" +
+                "        .marker-pin svg {\n" +
+                "            width: 100%;\n" +
+                "            height: 100%;\n" +
+                "        }\n" +
+                "        .lamp-pole {\n" +
+                "            stroke: #333; /* Default pole color (dark gray) */\n" +
+                "            stroke-width: 2;\n" +
+                "        }\n" +
+                "        .lamp-light {\n" +
+                "            fill: #34a853; /* Default light color (green for active) */\n" +
+                "        }\n" +
+                "    </style>\n" +
+                "</head>\n" +
+                "<body>\n" +
+                "    <div id=\"map\"></div>\n" +
+                "    <script>\n" +
+                "        var map = L.map('map').setView([36.8, 10.2], 13); // Coordonnées centrées sur la Tunisie\n" +
+                "        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {\n" +
+                "            maxZoom: 19,\n" +
+                "            attribution: '© OpenStreetMap contributors'\n" +
+                "        }).addTo(map);\n" +
+                "\n" +
+                "        function createCustomIcon(color) {\n" +
+                "            let lightColor = '#34a853'; // Default: active (green)\n" +
+                "            if (color === '#ea4335') lightColor = '#ea4335'; // Broken (red)\n" +
+                "            else if (color === '#fbbc04') lightColor = '#fbbc04'; // Maintenance (yellow)\n" +
+                "\n" +
+                "            return L.divIcon({\n" +
+                "                className: 'custom-div-icon',\n" +
+                "                html: `<div class='marker-pin'><svg width='24' height='48' viewBox='0 0 24 48' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M12 2L12 20' class='lamp-pole'/><circle cx='12' cy='25' r='8' class='lamp-light' fill='${lightColor}'/><path d='M12 33L12 46' class='lamp-pole'/></svg></div>`,\n" +
+                "                iconSize: [30, 48],\n" +
+                "                iconAnchor: [15, 48]\n" +
+                "            });\n" +
+                "        }\n" +
+                "\n" +
+                "        function addMarker(lat, lng, title, content, color) {\n" +
+                "            var customIcon = createCustomIcon(color);\n" +
+                "            var marker = L.marker([lat, lng], {icon: customIcon}).addTo(map);\n" +
+                "            marker.bindPopup('<b>' + content + '</b>');\n" +
+                "        }\n" +
+                "\n" +
+                "        function addMarkers(markers) {\n" +
+                "            markers.forEach(function(m) {\n" +
+                "                addMarker(m.lat, m.lng, m.title, m.content, m.color);\n" +
+                "            });\n" +
+                "        }\n" +
+                "    </script>\n" +
+                "</body>\n" +
+                "</html>";
     }
 }

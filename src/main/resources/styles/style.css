@@ -222,4 +222,14 @@
 
 .action-button.map:hover {
     -fx-background-color: #1557b0; /* Darker shade on hover */
-}
+}#overviewMap {
+     -fx-border-color: red;
+     -fx-border-width: 2;
+ }.card-container .card {
+      -fx-pref-width: 250px; /* Ajustez selon vos besoins */
+      -fx-pref-height: 300px; /* Ajustez selon vos besoins */
+  }.card {
+       -fx-background-color: white; /* ou autre couleur */
+       -fx-background-radius: 12;
+       -fx-padding: 16;
+   }
