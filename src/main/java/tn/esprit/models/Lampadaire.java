@@ -10,23 +10,70 @@ public class Lampadaire {
     private final ObjectProperty<EtatLampadaire> etat = new SimpleObjectProperty<>();
     private final ObjectProperty<LocalDate> dateInstallation = new SimpleObjectProperty<>();
     private final IntegerProperty idZone = new SimpleIntegerProperty();
+    private final DoubleProperty latitude = new SimpleDoubleProperty(); // Ajout
+    private final DoubleProperty longitude = new SimpleDoubleProperty(); // Ajout
 
     public Lampadaire() {}
 
     public Lampadaire(int id_lamp, String typeLampadaire, float puissance,
-                      EtatLampadaire etat, LocalDate dateInstallation, int id_zone) {
+                      EtatLampadaire etat, LocalDate dateInstallation, int id_zone,
+                      double latitude, double longitude) {
         this.idLamp.set(id_lamp);
         this.typeLampadaire.set(typeLampadaire);
         this.puissance.set(puissance);
         this.etat.set(etat);
         this.dateInstallation.set(dateInstallation);
         this.idZone.set(id_zone);
+        this.latitude.set(latitude);
+        this.longitude.set(longitude);
     }
 
-    public Lampadaire(String text, float v, EtatLampadaire value, LocalDate value1, int i) {
+    // Getters et setters pour latitude et longitude
+    public double getLatitude() { return latitude.get(); }
+    public void setLatitude(double latitude) { this.latitude.set(latitude); }
+    public DoubleProperty latitudeProperty() { return latitude; }
+
+    public double getLongitude() { return longitude.get(); }
+    public void setLongitude(double longitude) { this.longitude.set(longitude); }
+    public DoubleProperty longitudeProperty() { return longitude; }
+
+    // Autres getters/setters existants inchangés
+    public IntegerProperty idLampProperty() { return idLamp; }
+    public StringProperty typeLampadaireProperty() { return typeLampadaire; }
+    public FloatProperty puissanceProperty() { return puissance; }
+    public ObjectProperty<EtatLampadaire> etatProperty() { return etat; }
+    public ObjectProperty<LocalDate> dateInstallationProperty() { return dateInstallation; }
+    public IntegerProperty idZoneProperty() { return idZone; }
+
+    public int getIdLamp() { return idLamp.get(); }
+    public String getTypeLampadaire() { return typeLampadaire.get(); }
+    public float getPuissance() { return puissance.get(); }
+    public EtatLampadaire getEtat() { return etat.get(); }
+    public LocalDate getDateInstallation() { return dateInstallation.get(); }
+    public int getIdZone() { return idZone.get(); }
+
+    public void setIdLamp(int id_lamp) { this.idLamp.set(id_lamp); }
+    public void setTypeLampadaire(String typeLampadaire) { this.typeLampadaire.set(typeLampadaire); }
+    public void setPuissance(float puissance) { this.puissance.set(puissance); }
+    public void setEtat(EtatLampadaire etat) { this.etat.set(etat); }
+    public void setDateInstallation(LocalDate dateInstallation) { this.dateInstallation.set(dateInstallation); }
+    public void setIdZone(int id_zone) { this.idZone.set(id_zone); }
+
+    @Override
+    public String toString() {
+        return "Lampadaire{" +
+                "id_lamp=" + idLamp.get() +
+                ", typeLampadaire='" + typeLampadaire.get() + '\'' +
+                ", puissance=" + puissance.get() +
+                ", etat=" + etat.get() +
+                ", dateInstallation=" + dateInstallation.get() +
+                ", id_zone=" + idZone.get() +
+                ", latitude=" + latitude.get() +
+                ", longitude=" + longitude.get() +
+                '}';
     }
 
-    // Enum avec gestion des anciennes valeurs
+    // Enum EtatLampadaire inchangé
     public enum EtatLampadaire {
         ACTIF("actif", "allume"),
         EN_PANNE("en panne", "eteint"),
@@ -55,41 +102,5 @@ public class Lampadaire {
         public String toString() {
             return aliases[0];
         }
-    }
-
-    // Getters pour les propriétés
-    public IntegerProperty idLampProperty() { return idLamp; }
-    public StringProperty typeLampadaireProperty() { return typeLampadaire; }
-    public FloatProperty puissanceProperty() { return puissance; }
-    public ObjectProperty<EtatLampadaire> etatProperty() { return etat; }
-    public ObjectProperty<LocalDate> dateInstallationProperty() { return dateInstallation; }
-    public IntegerProperty idZoneProperty() { return idZone; }
-
-    // Getters classiques
-    public int getIdLamp() { return idLamp.get(); }
-    public String getTypeLampadaire() { return typeLampadaire.get(); }
-    public float getPuissance() { return puissance.get(); }
-    public EtatLampadaire getEtat() { return etat.get(); }
-    public LocalDate getDateInstallation() { return dateInstallation.get(); }
-    public int getIdZone() { return idZone.get(); }
-
-    // Setters
-    public void setIdLamp(int id_lamp) { this.idLamp.set(id_lamp); }
-    public void setTypeLampadaire(String typeLampadaire) { this.typeLampadaire.set(typeLampadaire); }
-    public void setPuissance(float puissance) { this.puissance.set(puissance); }
-    public void setEtat(EtatLampadaire etat) { this.etat.set(etat); }
-    public void setDateInstallation(LocalDate dateInstallation) { this.dateInstallation.set(dateInstallation); }
-    public void setIdZone(int id_zone) { this.idZone.set(id_zone); }
-
-    @Override
-    public String toString() {
-        return "Lampadaire{" +
-                "id_lamp=" + idLamp.get() +
-                ", typeLampadaire='" + typeLampadaire.get() + '\'' +
-                ", puissance=" + puissance.get() +
-                ", etat=" + etat.get() +
-                ", dateInstallation=" + dateInstallation.get() +
-                ", id_zone=" + idZone.get() +
-                '}';
     }
 }

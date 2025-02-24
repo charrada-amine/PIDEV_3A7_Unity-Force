@@ -6,7 +6,7 @@
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
-            xmlns:fx="http://javafx/fxml/1"
+            xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="tn.esprit.controllers.GestionLampadaireController"
             stylesheets="@styles/style.css">
 
@@ -35,7 +35,7 @@
     <!-- Contenu principal -->
     <center>
         <HBox spacing="30" style="-fx-padding: 25;">
-            <!-- Formulaire modernisé -->
+            <!-- Formulaire modernisé avec placeholder pour la carte -->
             <VBox spacing="20" styleClass="card" prefWidth="380">
                 <Label text="Gestion des Lampadaires" style="-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #202124;"/>
 
@@ -56,7 +56,10 @@
                     <Label fx:id="lblZoneError" styleClass="error-message" visible="false"/>
                 </VBox>
 
-                <!-- Nouveaux boutons modernisés -->
+                <!-- Placeholder pour la carte -->
+                <VBox fx:id="mapContainer" prefHeight="200" prefWidth="360" visible="false" managed="false"/>
+
+                <!-- Boutons modernisés -->
                 <HBox spacing="15" styleClass="button-container">
                     <Button text="Ajouter" onAction="#handleAdd" styleClass="action-button,add">
                         <graphic>

@@ -213,3 +213,13 @@
     -fx-font-size: 12px;
     -fx-padding: 2 0 0 5;
 }
+.action-button.map {
+    -fx-background-color: #1a73e8; /* Blue color for map-related action */
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-padding: 8 16;
+}
+
+.action-button.map:hover {
+    -fx-background-color: #1557b0; /* Darker shade on hover */
+}
