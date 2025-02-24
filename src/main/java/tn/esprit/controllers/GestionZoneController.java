@@ -107,7 +107,8 @@ public class GestionZoneController implements Initializable {
         icon.setIconSize(24);
         icon.setIconColor(Color.web("#1a73e8"));
 
-        Label title = new Label("Zone #" + zone.getIdZone());
+        // Modification ici : supprimer l'ID du titre et utiliser le nom de la zone
+        Label title = new Label("Zone " + zone.getNom());
         title.setStyle("-fx-font-size: 18; -fx-text-fill: #202124;");
 
         header.getChildren().addAll(icon, title);

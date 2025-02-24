@@ -26,6 +26,7 @@
     -fx-background-color: -primary;
     -fx-padding: 16;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 16, 0, 4, 4);
+    -fx-pref-width: 240px;
 }
 
 .nav-title {
@@ -60,6 +61,7 @@
     -fx-border-color: rgba(26,115,232,0.1);
     -fx-border-width: 2;
     -fx-border-radius: 16;
+    -fx-pref-width: 300px;
 }
 
 .card:hover {
@@ -161,13 +163,13 @@
 }
 
 #mapView {
-    -fx-min-width: 600px;
-    -fx-min-height: 400px;
+    -fx-pref-width: 600px;
+    -fx-pref-height: 400px;
+    -fx-max-width: infinity;
+    -fx-max-height: infinity;
     -fx-border-radius: 14;
     -fx-border-color: #e2e8f0;
     -fx-border-width: 2px;
-    -fx-max-width: infinity;
-    -fx-max-height: infinity;
 }
 
 /* ScrollPane */

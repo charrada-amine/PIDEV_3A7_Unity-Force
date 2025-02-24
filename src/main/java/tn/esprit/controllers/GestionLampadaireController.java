@@ -359,7 +359,8 @@ public class GestionLampadaireController implements Initializable {
         icon.setIconSize(24);
         icon.setIconColor(Color.web("#1a73e8"));
 
-        Label title = new Label("Lampadaire #" + lampadaire.getIdLamp());
+        // Modification ici : supprimer l'ID du titre
+        Label title = new Label("Lampadaire " + lampadaire.getTypeLampadaire());
         title.setStyle("-fx-font-size: 18; -fx-text-fill: #202124;");
 
         header.getChildren().addAll(icon, title);
@@ -398,7 +399,6 @@ public class GestionLampadaireController implements Initializable {
 
         return card;
     }
-
     private HBox createInfoRow(FontAwesomeSolid iconType, String text) {
         FontIcon icon = new FontIcon(iconType);
         icon.setIconSize(16);
