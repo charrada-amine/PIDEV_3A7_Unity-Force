@@ -239,4 +239,28 @@
 }
 #globalMapContainer {
     -fx-background-color: #ffffff; /* Remplacez toute valeur grise par blanc */
+}.action-button {
+     -fx-background-radius: 8px;
+     -fx-font-size: 14px;
+     -fx-font-weight: bold;
+ }
+
+.action-button,add {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+}
+
+.action-button,edit {
+    -fx-background-color: #2196F3;
+    -fx-text-fill: white;
+}
+
+.action-button,delete {
+    -fx-background-color: #F44336;
+    -fx-text-fill: white;
+}
+
+.action-button,reset {
+    -fx-background-color: #9E9E9E;
+    -fx-text-fill: #2d3436;
 }

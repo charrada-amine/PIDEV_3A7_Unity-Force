@@ -60,7 +60,8 @@
                                 <ComboBox fx:id="cbZone" promptText="Nom de la Zone" styleClass="modern-input"/>
                                 <Label fx:id="lblZoneError" styleClass="error-message" visible="false"/>
                             </VBox>
-
+                            <ComboBox fx:id="cbCamera" promptText="Caméra" styleClass="modern-input"/>
+                            <Label fx:id="lblCameraError" styleClass="error-message" visible="false"/>
                             <VBox fx:id="mapContainer" prefHeight="200" prefWidth="360" visible="false" managed="false"/>
 
                             <HBox spacing="15" styleClass="button-container">

@@ -17,7 +17,7 @@ public class MainFX extends Application {
     public void start(Stage primaryStage) {
         try {
             // Chemin corrigé pour MainMenu.fxml
-            Parent root = FXMLLoader.load(getClass().getResource("/MainMenu.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("/GestionCamera.fxml"));
 
             Scene scene = new Scene(root, 1200, 800);
 

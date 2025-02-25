@@ -1,50 +1,61 @@
 package tn.esprit.controllers;
-
-import java.util.Locale;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import java.util.Arrays;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.stage.Stage;
-import java.io.IOException;
-import javafx.animation.Timeline;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
 import javafx.scene.control.*;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.stage.StageStyle;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
+import tn.esprit.models.Camera;
 import tn.esprit.models.Lampadaire;
 import tn.esprit.models.Lampadaire.EtatLampadaire;
 import tn.esprit.models.Zone;
+import tn.esprit.services.ServiceCamera;
 import tn.esprit.services.ServiceLampadaire;
 import tn.esprit.services.ServiceZone;
-import java.net.URL;
-import java.time.format.DateTimeFormatter;
-import java.util.ResourceBundle;
-import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
-import org.kordamp.ikonli.javafx.FontIcon;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import org.json.JSONObject;
-import org.json.JSONArray;
-import javafx.scene.web.WebView;
-import javafx.scene.web.WebEngine;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
+import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
+import javafx.stage.StageStyle;
 import netscape.javascript.JSObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 public class GestionLampadaireController implements Initializable {
 
@@ -53,16 +64,20 @@ public class GestionLampadaireController implements Initializable {
     @FXML private ComboBox<EtatLampadaire> cbEtat;
     @FXML private DatePicker dpDateInstallation;
     @FXML private ComboBox<Zone> cbZone;
+    @FXML private ComboBox<Camera> cbCamera;
     @FXML private Label lblZoneError;
     @FXML private Label lblTypeError;
     @FXML private Label lblPuissanceError;
     @FXML private Label lblEtatError;
     @FXML private Label lblDateError;
+    @FXML private Label lblCameraError;
     @FXML private VBox mapContainer;
     @FXML private WebView globalMapView;
     @FXML private VBox globalMapContainer;
+
     private final ServiceLampadaire serviceLampadaire = new ServiceLampadaire();
     private final ServiceZone serviceZone = new ServiceZone();
+    private final ServiceCamera serviceCamera = new ServiceCamera();
     private final ObservableList<Lampadaire> lampadaires = FXCollections.observableArrayList();
     private Lampadaire selectedLampadaire;
     private WebView mapView;
@@ -75,18 +90,20 @@ public class GestionLampadaireController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         cbEtat.setItems(FXCollections.observableArrayList(EtatLampadaire.values()));
-
         cbZone.setItems(FXCollections.observableArrayList(serviceZone.getAll()));
         cbZone.setConverter(new StringConverter<Zone>() {
             @Override
-            public String toString(Zone zone) {
-                return (zone != null) ? zone.getNom() : "";
-            }
-
+            public String toString(Zone zone) { return (zone != null) ? zone.getNom() : ""; }
             @Override
-            public Zone fromString(String string) {
-                return null;
-            }
+            public Zone fromString(String string) { return null; }
+        });
+
+        cbCamera.setItems(FXCollections.observableArrayList(serviceCamera.getAll()));
+        cbCamera.setConverter(new StringConverter<Camera>() {
+            @Override
+            public String toString(Camera camera) { return camera != null ? "Caméra " + camera.getIdCamera() + " - " + camera.getUrlFlux() : ""; }
+            @Override
+            public Camera fromString(String string) { return null; }
         });
 
         tfType.textProperty().addListener((obs, oldVal, newVal) -> resetFieldError(tfType, lblTypeError));
@@ -101,11 +118,280 @@ public class GestionLampadaireController implements Initializable {
                 hideMap();
             }
         });
+        cbCamera.valueProperty().addListener((obs, oldVal, newVal) -> resetFieldError(cbCamera, lblCameraError));
 
         loadData();
         globalMapContainer.setVisible(true);
         globalMapContainer.setManaged(true);
         javafx.application.Platform.runLater(this::initializeGlobalMap);
+    }
+
+    private void loadData() {
+        lampadaires.setAll(serviceLampadaire.getAll());
+        javafx.application.Platform.runLater(this::initializeGlobalMap);
+    }
+
+    private void fillForm(Lampadaire lampadaire) {
+        selectedLampadaire = lampadaire;
+        tfType.setText(lampadaire.getTypeLampadaire());
+        tfPuissance.setText(String.valueOf(lampadaire.getPuissance()));
+        cbEtat.setValue(lampadaire.getEtat());
+        dpDateInstallation.setValue(lampadaire.getDateInstallation());
+        latitude = lampadaire.getLatitude();
+        longitude = lampadaire.getLongitude();
+        cbZone.getItems().stream()
+                .filter(z -> z.getIdZone() == lampadaire.getIdZone())
+                .findFirst()
+                .ifPresent(zone -> {
+                    cbZone.setValue(zone);
+                    showMapForZone(zone.getNom());
+                });
+        cbCamera.setValue(lampadaire.getIdCamera() > 0 ? serviceCamera.getById(lampadaire.getIdCamera()) : null);
+    }
+
+    private void clearForm() {
+        tfType.clear();
+        tfPuissance.clear();
+        cbEtat.getSelectionModel().clearSelection();
+        dpDateInstallation.setValue(null);
+        cbZone.getSelectionModel().clearSelection();
+        cbCamera.getSelectionModel().clearSelection();
+        hideMap();
+        selectedLampadaire = null;
+    }
+
+    @FXML
+    private void handleAdd() {
+        try {
+            validateInputs();
+            Lampadaire lampadaire = new Lampadaire();
+            lampadaire.setTypeLampadaire(tfType.getText());
+            lampadaire.setPuissance(Float.parseFloat(tfPuissance.getText()));
+            lampadaire.setEtat(cbEtat.getValue());
+            lampadaire.setDateInstallation(dpDateInstallation.getValue());
+            lampadaire.setIdZone(cbZone.getValue().getIdZone());
+            lampadaire.setLatitude(latitude);
+            lampadaire.setLongitude(longitude);
+            lampadaire.setIdCamera(cbCamera.getValue() != null ? cbCamera.getValue().getIdCamera() : 0);
+            serviceLampadaire.add(lampadaire);
+            loadData();
+            clearForm();
+            showSuccessFeedback();
+            javafx.application.Platform.runLater(this::initializeGlobalMap);
+        } catch (Exception e) {
+            showAlert("Erreur d'ajout", e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleBack(ActionEvent event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/MainMenu.fxml"));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger le menu principal");
+        }
+    }
+
+    @FXML
+    private void handleNavigateToZones(ActionEvent event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/GestionZone.fxml"));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger la gestion des zones");
+        }
+    }
+
+    @FXML
+    private void handleNavigateToCameras(ActionEvent event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/tn/esprit/views/GestionCamera.fxml"));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger la gestion des caméras");
+        }
+    }
+
+    @FXML
+    private void handleNavigateToLampadaires(ActionEvent event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/GestionLampadaire.fxml"));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger la gestion des lampadaires");
+        }
+    }
+
+    @FXML
+    private void handleUpdate() {
+        if (selectedLampadaire == null) {
+            showAlert("Erreur", "Veuillez sélectionner un lampadaire à modifier");
+            return;
+        }
+        try {
+            validateInputs();
+            selectedLampadaire.setTypeLampadaire(tfType.getText());
+            selectedLampadaire.setPuissance(Float.parseFloat(tfPuissance.getText()));
+            selectedLampadaire.setEtat(cbEtat.getValue());
+            selectedLampadaire.setDateInstallation(dpDateInstallation.getValue());
+            selectedLampadaire.setIdZone(cbZone.getValue().getIdZone());
+            selectedLampadaire.setLatitude(latitude);
+            selectedLampadaire.setLongitude(longitude);
+            selectedLampadaire.setIdCamera(cbCamera.getValue() != null ? cbCamera.getValue().getIdCamera() : 0);
+            serviceLampadaire.update(selectedLampadaire);
+            loadData();
+            clearForm();
+            showSuccessFeedback();
+            javafx.application.Platform.runLater(this::initializeGlobalMap);
+        } catch (Exception e) {
+            showAlert("Erreur de modification", e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleShowLampadaires() {
+        try {
+            clearForm();
+            loadData();
+            showSuccessFeedback();
+        } catch (Exception e) {
+            showAlert("Erreur", "Impossible de charger les lampadaires : " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleClear() {
+        clearForm();
+    }
+
+    private void validateInputs() throws Exception {
+        boolean hasError = false;
+        resetErrorStyles();
+
+        if (tfType.getText().isEmpty()) {
+            showError(tfType, lblTypeError, "Le type est requis");
+            hasError = true;
+        }
+
+        try {
+            Float.parseFloat(tfPuissance.getText());
+        } catch (NumberFormatException e) {
+            showError(tfPuissance, lblPuissanceError, "La puissance doit être un nombre");
+            hasError = true;
+        }
+
+        if (cbEtat.getValue() == null) {
+            showError(cbEtat, lblEtatError, "Sélectionnez un état");
+            hasError = true;
+        }
+
+        if (dpDateInstallation.getValue() == null) {
+            showError(dpDateInstallation, lblDateError, "Sélectionnez une date");
+            hasError = true;
+        }
+
+        if (cbZone.getValue() == null) {
+            showError(cbZone, lblZoneError, "Sélectionnez une zone");
+            hasError = true;
+        }
+
+        if (latitude == 0.0 && longitude == 0.0) {
+            showAlert("Coordonnées manquantes", "Veuillez sélectionner une position sur la carte");
+            hasError = true;
+        } else if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+            showAlert("Coordonnées invalides", "Les coordonnées GPS ne sont pas dans les plages valides");
+            hasError = true;
+        }
+
+        if (hasError) {
+            throw new Exception("Corrigez les erreurs avant de continuer");
+        }
+    }
+
+    private void showError(Control field, Label errorLabel, String message) {
+        if (!field.getStyleClass().contains("error-field")) {
+            field.getStyleClass().add("error-field");
+        }
+        errorLabel.setText(message);
+        errorLabel.setVisible(true);
+    }
+
+    private void resetErrorStyles() {
+        tfType.getStyleClass().remove("error-field");
+        tfPuissance.getStyleClass().remove("error-field");
+        cbEtat.getStyleClass().remove("error-field");
+        dpDateInstallation.getStyleClass().remove("error-field");
+        cbZone.getStyleClass().remove("error-field");
+        cbCamera.getStyleClass().remove("error-field");
+        lblTypeError.setVisible(false);
+        lblPuissanceError.setVisible(false);
+        lblEtatError.setVisible(false);
+        lblDateError.setVisible(false);
+        lblZoneError.setVisible(false);
+        lblCameraError.setVisible(false);
+    }
+
+    private void resetFieldError(Control field, Label errorLabel) {
+        field.getStyleClass().remove("error-field");
+        errorLabel.setVisible(false);
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.initStyle(StageStyle.TRANSPARENT);
+        alert.getDialogPane().getScene().getRoot().setStyle("-fx-background-color: rgba(255,255,255,0.95);-fx-background-radius: 16;-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 16, 0, 4, 4);");
+        alert.getDialogPane().setOpacity(0);
+        Timeline fadeIn = new Timeline(new KeyFrame(Duration.millis(200), new KeyValue(alert.getDialogPane().opacityProperty(), 1)));
+        fadeIn.play();
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private boolean showConfirmation(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.initStyle(StageStyle.TRANSPARENT);
+        alert.getDialogPane().getScene().getRoot().setStyle("-fx-background-color: rgba(255,255,255,0.95);-fx-background-radius: 16;-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 16, 0, 4, 4);");
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        return alert.showAndWait().filter(response -> response == ButtonType.OK).isPresent();
+    }
+
+    private void showSuccessFeedback() {
+        Pane root = (Pane) globalMapContainer.getParent();
+        Label feedback = new Label("✓ Opération réussie !");
+        feedback.setStyle("-fx-background-color: linear-gradient(to right, #34a853, #2d8a4a); " +
+                "-fx-text-fill: white; -fx-padding: 12 24; -fx-background-radius: 24; " +
+                "-fx-font-weight: 700;");
+        feedback.setTranslateY(-50);
+        feedback.setOpacity(0);
+
+        root.getChildren().add(feedback);
+
+        Timeline animation = new Timeline(
+                new KeyFrame(Duration.millis(300),
+                        new KeyValue(feedback.translateYProperty(), 20),
+                        new KeyValue(feedback.opacityProperty(), 1)),
+                new KeyFrame(Duration.millis(2000),
+                        new KeyValue(feedback.opacityProperty(), 0))
+        );
+        animation.setOnFinished(e -> root.getChildren().remove(feedback));
+        animation.play();
     }
 
     private void showMapForZone(String zoneName) {
@@ -232,240 +518,6 @@ public class GestionLampadaireController implements Initializable {
         return null;
     }
 
-    private void resetFieldError(Control field, Label errorLabel) {
-        field.getStyleClass().remove("error-field");
-        errorLabel.setVisible(false);
-    }
-
-    private void loadData() {
-        lampadaires.setAll(serviceLampadaire.getAll());
-        javafx.application.Platform.runLater(this::initializeGlobalMap);
-    }
-
-    private void fillForm(Lampadaire lampadaire) {
-        selectedLampadaire = lampadaire;
-        tfType.setText(lampadaire.getTypeLampadaire());
-        tfPuissance.setText(String.valueOf(lampadaire.getPuissance()));
-        cbEtat.setValue(lampadaire.getEtat());
-        dpDateInstallation.setValue(lampadaire.getDateInstallation());
-        latitude = lampadaire.getLatitude();
-        longitude = lampadaire.getLongitude();
-        cbZone.getItems().stream()
-                .filter(z -> z.getIdZone() == lampadaire.getIdZone())
-                .findFirst()
-                .ifPresent(zone -> {
-                    cbZone.setValue(zone);
-                    showMapForZone(zone.getNom());
-                });
-    }
-
-    private void clearForm() {
-        tfType.clear();
-        tfPuissance.clear();
-        cbEtat.getSelectionModel().clearSelection();
-        dpDateInstallation.setValue(null);
-        cbZone.getSelectionModel().clearSelection();
-        hideMap();
-        selectedLampadaire = null;
-    }
-
-    @FXML
-    private void handleAdd() {
-        try {
-            validateInputs();
-            Lampadaire lampadaire = new Lampadaire();
-            lampadaire.setTypeLampadaire(tfType.getText());
-            lampadaire.setPuissance(Float.parseFloat(tfPuissance.getText()));
-            lampadaire.setEtat(cbEtat.getValue());
-            lampadaire.setDateInstallation(dpDateInstallation.getValue());
-            lampadaire.setIdZone(cbZone.getValue().getIdZone());
-            lampadaire.setLatitude(latitude);
-            lampadaire.setLongitude(longitude);
-            serviceLampadaire.add(lampadaire);
-            loadData();
-            clearForm();
-            showSuccessFeedback();
-            javafx.application.Platform.runLater(this::initializeGlobalMap);
-        } catch (Exception e) {
-            showAlert("Erreur d'ajout", e.getMessage());
-        }
-    }
-
-    @FXML
-    private void handleBack(ActionEvent event) {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/MainMenu.fxml"));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            showAlert("Erreur", "Impossible de charger le menu principal");
-        }
-    }
-
-    @FXML
-    private void handleNavigateToZones(ActionEvent event) {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/GestionZone.fxml"));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            showAlert("Erreur", "Impossible de charger la gestion des zones");
-        }
-    }
-
-    @FXML
-    private void handleUpdate() {
-        if (selectedLampadaire == null) {
-            showAlert("Erreur", "Veuillez sélectionner un lampadaire à modifier");
-            return;
-        }
-        try {
-            validateInputs();
-            selectedLampadaire.setTypeLampadaire(tfType.getText());
-            selectedLampadaire.setPuissance(Float.parseFloat(tfPuissance.getText()));
-            selectedLampadaire.setEtat(cbEtat.getValue());
-            selectedLampadaire.setDateInstallation(dpDateInstallation.getValue());
-            selectedLampadaire.setIdZone(cbZone.getValue().getIdZone());
-            selectedLampadaire.setLatitude(latitude);
-            selectedLampadaire.setLongitude(longitude);
-            serviceLampadaire.update(selectedLampadaire);
-            loadData();
-            clearForm();
-            showSuccessFeedback();
-            javafx.application.Platform.runLater(this::initializeGlobalMap);
-        } catch (Exception e) {
-            showAlert("Erreur de modification", e.getMessage());
-        }
-    }
-
-    @FXML
-    private void handleShowLampadaires() {
-        try {
-            clearForm();
-            loadData();
-            showSuccessFeedback();
-        } catch (Exception e) {
-            showAlert("Erreur", "Impossible de charger les lampadaires : " + e.getMessage());
-        }
-    }
-
-    @FXML
-    private void handleClear() {
-        clearForm();
-    }
-
-    private void validateInputs() throws Exception {
-        boolean hasError = false;
-        resetErrorStyles();
-
-        if (tfType.getText().isEmpty()) {
-            showError(tfType, lblTypeError, "Le type est requis");
-            hasError = true;
-        }
-
-        try {
-            Float.parseFloat(tfPuissance.getText());
-        } catch (NumberFormatException e) {
-            showError(tfPuissance, lblPuissanceError, "La puissance doit être un nombre");
-            hasError = true;
-        }
-
-        if (cbEtat.getValue() == null) {
-            showError(cbEtat, lblEtatError, "Sélectionnez un état");
-            hasError = true;
-        }
-
-        if (dpDateInstallation.getValue() == null) {
-            showError(dpDateInstallation, lblDateError, "Sélectionnez une date");
-            hasError = true;
-        }
-
-        if (cbZone.getValue() == null) {
-            showError(cbZone, lblZoneError, "Sélectionnez une zone");
-            hasError = true;
-        }
-
-        if (latitude == 0.0 && longitude == 0.0) {
-            showAlert("Coordonnées manquantes", "Veuillez sélectionner une position sur la carte");
-            hasError = true;
-        } else if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
-            showAlert("Coordonnées invalides", "Les coordonnées GPS ne sont pas dans les plages valides");
-            hasError = true;
-        }
-
-        if (hasError) {
-            throw new Exception("Corrigez les erreurs avant de continuer");
-        }
-    }
-
-    private void showError(Control field, Label errorLabel, String message) {
-        if (!field.getStyleClass().contains("error-field")) {
-            field.getStyleClass().add("error-field");
-        }
-        errorLabel.setText(message);
-        errorLabel.setVisible(true);
-    }
-
-    private void resetErrorStyles() {
-        tfType.getStyleClass().remove("error-field");
-        tfPuissance.getStyleClass().remove("error-field");
-        cbEtat.getStyleClass().remove("error-field");
-        dpDateInstallation.getStyleClass().remove("error-field");
-        cbZone.getStyleClass().remove("error-field");
-        lblTypeError.setVisible(false);
-        lblPuissanceError.setVisible(false);
-        lblEtatError.setVisible(false);
-        lblDateError.setVisible(false);
-        lblZoneError.setVisible(false);
-    }
-
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.initStyle(StageStyle.TRANSPARENT);
-        alert.getDialogPane().getScene().getRoot().setStyle("-fx-background-color: rgba(255,255,255,0.95);-fx-background-radius: 16;-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 16, 0, 4, 4);");
-        alert.getDialogPane().setOpacity(0);
-        Timeline fadeIn = new Timeline(new KeyFrame(Duration.millis(200), new KeyValue(alert.getDialogPane().opacityProperty(), 1)));
-        fadeIn.play();
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
-    private boolean showConfirmation(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.initStyle(StageStyle.TRANSPARENT);
-        alert.getDialogPane().getScene().getRoot().setStyle("-fx-background-color: rgba(255,255,255,0.95);-fx-background-radius: 16;-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 16, 0, 4, 4);");
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        return alert.showAndWait().filter(response -> response == ButtonType.OK).isPresent();
-    }
-
-    private void showSuccessFeedback() {
-        Pane root = (Pane) globalMapContainer.getParent();
-        Label feedback = new Label("✓ Opération réussie !");
-        feedback.setStyle("-fx-background-color: linear-gradient(to right, #34a853, #2d8a4a); " +
-                "-fx-text-fill: white; -fx-padding: 12 24; -fx-background-radius: 24; " +
-                "-fx-font-weight: 700;");
-        feedback.setTranslateY(-50);
-        feedback.setOpacity(0);
-        root.getChildren().add(feedback);
-        Timeline animation = new Timeline(
-                new KeyFrame(Duration.millis(300),
-                        new KeyValue(feedback.translateYProperty(), 20),
-                        new KeyValue(feedback.opacityProperty(), 1)),
-                new KeyFrame(Duration.millis(2000),
-                        new KeyValue(feedback.opacityProperty(), 0))
-        );
-        animation.setOnFinished(e -> root.getChildren().remove(feedback));
-        animation.play();
-    }
-
     private void initializeGlobalMap() {
         try {
             if (globalMapView == null) {
@@ -511,8 +563,7 @@ public class GestionLampadaireController implements Initializable {
                                             lampadaire.getEtat() == EtatLampadaire.ACTIF ? "#34a853" : "#1a73e8";
                             markersJson.append(String.format(Locale.US,
                                     "{\"lat\":%f,\"lng\":%f,\"title\":\"%s\",\"content\":\"%s - Zone: %s<br>%s\",\"color\":\"%s\"}",
-                                    lat, lng, title, title, zoneName, description, color
-                            ));
+                                    lat, lng, title, title, zoneName, description, color));
                         }
                     }
                     markersJson.append("]");
@@ -593,6 +644,28 @@ public class GestionLampadaireController implements Initializable {
                 "</html>";
     }
 
+    private String escapeJsonString(String input) {
+        if (input == null) return "";
+        return input.replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r");
+    }
+
+    private HBox createInfoRow(FontAwesomeSolid iconType, String labelText, String value) {
+        FontIcon icon = new FontIcon(iconType);
+        icon.setIconSize(16);
+        icon.setIconColor(Color.web("#5f6368"));
+
+        Label label = new Label(labelText + ": ");
+        label.setStyle("-fx-font-weight: 600; -fx-text-fill: #202124;");
+
+        Label valueLabel = new Label(value);
+        valueLabel.setStyle("-fx-text-fill: #5f6368;");
+
+        HBox row = new HBox(8, icon, label, valueLabel);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setPadding(new Insets(0, 0, 0, 10));
+        return row;
+    }
+
     private void showLampadaireDetails(String jsonDetails) {
         try {
             JSONObject details = new JSONObject(jsonDetails);
@@ -623,6 +696,8 @@ public class GestionLampadaireController implements Initializable {
             dialogContainer.setEffect(new DropShadow(10, Color.gray(0.2)));
 
             HBox header = new HBox(10);
+            header.setAlignment(Pos.CENTER_LEFT);
+            header.setPadding(new Insets(0, 0, 0, 10));
             FontIcon headerIcon = new FontIcon(FontAwesomeSolid.LIGHTBULB);
             headerIcon.setIconSize(24);
             headerIcon.setIconColor(Color.web("#1a73e8"));
@@ -645,19 +720,19 @@ public class GestionLampadaireController implements Initializable {
                     createInfoRow(FontAwesomeSolid.POWER_OFF, "État", lampadaire.getEtat().toString()),
                     createInfoRow(FontAwesomeSolid.MAP_MARKER_ALT, "Zone", zoneName),
                     createInfoRow(FontAwesomeSolid.CALENDAR, "Date d'installation", dateFormatted),
-                    createInfoRow(FontAwesomeSolid.MAP_PIN, "Position", String.format("%.6f, %.6f", lampadaire.getLatitude(), lampadaire.getLongitude()))
+                    createInfoRow(FontAwesomeSolid.MAP_PIN, "Position", String.format("%.6f, %.6f", lampadaire.getLatitude(), lampadaire.getLongitude())),
+                    createInfoRow(FontAwesomeSolid.CAMERA, "Caméra", lampadaire.getIdCamera() > 0 ? "Caméra " + lampadaire.getIdCamera() : "Aucune")
             );
 
             HBox buttonContainer = new HBox(15);
-            buttonContainer.setAlignment(javafx.geometry.Pos.CENTER);
+            buttonContainer.setAlignment(Pos.CENTER);
             buttonContainer.setPadding(new Insets(10, 0, 0, 0));
-
             Button modifyCoordsButton = new Button("Modifier Coordonnées");
             modifyCoordsButton.setStyle("-fx-background-color: #1a73e8; -fx-text-fill: white; -fx-font-weight: 700; -fx-padding: 8 16; -fx-background-radius: 8;");
             modifyCoordsButton.setGraphic(new FontIcon(FontAwesomeSolid.MAP_PIN));
             modifyCoordsButton.setOnAction(e -> {
                 fillForm(lampadaire);
-                dialog.close(); // Ferme explicitement la fenêtre
+                dialog.close();
             });
 
             Button deleteButton = new Button("Supprimer");
@@ -669,25 +744,29 @@ public class GestionLampadaireController implements Initializable {
                         serviceLampadaire.delete(lampadaire);
                         loadData();
                         showSuccessFeedback();
-                        dialog.close(); // Ferme explicitement la fenêtre après suppression
+                        dialog.close();
                     } catch (Exception ex) {
                         showAlert("Erreur", "Erreur lors de la suppression : " + ex.getMessage());
                     }
                 }
             });
 
+            Button liveStreamButton = new Button("Afficher Live");
+            liveStreamButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: 700; -fx-padding: 8 16; -fx-background-radius: 8;");
+            liveStreamButton.setGraphic(new FontIcon(FontAwesomeSolid.VIDEO));
+            liveStreamButton.setOnAction(e -> showLiveStream(lampadaire));
+
             Button closeButton = new Button("Fermer");
             closeButton.setStyle("-fx-background-color: #5f6368; -fx-text-fill: white; -fx-font-weight: 700; -fx-padding: 8 16; -fx-background-radius: 8;");
-            closeButton.setOnAction(e -> dialog.close()); // Ferme explicitement la fenêtre
+            closeButton.setOnAction(e -> dialog.close());
 
-            buttonContainer.getChildren().addAll(modifyCoordsButton, deleteButton, closeButton);
+            buttonContainer.getChildren().addAll(modifyCoordsButton, deleteButton, liveStreamButton, closeButton);
 
             dialogContainer.getChildren().addAll(header, infoContainer, buttonContainer);
             dialog.getDialogPane().setContent(dialogContainer);
 
-            // Ajouter les boutons au DialogPane pour contrôler la fermeture
             dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
-            dialog.getDialogPane().lookupButton(ButtonType.CLOSE).setVisible(false); // Cacher le bouton par défaut
+            dialog.getDialogPane().lookupButton(ButtonType.CLOSE).setVisible(false);
 
             dialog.showAndWait();
 
@@ -697,24 +776,126 @@ public class GestionLampadaireController implements Initializable {
         }
     }
 
-    private HBox createInfoRow(FontAwesomeSolid iconType, String labelText, String value) {
-        FontIcon icon = new FontIcon(iconType);
-        icon.setIconSize(16);
-        icon.setIconColor(Color.web("#5f6368"));
+    private void showLiveStream(Lampadaire lampadaire) {
+        if (lampadaire.getIdCamera() <= 0) {
+            showAlert("Erreur", "Aucune caméra n'est associée à ce lampadaire.");
+            return;
+        }
 
-        Label label = new Label(labelText + ": ");
-        label.setStyle("-fx-font-weight: 600; -fx-text-fill: #202124;");
+        Camera camera = serviceCamera.getById(lampadaire.getIdCamera());
+        if (camera == null) {
+            showAlert("Erreur", "Caméra non trouvée.");
+            return;
+        }
 
-        Label valueLabel = new Label(value);
-        valueLabel.setStyle("-fx-text-fill: #5f6368;");
+        String ipAddress = camera.getIpAddress();
+        if (ipAddress == null || ipAddress.isEmpty()) {
+            showAlert("Erreur", "Aucune adresse IP n'est définie pour cette caméra.");
+            return;
+        }
 
-        HBox row = new HBox(8, icon, label, valueLabel);
-        row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-        return row;
+        String streamUrl = "http://" + ipAddress + "/stream";
+        System.out.println("Tentative de chargement du flux : " + streamUrl);
+
+        Dialog<Void> streamDialog = new Dialog<>();
+        streamDialog.initStyle(StageStyle.TRANSPARENT);
+        streamDialog.setTitle("Flux Vidéo en Direct");
+
+        VBox streamContainer = new VBox(15);
+        streamContainer.setPadding(new Insets(20));
+        streamContainer.setStyle("-fx-background-color: white; -fx-background-radius: 16; -fx-border-radius: 16;");
+        streamContainer.setEffect(new DropShadow(10, Color.gray(0.2)));
+
+        // Utilisation d'une ImageView pour afficher le flux
+        ImageView imageView = new ImageView();
+        imageView.setFitWidth(640);
+        imageView.setFitHeight(480);
+        imageView.setPreserveRatio(true);
+
+        // Thread pour extraire les frames MJPEG
+        Thread streamThread = new Thread(() -> {
+            try {
+                URL url = new URL(streamUrl);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestProperty("User-Agent", "Mozilla/5.0");
+                connection.setConnectTimeout(5000); // Timeout de 5 secondes
+                InputStream inputStream = connection.getInputStream();
+                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                int nRead;
+                byte[] data = new byte[16384];
+                byte[] boundary = "--123456789000000000000987654321".getBytes(); // Correspond à la boundary dans le code ESP32
+
+                while (!Thread.currentThread().isInterrupted() && (nRead = inputStream.read(data, 0, data.length)) != -1) {
+                    buffer.write(data, 0, nRead);
+                    byte[] content = buffer.toByteArray();
+
+                    // Recherche de la boundary pour extraire une frame JPEG
+                    int boundaryIndex = indexOf(content, boundary);
+                    if (boundaryIndex != -1) {
+                        int nextBoundaryIndex = indexOf(content, boundary, boundaryIndex + boundary.length);
+                        if (nextBoundaryIndex != -1) {
+                            // Trouver la fin de l'en-tête
+                            int headerEnd = indexOf(content, new byte[]{0x0D, 0x0A, 0x0D, 0x0A}, boundaryIndex);
+                            if (headerEnd != -1) {
+                                int imageStart = headerEnd + 4;
+                                int imageEnd = nextBoundaryIndex;
+                                byte[] imageData = Arrays.copyOfRange(content, imageStart, imageEnd);
+
+                                // Mettre à jour l'ImageView sur le thread UI
+                                Image image = new Image(new ByteArrayInputStream(imageData));
+                                javafx.application.Platform.runLater(() -> imageView.setImage(image));
+                            }
+                            // Réinitialiser le buffer pour la prochaine frame
+                            buffer.reset();
+                            buffer.write(content, nextBoundaryIndex, content.length - nextBoundaryIndex);
+                        }
+                    }
+                }
+                inputStream.close();
+                connection.disconnect();
+            } catch (Exception e) {
+                System.out.println("Erreur lors du chargement du flux : " + e.getMessage());
+                javafx.application.Platform.runLater(() -> showAlert("Erreur", "Impossible de charger le flux : " + e.getMessage()));
+            }
+        });
+        streamThread.setDaemon(true); // S'arrête quand l'application se ferme
+        streamThread.start();
+
+        streamContainer.getChildren().add(imageView);
+
+        HBox buttonContainer = new HBox(15);
+        buttonContainer.setAlignment(Pos.CENTER);
+        buttonContainer.setPadding(new Insets(10, 0, 0, 0));
+        Button closeStreamButton = new Button("Fermer");
+        closeStreamButton.setStyle("-fx-background-color: #5f6368; -fx-text-fill: white; -fx-font-weight: 700; -fx-padding: 8 16; -fx-background-radius: 8;");
+        closeStreamButton.setOnAction(e -> {
+            streamThread.interrupt(); // Arrêter le thread
+            streamDialog.close();
+        });
+
+        buttonContainer.getChildren().add(closeStreamButton);
+        streamContainer.getChildren().add(buttonContainer);
+
+        streamDialog.getDialogPane().setContent(streamContainer);
+        streamDialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+        streamDialog.getDialogPane().lookupButton(ButtonType.CLOSE).setVisible(false);
+
+        streamDialog.showAndWait();
     }
 
-    private String escapeJsonString(String input) {
-        if (input == null) return "";
-        return input.replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r");
+    // Méthodes utilitaires pour la recherche dans les bytes
+    private int indexOf(byte[] source, byte[] pattern) {
+        return indexOf(source, pattern, 0);
+    }
+
+    private int indexOf(byte[] source, byte[] pattern, int start) {
+        if (source == null || pattern == null || start >= source.length) return -1;
+        outer: for (int i = start; i < source.length - pattern.length + 1; i++) {
+            for (int j = 0; j < pattern.length; j++) {
+                if (source[i + j] != pattern[j]) continue outer;
+            }
+            return i;
+        }
+        return -1;
     }
 }

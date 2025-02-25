@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.esprit.controllers.GestionCameraController"
+            stylesheets="@styles/style.css">
+
+    <!-- Barre de navigation latérale -->
+    <left>
+        <VBox prefWidth="240" styleClass="nav-bar">
+            <Label text="Gestion Urbaine" styleClass="nav-title"/>
+            <Button text="Caméras" styleClass="nav-button" disable="true">
+                <graphic>
+                    <FontIcon iconLiteral="fas-camera" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Lampadaires" styleClass="nav-button" onAction="#handleNavigateToLampadaires">
+                <graphic>
+                    <FontIcon iconLiteral="fas-lightbulb" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Zones" styleClass="nav-button" onAction="#handleNavigateToZones">
+                <graphic>
+                    <FontIcon iconLiteral="fas-map-marker" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Retour" styleClass="nav-button" onAction="#handleBack">
+                <graphic>
+                    <FontIcon iconLiteral="fas-arrow-left" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+        </VBox>
+    </left>
+
+    <!-- Contenu principal -->
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background: transparent; -fx-border-width: 0;">
+            <content>
+                <VBox spacing="30" style="-fx-padding: 25;">
+                    <HBox spacing="30" alignment="TOP_LEFT">
+                        <!-- Formulaire -->
+                        <VBox spacing="20" styleClass="card" prefWidth="380">
+                            <Label text="Gestion des Caméras" style="-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #202124;"/>
+
+                            <VBox spacing="10">
+                                <TextField fx:id="tfUrlFlux" promptText="URL du flux (ex. rtsp://...)" styleClass="modern-input"/>
+                                <Label fx:id="lblUrlFluxError" styleClass="error-message" visible="false"/>
+
+                                <TextField fx:id="tfIpAddress" promptText="Adresse IP (ex. 192.168.1.100)" styleClass="modern-input"/> <!-- Ajout -->
+                                <Label fx:id="lblIpError" styleClass="error-message" visible="false"/> <!-- Ajout -->
+                            </VBox>
+
+                            <HBox spacing="15" styleClass="button-container">
+                                <Button text="Ajouter" onAction="#handleAdd" styleClass="action-button,add">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-plus-circle" iconSize="16" iconColor="white"/>
+                                    </graphic>
+                                </Button>
+                                <Button text="Modifier" onAction="#handleUpdate" styleClass="action-button,edit">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-edit" iconSize="16" iconColor="white"/>
+                                    </graphic>
+                                </Button>
+                                <Button text="Supprimer" onAction="#handleDelete" styleClass="action-button,delete">
+                                    <graphic>
+                                        <FontIcon iconLiteral="fas-trash" iconSize="16" iconColor="white"/>
+                                    </graphic>
+                                </Button>
+                            </HBox>
+                        </VBox>
+
+                        <!-- Liste des caméras -->
+                        <VBox styleClass="card" spacing="15" HBox.hgrow="ALWAYS">
+                            <Label text="Liste des Caméras" style="-fx-font-size: 20px; -fx-font-weight: 700; -fx-text-fill: #202124;"/>
+                            <ListView fx:id="lvCameras" prefHeight="400" style="-fx-background-color: #f8f9fa; -fx-border-color: #dadce0; -fx-border-width: 1;" HBox.hgrow="ALWAYS"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>
