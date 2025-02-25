@@ -10,7 +10,8 @@ import java.util.List;
 public class ServiceProfile {
     private Connection connection;
 
-    private final ServiceSource serviceSource = new ServiceSource(); // Ajout de l'objet ServiceSource
+    private final ServiceSource serviceSource = new ServiceSource();
+    // Ajout de l'objet ServiceSource
 
     // 🔹 Initialisation de la connexion à la base de données
     public ServiceProfile() {
@@ -113,6 +114,22 @@ public class ServiceProfile {
         }
     }
 
-    // 🔹 Récupérer les IDs des sources
+    public List<Integer> getAllProfileids() {
+        List<Integer> profileIds = new ArrayList<>();
+        String query = "SELECT idprofile FROM profile"; // Requête pour récupérer les idprofile dans la table profile
+
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+
+            while (resultSet.next()) {
+                profileIds.add(resultSet.getInt("idprofile")); // Ajouter chaque idprofile à la liste
+            }
+            System.out.println("✅ Récupération des idsProfile réussie !");
+        } catch (SQLException e) {
+            System.out.println("❌ Erreur lors de la récupération des idsProfile : " + e.getMessage());
+        }
+        return profileIds;
+    }
+
 
 }

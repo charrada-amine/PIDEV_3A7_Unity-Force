@@ -16,7 +16,6 @@ public class ServiceSource {
         this.connection = new MyDatabase2().getCnx();
     }
 
-    // 🔹 Ajouter une source
     public void add(Source source) {
         String query = "INSERT INTO source (type, capacite, rendement, etat, dateInstallation) VALUES (?, ?, ?, ?, ?)";
 
@@ -43,7 +42,6 @@ public class ServiceSource {
         }
     }
 
-    // 🔹 Récupérer toutes les sources
     public List<Source> getAll() {
         List<Source> sources = new ArrayList<>();
         String query = "SELECT * FROM source";
@@ -71,7 +69,6 @@ public class ServiceSource {
         return sources;
     }
 
-    // 🔹 Supprimer une source par son ID
     public void delete(int id) {
         String query = "DELETE FROM source WHERE idSource = ?";
 
@@ -89,7 +86,6 @@ public class ServiceSource {
         }
     }
 
-    // 🔹 Mettre à jour une source par son ID
     public void update(Source source) {
         String query = "UPDATE source SET type = ?, capacite = ?, rendement = ?, etat = ?, dateInstallation = ? WHERE idSource = ?";
 

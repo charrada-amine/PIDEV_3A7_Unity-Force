@@ -16,6 +16,9 @@ import javafx.stage.Stage;
 import tn.esprit.models.profile;
 import tn.esprit.services.ServiceProfile;
 import tn.esprit.services.ServiceSource;
+import tn.esprit.utils.EmailUtil;
+import tn.esprit.utils.SmsUtil;
+
 
 import java.io.IOException;
 import java.net.URL;
@@ -26,6 +29,8 @@ public class ProfileController implements Initializable {
 
     private final ServiceProfile serviceProfile = new ServiceProfile();
     private final ServiceSource serviceSource = new ServiceSource();
+    private static final double SEUIL_CONSOMMATION = 100.0; // Exemple : 100 unités
+
 
     @FXML
     private FlowPane flowPaneProfiles;
@@ -157,7 +162,10 @@ public class ProfileController implements Initializable {
     @FXML
     private void handleAdd() {
         try {
+            // Valider les entrées
             validateInputs();
+
+            // Créer un nouveau profil
             profile profile = new profile();
             profile.setConsommationJour(txtConsommationJour.getText());
             profile.setConsommationMois(txtConsommationMois.getText());
@@ -166,14 +174,26 @@ public class ProfileController implements Initializable {
             profile.setLampadaireId(Integer.parseInt(txtLampadaireId.getText()));
             profile.setSourceId(comboBoxSourceId.getValue());
 
+            // Ajouter le profil à la base de données
             serviceProfile.add(profile);
+
+            // Appeler la fonction pour vérifier la consommation et envoyer un email si nécessaire
+            checkConsommationAndSendEmail(profile);
+            sendProfileInfoBySms(profile);
+
+
+            // Charger les données et réinitialiser le formulaire
             loadData();
             clearForm();
+
+            // Afficher un message de succès
             showSuccessFeedback();
         } catch (Exception e) {
+            // Gérer les erreurs
             showAlert("Erreur d'ajout", e.getMessage());
         }
     }
+
 
     @FXML
     private void handleUpdate() {
@@ -275,5 +295,77 @@ public class ProfileController implements Initializable {
             e.printStackTrace();
         }
     }
+
+    public void checkConsommationAndSendEmail(profile profile) {
+        try {
+            String consommationStr = profile.getConsommationJour();
+
+            // Vérifier si la chaîne est vide ou nulle
+            if (consommationStr == null || consommationStr.trim().isEmpty()) {
+                System.out.println("Erreur : La consommation par jour est vide ou non définie.");
+                return;
+            }
+
+            // Convertir en double
+            double consommationJour = Double.parseDouble(consommationStr);
+
+            // Récupérer tous les IDs de profils existants
+            List<Integer> profileIdsExistants = serviceProfile.getAllProfileids();
+
+            // Vérifier si l'ID du profil actuel existe dans la base de données
+            if (!profileIdsExistants.contains(profile.getIdprofile())) {
+                System.out.println("Erreur : L'ID du profil " + profile.getIdprofile() + " n'existe pas dans la base de données.");
+                return;
+            }
+
+            // Comparer avec le seuil et envoyer un e-mail si nécessaire
+            if (consommationJour > SEUIL_CONSOMMATION) {
+                String to = "charradinoamin@gmail.com"; // Remplace par une adresse valide
+                String subject = "Alerte : Consommation élevée pour le profil " + profile.getIdprofile(); // Ajout de l'ID du profil dans le sujet
+                String body = "Alerte : La consommation journalière (" + consommationJour +
+                        ") dépasse le seuil autorisé (" + SEUIL_CONSOMMATION + ") pour le profilEnergetique ID=" + profile.getIdprofile() + ".\nMerci de prendre les mesures nécessaires.";
+
+                // Envoi de l'email
+                EmailUtil.sendEmail(to, subject, body);
+
+                // Afficher une alerte indiquant que l'email a été envoyé
+                showAlert("Alerte : E-mail envoyé", "L'e-mail d'alerte a été envoyé pour le profil ID=" + profile.getIdprofile() + " avec une consommation élevée.");
+                System.out.println("📩 Email envoyé avec succès pour la consommation élevée du profil ID=" + profile.getIdprofile());
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Erreur : La consommation par jour n'est pas un nombre valide.");
+        }
+    }
+
+
+    public void sendProfileInfoBySms(profile profile) {
+        try {
+            // Numéro de téléphone du destinataire (à remplacer par un numéro valide)
+            String toPhoneNumber = "+21652904114";
+
+            // Création du message contenant toutes les informations du profil
+            String messageBody = "📢 Informations du Profil\n" +
+                    "📌 ID Profil: " + profile.getIdprofile() + "\n" +
+                    "⚡ Consommation Jour: " + profile.getConsommationJour() + " kWh\n" +
+                    "📆 Consommation Mois: " + profile.getConsommationMois() + " kWh\n" +
+                    "💰 Coût Estimé: " + profile.getCoutEstime() + " €\n" +
+                    "⏳ Durée Activité: " + profile.getDureeActivite() + " h/jour\n" +
+                    "🔌 Source ID: " + profile.getSourceId();
+
+            // Envoi du SMS
+            SmsUtil.sendSms(toPhoneNumber, messageBody);
+
+            // Afficher une alerte de confirmation
+            showAlert("SMS Envoyé", "Les informations du profil ID=" + profile.getIdprofile() + " ont été envoyées avec succès.");
+            System.out.println("📩 SMS envoyé avec succès pour le profil ID=" + profile.getIdprofile());
+        } catch (Exception e) {
+            System.out.println("Erreur lors de l'envoi du SMS : " + e.getMessage());
+        }
+    }
+
+
+
+
+
 
 }
