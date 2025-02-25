@@ -33,13 +33,14 @@
         </VBox>
     </left>
 
-    <!-- Contenu principal avec défilement vertical -->
+    <!-- Contenu principal -->
     <center>
         <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background: transparent; -fx-border-width: 0;">
             <content>
-                <VBox>
-                    <HBox spacing="30" style="-fx-padding: 25;">
-                        <!-- Formulaire modernisé avec placeholder pour la carte -->
+                <VBox spacing="30" style="-fx-padding: 25;">
+                    <!-- Formulaire et Carte côte à côte -->
+                    <HBox spacing="30" alignment="TOP_LEFT">
+                        <!-- Formulaire -->
                         <VBox spacing="20" styleClass="card" prefWidth="380">
                             <Label text="Gestion des Lampadaires" style="-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #202124;"/>
 
@@ -60,10 +61,8 @@
                                 <Label fx:id="lblZoneError" styleClass="error-message" visible="false"/>
                             </VBox>
 
-                            <!-- Placeholder pour la carte de sélection -->
                             <VBox fx:id="mapContainer" prefHeight="200" prefWidth="360" visible="false" managed="false"/>
 
-                            <!-- Boutons modernisés -->
                             <HBox spacing="15" styleClass="button-container">
                                 <Button text="Ajouter" onAction="#handleAdd" styleClass="action-button,add">
                                     <graphic>
@@ -75,11 +74,6 @@
                                         <FontIcon iconLiteral="fas-edit" iconSize="16" iconColor="white"/>
                                     </graphic>
                                 </Button>
-                                <Button text="Supprimer" onAction="#handleDelete" styleClass="action-button,delete">
-                                    <graphic>
-                                        <FontIcon iconLiteral="fas-trash-alt" iconSize="16" iconColor="white"/>
-                                    </graphic>
-                                </Button>
                                 <Button text="Réinitialiser" onAction="#handleClear" styleClass="action-button,reset">
                                     <graphic>
                                         <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
@@ -88,20 +82,12 @@
                             </HBox>
                         </VBox>
 
-                        <!-- Zone des cartes de lampadaires -->
-                        <ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER"
-                                    style="-fx-background: transparent; -fx-border-width: 0;"
-                                    prefWidth="600">
-                            <FlowPane fx:id="cardContainer" hgap="25" vgap="25" style="-fx-padding: 20;"/>
-                        </ScrollPane>
-                    </HBox>
-
-                    <VBox style="-fx-padding: 0 25 25 25;">
-                        <VBox styleClass="card" spacing="15">
+                        <!-- Carte globale -->
+                        <VBox styleClass="card" spacing="15" HBox.hgrow="ALWAYS">
                             <Label text="Carte des lampadaires" style="-fx-font-size: 20px; -fx-font-weight: 700; -fx-text-fill: #202124;"/>
-                            <VBox fx:id="globalMapContainer" prefHeight="600" prefWidth="1200" style="-fx-background-color: #f8f9fa; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #dadce0; -fx-border-width: 1px;">
+                            <VBox fx:id="globalMapContainer" prefHeight="600" style="-fx-background-color: #f8f9fa; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #dadce0; -fx-border-width: 1px;" HBox.hgrow="ALWAYS">
                                 <children>
-                                    <WebView fx:id="globalMapView" prefHeight="600" prefWidth="1200"/>
+                                    <WebView fx:id="globalMapView" prefHeight="600" minWidth="0" HBox.hgrow="ALWAYS"/>
                                 </children>
                             </VBox>
                             <HBox spacing="15" alignment="CENTER_LEFT">
@@ -123,7 +109,7 @@
                                 </HBox>
                             </HBox>
                         </VBox>
-                    </VBox>
+                    </HBox>
                 </VBox>
             </content>
         </ScrollPane>

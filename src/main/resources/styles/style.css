@@ -233,3 +233,10 @@
        -fx-background-radius: 12;
        -fx-padding: 16;
    }
+
+.card {
+    -fx-background-color: #ffffff; /* Assurez-vous que c'est blanc ici */
+}
+#globalMapContainer {
+    -fx-background-color: #ffffff; /* Remplacez toute valeur grise par blanc */
+}

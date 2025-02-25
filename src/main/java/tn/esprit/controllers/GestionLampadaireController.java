@@ -20,7 +20,6 @@ import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
 import javafx.scene.text.Font;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
@@ -54,8 +53,6 @@ public class GestionLampadaireController implements Initializable {
     @FXML private ComboBox<EtatLampadaire> cbEtat;
     @FXML private DatePicker dpDateInstallation;
     @FXML private ComboBox<Zone> cbZone;
-    @FXML private FlowPane cardContainer;
-    @FXML private ScrollPane scrollPane;
     @FXML private Label lblZoneError;
     @FXML private Label lblTypeError;
     @FXML private Label lblPuissanceError;
@@ -78,10 +75,6 @@ public class GestionLampadaireController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         cbEtat.setItems(FXCollections.observableArrayList(EtatLampadaire.values()));
-        scrollPane.setFitToWidth(true);
-        cardContainer.setHgap(20);
-        cardContainer.setVgap(20);
-        cardContainer.setPadding(new Insets(20));
 
         cbZone.setItems(FXCollections.observableArrayList(serviceZone.getAll()));
         cbZone.setConverter(new StringConverter<Zone>() {
@@ -246,24 +239,7 @@ public class GestionLampadaireController implements Initializable {
 
     private void loadData() {
         lampadaires.setAll(serviceLampadaire.getAll());
-        cardContainer.getChildren().clear();
-        lampadaires.forEach(lampadaire -> cardContainer.getChildren().add(createLampadaireCard(lampadaire)));
-
-        if (globalMapInitialized) {
-            javafx.application.Platform.runLater(this::initializeGlobalMap);
-        }
-    }
-
-    private void handleDeleteLampadaire(Lampadaire lampadaire) {
-        if (showConfirmation("Confirmation", "Supprimer ce lampadaire ?")) {
-            try {
-                serviceLampadaire.delete(lampadaire);
-                loadData();
-                showSuccessFeedback();
-            } catch (Exception e) {
-                showAlert("Erreur", "Échec de la suppression : " + e.getMessage());
-            }
-        }
+        javafx.application.Platform.runLater(this::initializeGlobalMap);
     }
 
     private void fillForm(Lampadaire lampadaire) {
@@ -367,32 +343,10 @@ public class GestionLampadaireController implements Initializable {
     }
 
     @FXML
-    private void handleDelete() {
-        if (selectedLampadaire == null) {
-            showAlert("Erreur", "Veuillez sélectionner un lampadaire à supprimer");
-            return;
-        }
-        if (showConfirmation("Confirmation de suppression", "Voulez-vous vraiment supprimer ce lampadaire ?")) {
-            try {
-                serviceLampadaire.delete(selectedLampadaire);
-                loadData();
-                clearForm();
-                showSuccessFeedback();
-                javafx.application.Platform.runLater(this::initializeGlobalMap);
-            } catch (Exception e) {
-                showAlert("Erreur de suppression", e.getMessage());
-            }
-        }
-    }
-
-    @FXML
     private void handleShowLampadaires() {
         try {
             clearForm();
-            lampadaires.setAll(serviceLampadaire.getAll());
-            cardContainer.getChildren().clear();
-            lampadaires.forEach(l -> cardContainer.getChildren().add(createLampadaireCard(l)));
-            javafx.application.Platform.runLater(this::initializeGlobalMap);
+            loadData();
             showSuccessFeedback();
         } catch (Exception e) {
             showAlert("Erreur", "Impossible de charger les lampadaires : " + e.getMessage());
@@ -489,11 +443,11 @@ public class GestionLampadaireController implements Initializable {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
-        return alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK;
+        return alert.showAndWait().filter(response -> response == ButtonType.OK).isPresent();
     }
 
     private void showSuccessFeedback() {
-        Pane root = (Pane) cardContainer.getParent();
+        Pane root = (Pane) globalMapContainer.getParent();
         Label feedback = new Label("✓ Opération réussie !");
         feedback.setStyle("-fx-background-color: linear-gradient(to right, #34a853, #2d8a4a); " +
                 "-fx-text-fill: white; -fx-padding: 12 24; -fx-background-radius: 24; " +
@@ -510,83 +464,6 @@ public class GestionLampadaireController implements Initializable {
         );
         animation.setOnFinished(e -> root.getChildren().remove(feedback));
         animation.play();
-    }
-
-    private VBox createLampadaireCard(Lampadaire lampadaire) {
-        VBox card = new VBox(15);
-        card.getStyleClass().add("card");
-
-        HBox header = new HBox(10);
-        FontIcon icon = new FontIcon(FontAwesomeSolid.LIGHTBULB);
-        icon.setIconSize(24);
-        icon.setIconColor(Color.web("#1a73e8"));
-
-        Label title = new Label("Lampadaire " + lampadaire.getTypeLampadaire());
-        title.setStyle("-fx-font-size: 18; -fx-text-fill: #202124;");
-
-        header.getChildren().addAll(icon, title);
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        String dateFormatted = (lampadaire.getDateInstallation() != null)
-                ? lampadaire.getDateInstallation().format(formatter)
-                : "N/A";
-
-        VBox content = new VBox(8);
-        Zone zone = serviceZone.getById(lampadaire.getIdZone());
-        String zoneName = (zone != null) ? zone.getNom() : "Inconnue";
-
-        content.getChildren().addAll(
-                createInfoRow(FontAwesomeSolid.TAG, "Type : " + lampadaire.getTypeLampadaire()),
-                createInfoRow(FontAwesomeSolid.BOLT, "Puissance : " + lampadaire.getPuissance() + " W"),
-                createInfoRow(FontAwesomeSolid.POWER_OFF, "État : " + lampadaire.getEtat().toString()),
-                createInfoRow(FontAwesomeSolid.MAP_MARKER, "Zone : " + zoneName),
-                createInfoRow(FontAwesomeSolid.CALENDAR, "Installation : " + dateFormatted),
-                createInfoRow(FontAwesomeSolid.MAP_PIN, String.format("Position : %.6f, %.6f",
-                        lampadaire.getLatitude(), lampadaire.getLongitude()))
-        );
-
-        HBox buttons = new HBox(10);
-        Button btnModifier = createIconButton("Modifier", FontAwesomeSolid.PENCIL_ALT, "-secondary");
-        Button btnSupprimer = createIconButton("Supprimer", FontAwesomeSolid.TRASH, "#ea4335");
-
-        btnModifier.setOnAction(e -> fillForm(lampadaire));
-        btnSupprimer.setOnAction(e -> handleDeleteLampadaire(lampadaire));
-
-        buttons.getChildren().addAll(btnModifier, btnSupprimer);
-        card.getChildren().addAll(header, new Separator(), content, buttons);
-
-        card.setStyle("-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16;");
-        card.setEffect(new DropShadow(10, Color.gray(0.3)));
-
-        return card;
-    }
-
-    private HBox createInfoRow(FontAwesomeSolid iconType, String text) {
-        FontIcon icon = new FontIcon(iconType);
-        icon.setIconSize(16);
-        icon.setIconColor(Color.web("#5f6368"));
-
-        Label label = new Label(text);
-        label.setStyle("-fx-text-fill: #5f6368;");
-
-        return new HBox(10, icon, label);
-    }
-
-    private Button createIconButton(String text, FontAwesomeSolid iconType, String color) {
-        FontIcon icon = new FontIcon(iconType);
-        icon.setIconSize(16);
-        icon.setIconColor(Color.WHITE);
-
-        Button button = new Button(text, icon);
-        button.setStyle("-fx-background-color: " + color + "; -fx-text-fill: white;");
-        button.setContentDisplay(ContentDisplay.LEFT);
-        button.setGraphicTextGap(8);
-        return button;
-    }
-
-    private String escapeJsonString(String input) {
-        if (input == null) return "";
-        return input.replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r");
     }
 
     private void initializeGlobalMap() {
@@ -702,7 +579,6 @@ public class GestionLampadaireController implements Initializable {
                 "        function addMarker(lat, lng, title, content, color, details) {\n" +
                 "            var customIcon = createCustomIcon(color);\n" +
                 "            var marker = L.marker([lat, lng], {icon: customIcon}).addTo(map);\n" +
-                "            marker.bindPopup('<b>' + content + '</b>');\n" +
                 "            marker.on('click', function(e) {\n" +
                 "                alert('LAMPADAIRE_DETAILS:' + JSON.stringify(details));\n" +
                 "            });\n" +
@@ -737,7 +613,7 @@ public class GestionLampadaireController implements Initializable {
                 return;
             }
 
-            Dialog<Void> dialog = new Dialog<>();
+            Dialog<ButtonType> dialog = new Dialog<>();
             dialog.initStyle(StageStyle.TRANSPARENT);
             dialog.getDialogPane().setStyle("-fx-background-color: transparent;");
 
@@ -772,13 +648,46 @@ public class GestionLampadaireController implements Initializable {
                     createInfoRow(FontAwesomeSolid.MAP_PIN, "Position", String.format("%.6f, %.6f", lampadaire.getLatitude(), lampadaire.getLongitude()))
             );
 
-            dialogContainer.getChildren().addAll(header, infoContainer);
-            dialog.getDialogPane().setContent(dialogContainer);
-            dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+            HBox buttonContainer = new HBox(15);
+            buttonContainer.setAlignment(javafx.geometry.Pos.CENTER);
+            buttonContainer.setPadding(new Insets(10, 0, 0, 0));
 
-            Button closeButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.CLOSE);
-            closeButton.setStyle("-fx-background-color: #1a73e8; -fx-text-fill: white; -fx-font-weight: 700; -fx-padding: 8 16; -fx-background-radius: 8;");
-            closeButton.setText("Fermer");
+            Button modifyCoordsButton = new Button("Modifier Coordonnées");
+            modifyCoordsButton.setStyle("-fx-background-color: #1a73e8; -fx-text-fill: white; -fx-font-weight: 700; -fx-padding: 8 16; -fx-background-radius: 8;");
+            modifyCoordsButton.setGraphic(new FontIcon(FontAwesomeSolid.MAP_PIN));
+            modifyCoordsButton.setOnAction(e -> {
+                fillForm(lampadaire);
+                dialog.close(); // Ferme explicitement la fenêtre
+            });
+
+            Button deleteButton = new Button("Supprimer");
+            deleteButton.setStyle("-fx-background-color: #ea4335; -fx-text-fill: white; -fx-font-weight: 700; -fx-padding: 8 16; -fx-background-radius: 8;");
+            deleteButton.setGraphic(new FontIcon(FontAwesomeSolid.TRASH));
+            deleteButton.setOnAction(e -> {
+                if (showConfirmation("Confirmation", "Voulez-vous supprimer ce lampadaire ?")) {
+                    try {
+                        serviceLampadaire.delete(lampadaire);
+                        loadData();
+                        showSuccessFeedback();
+                        dialog.close(); // Ferme explicitement la fenêtre après suppression
+                    } catch (Exception ex) {
+                        showAlert("Erreur", "Erreur lors de la suppression : " + ex.getMessage());
+                    }
+                }
+            });
+
+            Button closeButton = new Button("Fermer");
+            closeButton.setStyle("-fx-background-color: #5f6368; -fx-text-fill: white; -fx-font-weight: 700; -fx-padding: 8 16; -fx-background-radius: 8;");
+            closeButton.setOnAction(e -> dialog.close()); // Ferme explicitement la fenêtre
+
+            buttonContainer.getChildren().addAll(modifyCoordsButton, deleteButton, closeButton);
+
+            dialogContainer.getChildren().addAll(header, infoContainer, buttonContainer);
+            dialog.getDialogPane().setContent(dialogContainer);
+
+            // Ajouter les boutons au DialogPane pour contrôler la fermeture
+            dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+            dialog.getDialogPane().lookupButton(ButtonType.CLOSE).setVisible(false); // Cacher le bouton par défaut
 
             dialog.showAndWait();
 
@@ -802,5 +711,10 @@ public class GestionLampadaireController implements Initializable {
         HBox row = new HBox(8, icon, label, valueLabel);
         row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
         return row;
+    }
+
+    private String escapeJsonString(String input) {
+        if (input == null) return "";
+        return input.replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r");
     }
 }
