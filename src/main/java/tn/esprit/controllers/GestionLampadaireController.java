@@ -61,19 +61,18 @@ public class GestionLampadaireController implements Initializable {
     @FXML private Label lblPuissanceError;
     @FXML private Label lblEtatError;
     @FXML private Label lblDateError;
-    @FXML private VBox mapContainer;      // Placeholder for the map
-    @FXML private WebView globalMapView;  // Déclaré dans le FXML
+    @FXML private VBox mapContainer;
+    @FXML private WebView globalMapView;
     @FXML private VBox globalMapContainer;
     private final ServiceLampadaire serviceLampadaire = new ServiceLampadaire();
     private final ServiceZone serviceZone = new ServiceZone();
     private final ObservableList<Lampadaire> lampadaires = FXCollections.observableArrayList();
     private Lampadaire selectedLampadaire;
-    private WebView mapView;              // Dynamically created map
-    private double latitude;              // Internal storage for latitude
-    private double longitude;             // Internal storage for longitude
+    private WebView mapView;
+    private double latitude;
+    private double longitude;
     private boolean globalMapInitialized = false;
 
-    // OpenCage API key (replace with your own key)
     private static final String OPENCAGE_API_KEY = "54e21fa99da1458b8ce623f0331efed6";
 
     @Override
@@ -84,7 +83,6 @@ public class GestionLampadaireController implements Initializable {
         cardContainer.setVgap(20);
         cardContainer.setPadding(new Insets(20));
 
-        // Load zones
         cbZone.setItems(FXCollections.observableArrayList(serviceZone.getAll()));
         cbZone.setConverter(new StringConverter<Zone>() {
             @Override
@@ -98,7 +96,6 @@ public class GestionLampadaireController implements Initializable {
             }
         });
 
-        // Listeners for error handling and map display
         tfType.textProperty().addListener((obs, oldVal, newVal) -> resetFieldError(tfType, lblTypeError));
         tfPuissance.textProperty().addListener((obs, oldVal, newVal) -> resetFieldError(tfPuissance, lblPuissanceError));
         cbEtat.valueProperty().addListener((obs, oldVal, newVal) -> resetFieldError(cbEtat, lblEtatError));
@@ -113,10 +110,8 @@ public class GestionLampadaireController implements Initializable {
         });
 
         loadData();
-        // On s'assure que le conteneur de la carte globale est visible
         globalMapContainer.setVisible(true);
         globalMapContainer.setManaged(true);
-        // On initialise la carte avec un délai pour s'assurer que tout est chargé
         javafx.application.Platform.runLater(this::initializeGlobalMap);
     }
 
@@ -127,10 +122,7 @@ public class GestionLampadaireController implements Initializable {
             return;
         }
 
-        // Remove existing map if present
         hideMap();
-
-        // Create and configure the map
         mapView = new WebView();
         mapView.setPrefHeight(200);
         mapView.setPrefWidth(360);
@@ -142,7 +134,6 @@ public class GestionLampadaireController implements Initializable {
                 JSObject window = (JSObject) webEngine.executeScript("window");
                 window.setMember("javaController", this);
                 webEngine.executeScript("initMap(" + coordinates[0] + ", " + coordinates[1] + ");");
-                // Set initial coordinates
                 latitude = coordinates[0];
                 longitude = coordinates[1];
             }
@@ -157,7 +148,6 @@ public class GestionLampadaireController implements Initializable {
             }
         });
 
-        // Add map to container and make it visible
         mapContainer.getChildren().add(mapView);
         mapContainer.setVisible(true);
         mapContainer.setManaged(true);
@@ -197,7 +187,6 @@ public class GestionLampadaireController implements Initializable {
                 "    <script>\n" +
                 "        var map;\n" +
                 "        var marker;\n" +
-                "\n" +
                 "        function initMap(lat, lng) {\n" +
                 "            map = L.map('map').setView([lat, lng], 15);\n" +
                 "            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {\n" +
@@ -260,7 +249,6 @@ public class GestionLampadaireController implements Initializable {
         cardContainer.getChildren().clear();
         lampadaires.forEach(lampadaire -> cardContainer.getChildren().add(createLampadaireCard(lampadaire)));
 
-        // Si la carte globale est déjà initialisée, réinitialisez-la
         if (globalMapInitialized) {
             javafx.application.Platform.runLater(this::initializeGlobalMap);
         }
@@ -596,7 +584,6 @@ public class GestionLampadaireController implements Initializable {
         return button;
     }
 
-    // Helper method to escape JSON strings
     private String escapeJsonString(String input) {
         if (input == null) return "";
         return input.replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r");
@@ -615,6 +602,7 @@ public class GestionLampadaireController implements Initializable {
             }
 
             WebEngine webEngine = globalMapView.getEngine();
+            webEngine.setJavaScriptEnabled(true);
             webEngine.setOnAlert(event -> {
                 String data = event.getData();
                 System.out.println("JavaScript Alert: " + data);
@@ -624,13 +612,11 @@ public class GestionLampadaireController implements Initializable {
                 }
             });
             webEngine.setOnError(event -> System.out.println("JavaScript Error: " + event.getMessage()));
-            webEngine.setJavaScriptEnabled(true);
             webEngine.loadContent(getGlobalMapHtml());
 
             webEngine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
                 if (newState == Worker.State.SUCCEEDED) {
                     System.out.println("Carte globale chargée avec succès");
-
                     StringBuilder markersJson = new StringBuilder("[");
                     boolean first = true;
                     for (Lampadaire lampadaire : lampadaires) {
@@ -663,12 +649,13 @@ public class GestionLampadaireController implements Initializable {
                         e.printStackTrace();
                     }
                     globalMapInitialized = true;
+                } else if (newState == Worker.State.FAILED) {
+                    System.out.println("Échec du chargement de la carte");
                 }
             });
 
             globalMapContainer.setVisible(true);
             globalMapContainer.setManaged(true);
-            System.out.println("Taille du conteneur : " + globalMapContainer.getWidth() + "x" + globalMapContainer.getHeight());
         } catch (Exception e) {
             System.out.println("Erreur lors de l'initialisation de la carte globale : " + e.getMessage());
             e.printStackTrace();
@@ -691,25 +678,9 @@ public class GestionLampadaireController implements Initializable {
                 "            margin: 0;\n" +
                 "            padding: 0;\n" +
                 "        }\n" +
-                "        .custom-icon {\n" +
-                "            text-align: center;\n" +
-                "            display: flex;\n" +
-                "            align-items: center;\n" +
-                "            justify-content: center;\n" +
-                "        }\n" +
-                "        .marker-pin {\n" +
-                "            width: 30px;\n" +
-                "            height: 48px;\n" +
-                "            position: relative;\n" +
-                "        }\n" +
-                "        .marker-pin svg {\n" +
-                "            width: 100%;\n" +
-                "            height: 100%;\n" +
-                "        }\n" +
-                "        .lamp-pole {\n" +
-                "            stroke: #333;\n" +
-                "            stroke-width: 2;\n" +
-                "        }\n" +
+                "        .marker-pin { width: 30px; height: 48px; position: relative; }\n" +
+                "        .marker-pin svg { width: 100%; height: 100%; }\n" +
+                "        .lamp-pole { stroke: #333; stroke-width: 2; }\n" +
                 "    </style>\n" +
                 "</head>\n" +
                 "<body>\n" +
@@ -720,7 +691,6 @@ public class GestionLampadaireController implements Initializable {
                 "            maxZoom: 19,\n" +
                 "            attribution: '© OpenStreetMap contributors'\n" +
                 "        }).addTo(map);\n" +
-                "\n" +
                 "        function createCustomIcon(color) {\n" +
                 "            return L.divIcon({\n" +
                 "                className: 'custom-div-icon',\n" +
@@ -729,7 +699,6 @@ public class GestionLampadaireController implements Initializable {
                 "                iconAnchor: [15, 48]\n" +
                 "            });\n" +
                 "        }\n" +
-                "\n" +
                 "        function addMarker(lat, lng, title, content, color, details) {\n" +
                 "            var customIcon = createCustomIcon(color);\n" +
                 "            var marker = L.marker([lat, lng], {icon: customIcon}).addTo(map);\n" +
@@ -738,36 +707,24 @@ public class GestionLampadaireController implements Initializable {
                 "                alert('LAMPADAIRE_DETAILS:' + JSON.stringify(details));\n" +
                 "            });\n" +
                 "        }\n" +
-                "\n" +
                 "        function addMarkers(markers) {\n" +
                 "            markers.forEach(function(m) {\n" +
-                "                addMarker(m.lat, m.lng, m.title, m.content, m.color, {\n" +
-                "                    'lat': m.lat,\n" +
-                "                    'lng': m.lng,\n" +
-                "                    'title': m.title,\n" +
-                "                    'content': m.content,\n" +
-                "                    'color': m.color\n" +
-                "                });\n" +
+                "                addMarker(m.lat, m.lng, m.title, m.content, m.color, {lat: m.lat, lng: m.lng, title: m.title, content: m.content, color: m.color});\n" +
                 "            });\n" +
                 "        }\n" +
                 "    </script>\n" +
                 "</body>\n" +
                 "</html>";
     }
+
     private void showLampadaireDetails(String jsonDetails) {
         try {
             JSONObject details = new JSONObject(jsonDetails);
             double lat = details.getDouble("lat");
             double lng = details.getDouble("lng");
             String title = details.getString("title");
-            String content = details.getString("content");
 
-            System.out.println("Recherche lampadaire avec lat=" + lat + ", lng=" + lng + ", title=" + title);
-
-            // Tolérance pour les coordonnées flottantes
-            double tolerance = 0.000001; // Ajustez selon vos besoins
-
-            // Trouver le lampadaire correspondant dans la liste
+            double tolerance = 0.000001;
             Lampadaire lampadaire = lampadaires.stream()
                     .filter(l -> Math.abs(l.getLatitude() - lat) < tolerance
                             && Math.abs(l.getLongitude() - lng) < tolerance
@@ -776,49 +733,74 @@ public class GestionLampadaireController implements Initializable {
                     .orElse(null);
 
             if (lampadaire == null) {
-                System.out.println("Aucun lampadaire trouvé pour lat=" + lat + ", lng=" + lng + ", title=" + title);
-                System.out.println("Contenu de lampadaires :");
-                lampadaires.forEach(l -> System.out.println("Lampadaire: lat=" + l.getLatitude() + ", lng=" + l.getLongitude() + ", title=" + l.getTypeLampadaire()));
                 showAlert("Erreur", "Lampadaire non trouvé dans les données.");
                 return;
             }
 
-            System.out.println("Lampadaire trouvé : " + lampadaire.getTypeLampadaire());
-
-            // Créer une boîte de dialogue personnalisée
             Dialog<Void> dialog = new Dialog<>();
             dialog.initStyle(StageStyle.TRANSPARENT);
-            dialog.getDialogPane().setStyle("-fx-background-color: rgba(255,255,255,0.95); -fx-background-radius: 16; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 16, 0, 4, 4);");
+            dialog.getDialogPane().setStyle("-fx-background-color: transparent;");
 
-            VBox contentBox = new VBox(10);
-            contentBox.setPadding(new Insets(20));
-            contentBox.setStyle("-fx-background-color: white; -fx-background-radius: 12;");
+            VBox dialogContainer = new VBox(15);
+            dialogContainer.setPadding(new Insets(20));
+            dialogContainer.setStyle("-fx-background-color: white; -fx-background-radius: 16; -fx-border-radius: 16;");
+            dialogContainer.setEffect(new DropShadow(10, Color.gray(0.2)));
 
+            HBox header = new HBox(10);
+            FontIcon headerIcon = new FontIcon(FontAwesomeSolid.LIGHTBULB);
+            headerIcon.setIconSize(24);
+            headerIcon.setIconColor(Color.web("#1a73e8"));
             Label titleLabel = new Label("Détails du Lampadaire");
-            titleLabel.setStyle("-fx-font-size: 18; -fx-font-weight: 700; -fx-text-fill: #202124;");
+            titleLabel.setStyle("-fx-font-size: 20; -fx-font-weight: 700; -fx-text-fill: #202124;");
+            header.getChildren().addAll(headerIcon, titleLabel);
+
+            VBox infoContainer = new VBox(12);
+            infoContainer.setPadding(new Insets(10));
+            infoContainer.setStyle("-fx-background-color: #f8f9fa; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #dadce0; -fx-border-width: 1;");
 
             Zone zone = serviceZone.getById(lampadaire.getIdZone());
             String zoneName = (zone != null) ? zone.getNom() : "Inconnue";
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             String dateFormatted = (lampadaire.getDateInstallation() != null) ? lampadaire.getDateInstallation().format(formatter) : "N/A";
 
-            contentBox.getChildren().addAll(
-                    titleLabel,
-                    new Label("Type: " + lampadaire.getTypeLampadaire()),
-                    new Label("Puissance: " + lampadaire.getPuissance() + " W"),
-                    new Label("État: " + lampadaire.getEtat().toString()),
-                    new Label("Zone: " + zoneName),
-                    new Label("Date d'installation: " + dateFormatted),
-                    new Label(String.format("Position: %.6f, %.6f", lampadaire.getLatitude(), lampadaire.getLongitude()))
+            infoContainer.getChildren().addAll(
+                    createInfoRow(FontAwesomeSolid.TAG, "Type", lampadaire.getTypeLampadaire()),
+                    createInfoRow(FontAwesomeSolid.BOLT, "Puissance", lampadaire.getPuissance() + " W"),
+                    createInfoRow(FontAwesomeSolid.POWER_OFF, "État", lampadaire.getEtat().toString()),
+                    createInfoRow(FontAwesomeSolid.MAP_MARKER_ALT, "Zone", zoneName),
+                    createInfoRow(FontAwesomeSolid.CALENDAR, "Date d'installation", dateFormatted),
+                    createInfoRow(FontAwesomeSolid.MAP_PIN, "Position", String.format("%.6f, %.6f", lampadaire.getLatitude(), lampadaire.getLongitude()))
             );
 
-            dialog.getDialogPane().setContent(contentBox);
+            dialogContainer.getChildren().addAll(header, infoContainer);
+            dialog.getDialogPane().setContent(dialogContainer);
             dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+
+            Button closeButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.CLOSE);
+            closeButton.setStyle("-fx-background-color: #1a73e8; -fx-text-fill: white; -fx-font-weight: 700; -fx-padding: 8 16; -fx-background-radius: 8;");
+            closeButton.setText("Fermer");
+
             dialog.showAndWait();
 
         } catch (Exception e) {
             showAlert("Erreur", "Impossible d'afficher les détails : " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private HBox createInfoRow(FontAwesomeSolid iconType, String labelText, String value) {
+        FontIcon icon = new FontIcon(iconType);
+        icon.setIconSize(16);
+        icon.setIconColor(Color.web("#5f6368"));
+
+        Label label = new Label(labelText + ": ");
+        label.setStyle("-fx-font-weight: 600; -fx-text-fill: #202124;");
+
+        Label valueLabel = new Label(value);
+        valueLabel.setStyle("-fx-text-fill: #5f6368;");
+
+        HBox row = new HBox(8, icon, label, valueLabel);
+        row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        return row;
     }
 }
