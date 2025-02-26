@@ -5,9 +5,8 @@
 <?import javafx.scene.text.*?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 <?import java.lang.String?>
-<?import javafx.collections.FXCollections?>
-<?import javafx.collections.FXCollections?>
 
+<?import javafx.collections.FXCollections?>
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.GestionResponsableController" stylesheets="@styles/style.css">
 
     <!-- Barre d'actions supérieure -->
@@ -17,52 +16,119 @@
         </HBox>
     </top>
 
+    <!-- Barre de navigation latérale -->
     <left>
         <VBox prefWidth="240" styleClass="nav-bar">
-            <Label text="Gestion utilisateur" styleClass="nav-title"/>
-            <Button text="Technicien" styleClass="nav-button" onAction="#filterByTechnicien">
+            <Label text="Gestion Urbaine" styleClass="nav-title"/>
+
+            <!-- Boutons de navigation -->
+            <Button text="Capteurs" styleClass="nav-button" onAction="#handleGestionCapteur">
+                <graphic>
+                    <FontIcon iconLiteral="fas-microchip" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Citoyens" styleClass="nav-button" onAction="#handleGestionCitoyen">
+                <graphic>
+                    <FontIcon iconLiteral="fas-users" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Données" styleClass="nav-button" onAction="#handleGestionDonnee">
+                <graphic>
+                    <FontIcon iconLiteral="fas-database" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Interventions" styleClass="nav-button" onAction="#handleGestionIntervention">
+                <graphic>
+                    <FontIcon iconLiteral="fas-tools" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Lampadaires" styleClass="nav-button" onAction="#handleGestionLampadaire">
+                <graphic>
+                    <FontIcon iconLiteral="fas-lightbulb" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Réclamations" styleClass="nav-button" onAction="#handleGestionReclamation">
+                <graphic>
+                    <FontIcon iconLiteral="fas-exclamation-circle" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Responsables" styleClass="nav-button" onAction="#handleGestionResponsable">
                 <graphic>
                     <FontIcon iconLiteral="fas-user-tie" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-            <Button text="Citoyen" styleClass="nav-button" onAction="#filterByCitoyen">
+
+            <Button text="Techniciens" styleClass="nav-button" onAction="#handleGestionTechnicien">
+                <graphic>
+                    <FontIcon iconLiteral="fas-user-cog" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Utilisateurs" styleClass="nav-button" onAction="#handleGestionUtilisateur">
                 <graphic>
                     <FontIcon iconLiteral="fas-user" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-            <Button text="Utilisateur" styleClass="nav-button" onAction="#filterByUtilisateur">
+
+            <Button text="Zones" styleClass="nav-button" onAction="#handleGestionZone">
                 <graphic>
-                    <FontIcon iconLiteral="fas-tools" iconSize="16" iconColor="#ffffff"/>
+                    <FontIcon iconLiteral="fas-map-marked-alt" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-            <Button text="Retour" styleClass="nav-button" onAction="#filterByAccueil">
+
+            <Button text="Profil" styleClass="nav-button" onAction="#handleProfileInterface">
                 <graphic>
-                    <FontIcon iconLiteral="fas-tools" iconSize="16" iconColor="#ffffff"/>
+                    <FontIcon iconLiteral="fas-user-circle" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Sources" styleClass="nav-button" onAction="#handleSourceInterface">
+                <graphic>
+                    <FontIcon iconLiteral="fas-code-branch" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Retour" styleClass="nav-button" onAction="#handleBack">
+                <graphic>
+                    <FontIcon iconLiteral="fas-arrow-left" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
         </VBox>
     </left>
-
-    <!-- Conteneur principal avec la liste à côté du formulaire -->
+    <!-- Conteneur principal -->
     <center>
         <HBox spacing="30" style="-fx-padding: 20;">
-            <!-- Formulaire de gestion des responsables -->
+            <!-- Formulaire d'utilisateur -->
             <VBox spacing="20" styleClass="card" prefWidth="400">
                 <Label text="Gestion des Responsables" style="-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #202124;"/>
 
                 <VBox spacing="10" style="-fx-padding: 20;"> <!-- Marges internes -->
-                    <TextField fx:id="idField" promptText="ID" styleClass="modern-input"/>
                     <TextField fx:id="nameField" promptText="Nom" styleClass="modern-input"/>
                     <TextField fx:id="prenomField" promptText="Prénom" styleClass="modern-input"/>
                     <TextField fx:id="emailField" promptText="Email" styleClass="modern-input"/>
-                    <PasswordField fx:id="passwordField" promptText="Mot de passe" styleClass="modern-input"/>
-
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <StackPane>
+                            <PasswordField fx:id="passwordField" promptText="Mot de passe" styleClass="modern-input" prefWidth="200" />
+                            <TextField fx:id="visiblePasswordField" promptText="Mot de passe" styleClass="modern-input" prefWidth="200" visible="false" />
+                        </StackPane>
+                        <ToggleButton fx:id="togglePasswordButton" styleClass="icon-button">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-eye-slash" iconSize="20" />
+                            </graphic>
+                        </ToggleButton>
+                    </HBox>
                     <HBox spacing="10">
                         <!-- Label pour les modules -->
                         <Label text="Modules :" />
 
-                        <!-- TextField pour les modules -->
-                        <TextField fx:id="modulesField" promptText="Modules" styleClass="modern-input"/>
+                        <!-- Champ pour les modules -->
+                        <TextField fx:id="modulesField" promptText="Modules" styleClass="modern-input" prefWidth="200" />
                     </HBox>
 
                     <!-- Boutons d'action -->
@@ -86,15 +152,14 @@
                 </VBox>
             </VBox>
 
-            <!-- Liste des responsables placée à côté du formulaire -->
-            <ScrollPane fx:id="scrollPane" fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="scroll-pane"
-                        style="-fx-background: transparent; -fx-padding: 10;">
-                <FlowPane fx:id="responsableFlowPane" orientation="VERTICAL" hgap="20" vgap="20" style="-fx-padding: 10;"/>
+            <!-- Liste des responsables -->
+            <ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER"
+                        style="-fx-background: transparent; -fx-border-width: 0;"
+                        prefWidth="800">
+                <FlowPane fx:id="responsableFlowPane"  hgap="20" vgap="20" style="-fx-padding: 10;"/>
             </ScrollPane>
         </HBox>
-
     </center>
-
 
     <!-- Pied de page -->
     <bottom>

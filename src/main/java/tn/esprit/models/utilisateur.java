@@ -1,5 +1,7 @@
 package tn.esprit.models;
 
+import tn.esprit.models.Role;
+
 import java.util.Date;
 
 public class utilisateur {
@@ -20,6 +22,17 @@ public class utilisateur {
         this.role = role;
         this.dateInscription = dateInscription;
     }
+    // Constructeur AVEC ID
+    public utilisateur(int id_utilisateur, String nom, String prenom, String email, String motdepasse, Role role, Date dateInscription) {
+        this.id_utilisateur = id_utilisateur;
+        this.nom = nom;
+        this.prenom = prenom;
+        this.email = email;
+        this.motdepasse = motdepasse;
+        this.role = role;
+        this.dateInscription = dateInscription;
+    }
+
 
     // Constructeur par défaut
     public utilisateur() {

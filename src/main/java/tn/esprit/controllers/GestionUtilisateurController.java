@@ -2,7 +2,9 @@ package tn.esprit.controllers;
 import java.time.format.DateTimeFormatter;
 import java.text.SimpleDateFormat;
 
+import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import tn.esprit.utils.MyDatabase;
 import tn.esprit.models.utilisateur;
 import javafx.fxml.FXMLLoader;
@@ -221,13 +223,13 @@ public class GestionUtilisateurController {
         card.setStyle("-fx-border-color: #ddd; -fx-border-width: 1; -fx-padding: 10; -fx-background-color: #f9f9f9; -fx-alignment: center;");
 
         // Champ ID (non modifiable)
-        Label idLabel = new Label("ID:");
+        /*Label idLabel = new Label("ID:");
         idLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: black;");
         TextField idField = new TextField(String.valueOf(user.getId_utilisateur()));
         idField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         idField.setEditable(false); // Non modifiable
         HBox idBox = new HBox(10, idLabel, idField);
-        idBox.setAlignment(Pos.CENTER_LEFT);
+        idBox.setAlignment(Pos.CENTER_LEFT);*/
 
         // Champ Nom
         Label nameLabel = new Label("Nom:");
@@ -257,13 +259,13 @@ public class GestionUtilisateurController {
         emailBox.setAlignment(Pos.CENTER_LEFT);
 
         // Champ Mot de passe
-        Label passwordLabel = new Label("Mot de passe:");
+        /*Label passwordLabel = new Label("Mot de passe:");
         passwordLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
         TextField mdpfield = new TextField(user.getMotdepasse());
         mdpfield.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         mdpfield.setEditable(false);
         HBox mdpBox = new HBox(10, passwordLabel, mdpfield);
-        mdpBox.setAlignment(Pos.CENTER_LEFT);
+        mdpBox.setAlignment(Pos.CENTER_LEFT);*/
 
         // Champ Rôle
         Label roleLabel = new Label("Rôle:");
@@ -286,7 +288,7 @@ public class GestionUtilisateurController {
         dateInscriptionBox.setAlignment(Pos.CENTER_LEFT);
 
         // Ajouter les HBoxes à la carte
-        card.getChildren().addAll(idBox, nameBox, prenomBox, emailBox, mdpBox, roleBox, dateInscriptionBox);
+        card.getChildren().addAll(nameBox, prenomBox, emailBox,  roleBox, dateInscriptionBox);
 
         return card;
     }
@@ -674,6 +676,84 @@ public class GestionUtilisateurController {
         for (utilisateur user : users) {
             VBox card = createUserCard(user);
             userFlowPane.getChildren().add(card);
+        }
+    }
+    @FXML
+    private void handleGestionCapteur(ActionEvent event) {
+        switchScene(event, "/GestionCapteur.fxml");
+    }
+
+    @FXML
+    private void handleGestionCitoyen(ActionEvent event) {
+        switchScene(event, "/GestionCitoyen.fxml");
+    }
+
+    @FXML
+    private void handleGestionDonnee(ActionEvent event) {
+        switchScene(event, "/GestionDonnee.fxml");
+    }
+
+    @FXML
+    private void handleGestionIntervention(ActionEvent event) {
+        switchScene(event, "/GestionIntervention.fxml");
+    }
+
+    @FXML
+    private void handleGestionLampadaire(ActionEvent event) {
+        switchScene(event, "/GestionLampadaire.fxml");
+    }
+
+    @FXML
+    private void handleGestionReclamation(ActionEvent event) {
+        switchScene(event, "/GestionReclamation.fxml");
+    }
+
+    @FXML
+    private void handleGestionResponsable(ActionEvent event) {
+        switchScene(event, "/GestionResponsable.fxml");
+    }
+
+    @FXML
+    private void handleGestionTechnicien(ActionEvent event) {
+        switchScene(event, "/GestionTechnicien.fxml");
+    }
+
+    @FXML
+    private void handleGestionUtilisateur(ActionEvent event) {
+        switchScene(event, "/GestionUtilisateur.fxml");
+    }
+
+    @FXML
+    private void handleGestionZone(ActionEvent event) {
+        switchScene(event, "/GestionZone.fxml");
+    }
+
+    @FXML
+    private void handleProfileInterface(ActionEvent event) {
+        switchScene(event, "/ProfileInterface.fxml");
+    }
+
+    @FXML
+    private void handleSourceInterface(ActionEvent event) {
+        switchScene(event, "/SourceInterface.fxml");
+    }
+
+    @FXML
+    private void handleBack() {
+        // Logique pour revenir à la page précédente
+        System.out.println("Retour à la page précédente");
+    }
+
+    private void switchScene(ActionEvent event, String fxmlPath) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+
+            // Récupère la scène actuelle et met à jour son contenu
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

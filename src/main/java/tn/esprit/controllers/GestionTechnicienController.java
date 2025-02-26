@@ -2,17 +2,20 @@ package tn.esprit.controllers;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import org.kordamp.ikonli.javafx.FontIcon;
 import tn.esprit.models.citoyen;
 import tn.esprit.models.technicien;
 import tn.esprit.models.Specialite;
-import tn.esprit.models.Specialite;
+
 import javafx.geometry.Pos;
 
 import tn.esprit.models.utilisateur;
@@ -35,7 +38,7 @@ import java.util.stream.Collectors;
 public class GestionTechnicienController {
 
     @FXML
-    private TextField idField, nameField, prenomField, emailField, passwordField;
+    private TextField  nameField, prenomField, emailField, passwordField;
     @FXML
     private ComboBox<String> specialiteComboBox;
     @FXML
@@ -44,9 +47,13 @@ public class GestionTechnicienController {
     private final ServiceUtilisateur serviceUtilisateur = new ServiceUtilisateur();
     private final ServiceTechnicien serviceTechnicien = new ServiceTechnicien();
     @FXML
+    private TextField visiblePasswordField;
+    @FXML
+    private ToggleButton togglePasswordButton;
 
 
 
+    @FXML
     private void initialize() {
         if (technicienFlowPane == null) {
             System.err.println("Erreur : 'technicienFlowPane' est nul. Vérifiez le fichier FXML.");
@@ -54,32 +61,50 @@ public class GestionTechnicienController {
             System.out.println("FlowPane 'technicienFlowPane' initialisé correctement.");
             loadUsers(); // Charger les techniciens
         }
-            if (specialiteComboBox != null) {
-                // Initialiser le ComboBox avec les noms des valeurs de l'énumération Specialite
-                specialiteComboBox.setItems(FXCollections.observableArrayList(
-                        Arrays.stream(Specialite.values())
-                                .map(Specialite::name) // Récupérer le nom des spécialités sous forme de String
-                                .collect(Collectors.toList())
-                ));
+
+        if (specialiteComboBox != null) {
+            // Initialiser le ComboBox avec les noms des valeurs de l'énumération Specialite
+            specialiteComboBox.setItems(FXCollections.observableArrayList(
+                    Arrays.stream(Specialite.values())
+                            .map(Specialite::name) // Récupérer le nom des spécialités sous forme de String
+                            .collect(Collectors.toList())
+            ));
+        } else {
+            System.err.println("Erreur : 'specialiteCombo' est nul.");
+        }
+
+        // Ajouter un écouteur pour basculer la visibilité du mot de passe
+        togglePasswordButton.selectedProperty().addListener((obs, wasSelected, isNowSelected) -> {
+            if (isNowSelected) {
+                // Afficher le mot de passe en clair
+                visiblePasswordField.setText(passwordField.getText());
+                visiblePasswordField.setVisible(true);
+                passwordField.setVisible(false);
+                ((FontIcon) togglePasswordButton.getGraphic()).setIconLiteral("fas-eye");
             } else {
-                System.err.println("Erreur : 'specialiteCombo' est nul.");
+                // Masquer le mot de passe
+                passwordField.setText(visiblePasswordField.getText());
+                passwordField.setVisible(true);
+                visiblePasswordField.setVisible(false);
+                ((FontIcon) togglePasswordButton.getGraphic()).setIconLiteral("fas-eye-slash");
+
             }
-
-
+        });
     }
+
 
     private VBox createTechnicienCard(technicien technicien) {
         VBox card = new VBox(10);
         card.setStyle("-fx-border-color: #ddd; -fx-border-width: 1; -fx-padding: 10; -fx-background-color: #f9f9f9; -fx-alignment: center;");
 
         // Champ ID (non modifiable)
-        Label idLabel = new Label("ID:");
+       /* Label idLabel = new Label("ID:");
         idLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: black;");
         TextField idField = new TextField(String.valueOf(technicien.getId_utilisateur()));
         idField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         idField.setEditable(false); // Non modifiable
         HBox idBox = new HBox(10, idLabel, idField); // Aligner le label et le champ ID
-        idBox.setAlignment(Pos.CENTER_LEFT); // Aligner à gauche
+        idBox.setAlignment(Pos.CENTER_LEFT); // Aligner à gauche*/
 
         // Champ Nom (non modifiable)
         Label nameLabel = new Label("Nom:");
@@ -109,13 +134,13 @@ public class GestionTechnicienController {
         emailBox.setAlignment(Pos.CENTER_LEFT);
 
         // Champ Mot de passe (non modifiable)
-        Label passwordLabel = new Label("Mot de passe:");
+       /* Label passwordLabel = new Label("Mot de passe:");
         passwordLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
         TextField passwordField = new TextField(technicien.getMotdepasse());
         passwordField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         passwordField.setEditable(false); // Non modifiable
         HBox passwordBox = new HBox(10, passwordLabel, passwordField); // Aligner le label et le champ Mot de passe
-        passwordBox.setAlignment(Pos.CENTER_LEFT);
+        passwordBox.setAlignment(Pos.CENTER_LEFT);*/
 
 
 
@@ -140,11 +165,9 @@ public class GestionTechnicienController {
 
         // Ajouter les HBoxes à la carte
         card.getChildren().addAll(
-                idBox,
                 nameBox,
                 prenomBox,
                 emailBox,
-                passwordBox,
                 dateInscriptionBox,
                 specialiteBox
         );
@@ -223,97 +246,75 @@ public class GestionTechnicienController {
     @FXML
     private void handleUpdateTechnicien() {
         try {
-            // Récupérer l'ID du technicien
-            String userIdText = idField.getText();
-            if (userIdText.isEmpty()) {
-                showAlert("Erreur", "L'ID de l'utilisateur/technicien ne peut pas être vide.");
+            // Récupérer et valider l'email
+            String email = emailField.getText().trim();
+            if (email.isEmpty() || !email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                showAlert("Erreur", "L'email doit être valide.");
                 return;
             }
 
-            int userId;
-            try {
-                userId = Integer.parseInt(userIdText);
-                if (userId <= 0) {
-                    showAlert("Erreur", "L'ID doit être un nombre entier positif.");
-                    return;
-                }
-            } catch (NumberFormatException e) {
-                showAlert("Erreur", "L'ID doit être un nombre entier.");
+            // Récupérer et valider le mot de passe
+            String password = togglePasswordButton.isSelected() ? visiblePasswordField.getText().trim() : passwordField.getText().trim();
+            if (password.isEmpty()) {
+                showAlert("Erreur", "Le mot de passe ne peut pas être vide.");
                 return;
             }
 
-            // Vérifier si l'utilisateur existe
-            utilisateur existingUser = serviceUtilisateur.getUtilisateurById(userId);
-            if (existingUser == null) {
-                showAlert("Erreur", "Aucun utilisateur trouvé avec cet ID.");
+            // Vérifier si le technicien existe avec cet email et mot de passe
+            utilisateur technicien = serviceUtilisateur.getByEmailAndPassword(email, password);
+            if (technicien == null) {
+                showAlert("Erreur", "Email ou mot de passe incorrect.");
                 return;
             }
 
-            // Récupérer et valider les champs
+            // Récupérer et valider le nouveau nom
             String newName = nameField.getText().trim();
             if (newName.isEmpty() || !newName.matches("[A-Za-zÀ-ÖØ-öø-ÿ\\s-]+")) {
                 showAlert("Erreur", "Le nom doit contenir uniquement des lettres et ne peut pas être vide.");
                 return;
             }
 
+            // Récupérer et valider le nouveau prénom
             String newPrenom = prenomField.getText().trim();
             if (newPrenom.isEmpty() || !newPrenom.matches("[A-Za-zÀ-ÖØ-öø-ÿ\\s-]+")) {
                 showAlert("Erreur", "Le prénom doit contenir uniquement des lettres et ne peut pas être vide.");
                 return;
             }
 
-            String newEmail = emailField.getText().trim();
-            if (newEmail.isEmpty() || !newEmail.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-                showAlert("Erreur", "L'email doit être valide.");
-                return;
-            }
-            if (!newEmail.equals(existingUser.getEmail()) && emailExists(newEmail)) {
-                showAlert("Erreur", "L'email est déjà utilisé.");
-                return;
-            }
-
-            String newPassword = passwordField.getText().trim();
-            if (newPassword.isEmpty() || newPassword.length() < 8
-                    || !newPassword.matches(".*\\d.*")
-                    || !newPassword.matches(".*[A-Z].*")) {
-                showAlert("Erreur", "Le mot de passe doit comporter au moins 8 caractères, un chiffre et une lettre majuscule.");
-                return;
-            }
-
-            // Validation de la spécialité
             String newSpecialite = specialiteComboBox.getValue();
             if (newSpecialite == null || newSpecialite.trim().isEmpty()) {
                 showAlert("Erreur", "La spécialité doit être sélectionnée.");
                 return;
             }
 
-            // Mise à jour des champs dans le service
-            serviceUtilisateur.updateFieldTechnicien(userId, "nom", newName);
-            serviceUtilisateur.updateFieldTechnicien(userId, "prenom", newPrenom);
-            serviceUtilisateur.updateFieldTechnicien(userId, "email", newEmail);
-            serviceUtilisateur.updateFieldTechnicien(userId, "motdepasse", newPassword);
-            serviceUtilisateur.updateFieldTechnicien(userId, "specialite", newSpecialite);
+            // Mettre à jour les champs autorisés (nom, prénom, spécialité)
+            serviceUtilisateur.updateFieldTechnicien(technicien.getId_utilisateur(), "nom", newName);
+            serviceUtilisateur.updateFieldTechnicien(technicien.getId_utilisateur(), "prenom", newPrenom);
+            serviceUtilisateur.updateFieldTechnicien(technicien.getId_utilisateur(), "specialite", newSpecialite);
 
-            // Recharger les utilisateurs pour refléter la modification
+            // Recharger la liste des techniciens
             loadUsers();
 
             // Réinitialiser les champs
             clearFields();
 
-            // Confirmation de la modification
+            // Afficher confirmation
             showAlert("Succès", "Technicien modifié avec succès.");
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Erreur", "Une erreur est survenue lors de la modification.");
         }
     }
+
+
     private void clearFields() {
-        idField.clear();
         nameField.clear();
         prenomField.clear();
         emailField.clear();
         passwordField.clear();
         specialiteComboBox.setValue(null); // Réinitialiser le ComboBox
+        togglePasswordButton.setSelected(false); // Désactiver le basculement
+
     }
     @FXML
     public void handleClear() {
@@ -414,17 +415,20 @@ public class GestionTechnicienController {
 
     @FXML
     private void handleDeleteTechnicien() {
-        // Créer un formulaire pour entrer l'ID du technicien
+        // Créer un formulaire pour entrer l'email et le mot de passe
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle("Supprimer Technicien");
-        dialog.setHeaderText("Supprimer un technicien par son ID");
+        dialog.setHeaderText("Supprimer un technicien en vérifiant son identité");
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
 
-        TextField technicienIdField = new TextField();
-        grid.addRow(0, new Label("ID Technicien :"), technicienIdField);
+        TextField emailField = new TextField();
+        PasswordField passwordField = new PasswordField();
+
+        grid.addRow(0, new Label("Email :"), emailField);
+        grid.addRow(1, new Label("Mot de passe :"), passwordField);
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
@@ -432,27 +436,37 @@ public class GestionTechnicienController {
         dialog.setResultConverter(button -> {
             if (button == ButtonType.OK) {
                 try {
-                    int id = Integer.parseInt(technicienIdField.getText());
-                    technicien technician = serviceTechnicien.getTechnicienById(id);
+                    String email = emailField.getText().trim();
+                    String password = passwordField.getText().trim();
 
-                    if (technician != null) {
-                        // Demande de confirmation
-                        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-                        confirmation.setTitle("Confirmation");
-                        confirmation.setHeaderText("Voulez-vous vraiment supprimer le technicien : " +
-                                technician.getNom() + " " + technician.getPrenom() + "?");
-
-                        Optional<ButtonType> result = confirmation.showAndWait();
-                        if (result.isPresent() && result.get() == ButtonType.OK) {
-                            serviceTechnicien.deleteById(id);
-                            showAlert("Succès", "Technicien supprimé avec succès !");
-                            loadUsers(); // Recharger la liste après suppression
-                        }
-                    } else {
-                        showAlert("Erreur", "Technicien avec l'ID " + id + " introuvable.");
+                    if (email.isEmpty() || password.isEmpty()) {
+                        showAlert("Erreur", "L'email et le mot de passe ne peuvent pas être vides.");
+                        return null;
                     }
-                } catch (NumberFormatException e) {
-                    showAlert("Erreur", "Veuillez entrer un ID valide.");
+
+                    // Vérifier si le technicien existe avec cet email et mot de passe
+                    utilisateur technicien = serviceUtilisateur.getByEmailAndPassword(email, password);
+                    if (technicien == null) {
+                        showAlert("Erreur", "Email ou mot de passe incorrect.");
+                        return null;
+                    }
+
+                    // Demande de confirmation
+                    Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+                    confirmation.setTitle("Confirmation");
+                    confirmation.setHeaderText("Voulez-vous vraiment supprimer le technicien : " +
+                            technicien.getNom() + " " + technicien.getPrenom() + "?");
+
+                    Optional<ButtonType> result = confirmation.showAndWait();
+                    if (result.isPresent() && result.get() == ButtonType.OK) {
+                        serviceUtilisateur.deleteById(technicien.getId_utilisateur());
+                        showAlert("Succès", "Technicien supprimé avec succès !");
+                        loadUsers(); // Recharger la liste après suppression
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    showAlert("Erreur", "Une erreur est survenue lors de la suppression.");
                 }
             }
             return null;
@@ -462,11 +476,90 @@ public class GestionTechnicienController {
     }
 
 
+
     private void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
+    }
+    @FXML
+    private void handleGestionCapteur(ActionEvent event) {
+        switchScene(event, "/GestionCapteur.fxml");
+    }
+
+    @FXML
+    private void handleGestionCitoyen(ActionEvent event) {
+        switchScene(event, "/GestionCitoyen.fxml");
+    }
+
+    @FXML
+    private void handleGestionDonnee(ActionEvent event) {
+        switchScene(event, "/GestionDonnee.fxml");
+    }
+
+    @FXML
+    private void handleGestionIntervention(ActionEvent event) {
+        switchScene(event, "/GestionIntervention.fxml");
+    }
+
+    @FXML
+    private void handleGestionLampadaire(ActionEvent event) {
+        switchScene(event, "/GestionLampadaire.fxml");
+    }
+
+    @FXML
+    private void handleGestionReclamation(ActionEvent event) {
+        switchScene(event, "/GestionReclamation.fxml");
+    }
+
+    @FXML
+    private void handleGestionResponsable(ActionEvent event) {
+        switchScene(event, "/GestionResponsable.fxml");
+    }
+
+    @FXML
+    private void handleGestionTechnicien(ActionEvent event) {
+        switchScene(event, "/GestionTechnicien.fxml");
+    }
+
+    @FXML
+    private void handleGestionUtilisateur(ActionEvent event) {
+        switchScene(event, "/GestionUtilisateur.fxml");
+    }
+
+    @FXML
+    private void handleGestionZone(ActionEvent event) {
+        switchScene(event, "/GestionZone.fxml");
+    }
+
+    @FXML
+    private void handleProfileInterface(ActionEvent event) {
+        switchScene(event, "/ProfileInterface.fxml");
+    }
+
+    @FXML
+    private void handleSourceInterface(ActionEvent event) {
+        switchScene(event, "/SourceInterface.fxml");
+    }
+
+    @FXML
+    private void handleBack() {
+        // Logique pour revenir à la page précédente
+        System.out.println("Retour à la page précédente");
+    }
+
+    private void switchScene(ActionEvent event, String fxmlPath) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+
+            // Récupère la scène actuelle et met à jour son contenu
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

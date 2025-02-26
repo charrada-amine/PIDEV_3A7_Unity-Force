@@ -382,33 +382,33 @@ public class ServiceUtilisateur {
 
 
     // Méthode pour récupérer un utilisateur par son ID
-        public utilisateur getUtilisateurById(int userId) {
-            utilisateur user = null;
+    public utilisateur getUtilisateurById(int userId) {
+        utilisateur user = null;
 
-            String query = "SELECT * FROM utilisateur WHERE id_utilisateur = ?";
+        String query = "SELECT * FROM utilisateur WHERE id_utilisateur = ?";
 
-            try (Connection connection = MyDatabase.getConnection();
-                 PreparedStatement stmt = connection.prepareStatement(query)) {
+        try (Connection connection = MyDatabase.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
 
-                stmt.setInt(1, userId); // Set l'ID dans la requête
+            stmt.setInt(1, userId); // Set l'ID dans la requête
 
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        // Si un utilisateur est trouvé
-                        user = new utilisateur();
-                        user.setId_utilisateur(rs.getInt("id_utilisateur"));
-                        user.setNom(rs.getString("nom"));
-                        user.setEmail(rs.getString("email"));
-                        // Ajouter d'autres champs si nécessaire
-                    }
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    // Si un utilisateur est trouvé
+                    user = new utilisateur();
+                    user.setId_utilisateur(rs.getInt("id_utilisateur"));
+                    user.setNom(rs.getString("nom"));
+                    user.setEmail(rs.getString("email"));
+                    // Ajouter d'autres champs si nécessaire
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-                // Gérer les exceptions ici (par exemple, afficher un message d'erreur)
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Gérer les exceptions ici (par exemple, afficher un message d'erreur)
+        }
 
-            return user; // Retourner l'utilisateur trouvé ou null s'il n'existe pas
-        }/*
+        return user; // Retourner l'utilisateur trouvé ou null s'il n'existe pas
+    }/*
     public boolean isEmailExists(String email) {
         // Connexion à la base de données
         try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/pi3a7")) {
@@ -433,9 +433,31 @@ public class ServiceUtilisateur {
         return false; // Si une erreur se produit, supposez que l'email n'existe pas
     }*/
 
-    public void updateSpecialite(int idUtilisateur, Specialite selectedSpecialite) {
-    }
+    public utilisateur getByEmailAndPassword(String email, String password) {
+        String query = "SELECT * FROM utilisateur WHERE email = ? AND motdepasse = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(query)) {
+            ps.setString(1, email);
+            ps.setString(2, password);
+            ResultSet rs = ps.executeQuery();
 
+            if (rs.next()) {
+                return new utilisateur(
+                        rs.getInt("id_utilisateur"),
+                        rs.getString("nom"),
+                        rs.getString("prenom"),
+                        rs.getString("email"),
+                        rs.getString("motdepasse"),
+                        Role.valueOf(rs.getString("role")), // Conversion String -> Enum Role
+                        rs.getDate("dateInscription") // Remplace "date_inscription" par le vrai nom de la colonne
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
+
+
 
 
