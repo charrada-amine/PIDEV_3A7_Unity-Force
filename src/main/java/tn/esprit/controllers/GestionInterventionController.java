@@ -29,6 +29,7 @@ import tn.esprit.services.ServiceIntervention;
 import java.net.URL;
 import java.sql.Date;
 import java.sql.Time;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
@@ -38,7 +39,7 @@ public class GestionInterventionController implements Initializable {
 
     @FXML private ComboBox<TypeIntervention> cbType;
     @FXML private TextField tfDescription;
-    @FXML private TextField tfEtat;
+    @FXML private ComboBox<String> cbEtat;
     @FXML private DatePicker dpDate;
     @FXML private TextField tfHeure;
     @FXML private TextField tfLampadaireId;
@@ -84,7 +85,7 @@ public class GestionInterventionController implements Initializable {
         selectedIntervention = intervention;
         cbType.setValue(intervention.getTypeIntervention());
         tfDescription.setText(intervention.getDescription());
-        tfEtat.setText(intervention.getEtat());
+        cbEtat.setValue(intervention.getEtat());
         dpDate.setValue(intervention.getDateIntervention().toLocalDate());
         tfHeure.setText(intervention.getHeureIntervention().toString());
         tfLampadaireId.setText(String.valueOf(intervention.getLampadaireId()));
@@ -96,7 +97,7 @@ public class GestionInterventionController implements Initializable {
     private void clearForm() {
         cbType.getSelectionModel().clearSelection();
         tfDescription.clear();
-        tfEtat.clear();
+        cbEtat.getSelectionModel().clearSelection();
         dpDate.setValue(null);
         tfHeure.clear();
         tfLampadaireId.clear();
@@ -112,7 +113,7 @@ public class GestionInterventionController implements Initializable {
             Intervention intervention = new Intervention(
                     cbType.getValue(),
                     tfDescription.getText(),
-                    tfEtat.getText(),
+                    cbEtat.getValue(),
                     Date.valueOf(dpDate.getValue()),
                     Time.valueOf(tfHeure.getText()),
                     Integer.parseInt(tfLampadaireId.getText()),
@@ -138,7 +139,7 @@ public class GestionInterventionController implements Initializable {
             validateInputs();
             selectedIntervention.setTypeIntervention(cbType.getValue());
             selectedIntervention.setDescription(tfDescription.getText());
-            selectedIntervention.setEtat(tfEtat.getText());
+            selectedIntervention.setEtat(cbEtat.getValue());
             selectedIntervention.setDateIntervention(Date.valueOf(dpDate.getValue()));
             selectedIntervention.setHeureIntervention(Time.valueOf(tfHeure.getText()));
             selectedIntervention.setLampadaireId(Integer.parseInt(tfLampadaireId.getText()));
@@ -179,9 +180,10 @@ public class GestionInterventionController implements Initializable {
     }
 
     private void validateInputs() throws Exception {
+        // Validation des champs obligatoires
         if (cbType.getValue() == null ||
                 tfDescription.getText().isEmpty() ||
-                tfEtat.getText().isEmpty() ||
+                cbEtat.getValue() == null || // Modifié pour ComboBox
                 dpDate.getValue() == null ||
                 tfHeure.getText().isEmpty() ||
                 tfLampadaireId.getText().isEmpty() ||
@@ -189,20 +191,33 @@ public class GestionInterventionController implements Initializable {
             throw new Exception("Tous les champs obligatoires doivent être remplis");
         }
 
-        try {
-            Time.valueOf(tfHeure.getText());
-        } catch (Exception e) {
+        // Validation de la date
+        LocalDate selectedDate = dpDate.getValue();
+        if (((LocalDate) selectedDate).isBefore(LocalDate.now())) {
+            throw new Exception("La date d'intervention ne peut pas être antérieure à aujourd'hui");
+        }
+
+        // Validation du format horaire
+        if (!tfHeure.getText().matches("^([0-1]?\\d|2[0-3]):([0-5]\\d):([0-5]\\d)$")) {
             throw new Exception("Format d'heure invalide (HH:MM:SS)");
         }
 
+        // Validation des IDs numériques positifs
+        validatePositiveId(tfLampadaireId, "Lampadaire");
+        validatePositiveId(tfTechnicienId, "Technicien");
+        if (!tfReclamationId.getText().isEmpty()) {
+            validatePositiveId(tfReclamationId, "Réclamation");
+        }
+    }
+
+    private void validatePositiveId(TextField field, String fieldName) throws Exception {
         try {
-            Integer.parseInt(tfLampadaireId.getText());
-            Integer.parseInt(tfTechnicienId.getText());
-            if (!tfReclamationId.getText().isEmpty()) {
-                Integer.parseInt(tfReclamationId.getText());
+            int id = Integer.parseInt(field.getText());
+            if (id <= 0) {
+                throw new Exception("L'ID " + fieldName + " doit être un nombre positif");
             }
         } catch (NumberFormatException e) {
-            throw new Exception("Les IDs doivent être des nombres valides");
+            throw new Exception("L'ID " + fieldName + " doit être un nombre valide");
         }
     }
 

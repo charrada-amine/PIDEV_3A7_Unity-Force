@@ -29,7 +29,7 @@ public class ServiceIntervention implements IService<Intervention> {
             pstm.setInt(6, intervention.getLampadaireId());
             pstm.setInt(7, intervention.getTechnicienId());
 
-            // Gestion de la valeur NULL pour ID_reclamation
+
             if(intervention.getID_reclamation() != null) {
                 pstm.setInt(8, intervention.getID_reclamation());
             } else {
@@ -38,7 +38,7 @@ public class ServiceIntervention implements IService<Intervention> {
 
             pstm.executeUpdate();
 
-            // Mise à jour de l'ID généré
+
             ResultSet generatedKeys = pstm.getGeneratedKeys();
             if (generatedKeys.next()) {
                 intervention.setID_intervention(generatedKeys.getInt(1));
