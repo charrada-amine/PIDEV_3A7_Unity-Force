@@ -39,6 +39,9 @@
                 <Label text="Gestion des Sources" style="-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #202124;"/>
 
                 <VBox spacing="20">
+
+                    <TextField fx:id="tfNom" promptText="Nom de la source" styleClass="modern-input"/>
+
                     <!-- Type de source -->
                     <ComboBox fx:id="cbType" promptText="Type" styleClass="modern-input"/>
 

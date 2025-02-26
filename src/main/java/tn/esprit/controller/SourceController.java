@@ -43,6 +43,7 @@ public class SourceController implements Initializable {
     @FXML private ComboBox<EnumType> cbType; // Utilisation d'un ComboBox pour le type
     @FXML private TextField tfCapacite;
     @FXML private TextField tfRendement;
+    @FXML private TextField  tfNom;
     @FXML private ComboBox<EnumEtat> cbEtat;
     @FXML private FlowPane cardContainer;
     @FXML private ScrollPane scrollPane;
@@ -54,6 +55,7 @@ public class SourceController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         cbType.setItems(FXCollections.observableArrayList(EnumType.values())); // Initialisation du ComboBox pour le type
         cbEtat.setItems(FXCollections.observableArrayList(EnumEtat.values()));
+
         scrollPane.setFitToWidth(true);
         cardContainer.setHgap(20);
         cardContainer.setVgap(20);
@@ -99,9 +101,8 @@ public class SourceController implements Initializable {
         tfCapacite.setText(String.valueOf(source.getCapacite()));
         tfRendement.setText(String.valueOf(source.getRendement()));
         cbEtat.setValue(source.getEtat());
-
+        tfNom.setText(source.getNom()); // Remplir le champ nom
     }
-
 
 
     private void clearForm() {
@@ -109,8 +110,7 @@ public class SourceController implements Initializable {
         tfCapacite.clear();
         tfRendement.clear();
         cbEtat.getSelectionModel().clearSelection();
-        //dpDateInstallation.setValue(null);
-        //dpDateInstallation.setDisable(false); // Re-enable the DatePicker for new entry
+        tfNom.clear(); // Effacer le champ nom
         selectedSource = null;
     }
 
@@ -127,6 +127,7 @@ public class SourceController implements Initializable {
             source.setRendement(Float.parseFloat(tfRendement.getText()));
             source.setEtat(cbEtat.getValue());
             source.setDateInstallation(LocalDate.now()); // Automatically set to current date
+            source.setNom(tfNom.getText()); // Récupérer le nom depuis le champ
             serviceSource.add(source);
             loadData();
             clearForm();
@@ -135,7 +136,6 @@ public class SourceController implements Initializable {
             showAlert("Erreur d'ajout", e.getMessage());
         }
     }
-
 
 
 
@@ -152,7 +152,7 @@ public class SourceController implements Initializable {
             selectedSource.setCapacite(Float.parseFloat(tfCapacite.getText()));
             selectedSource.setRendement(Float.parseFloat(tfRendement.getText()));
             selectedSource.setEtat(cbEtat.getValue());
-
+            selectedSource.setNom(tfNom.getText()); // Mettre à jour le nom
             // Ne pas modifier la date d'installation
             // selectedSource.setDateInstallation reste inchangé
 
@@ -187,9 +187,10 @@ public class SourceController implements Initializable {
     }
 
     private void validateInputs() throws Exception {
-        if (cbType.getValue() == null || tfCapacite.getText().isEmpty() || tfRendement.getText().isEmpty() || cbEtat.getValue() == null) {
-            throw new Exception("Veuillez remplir tous les champs.");
+        if (cbType.getValue() == null || tfCapacite.getText().isEmpty() || tfRendement.getText().isEmpty() || cbEtat.getValue() == null || tfNom.getText().isEmpty()) {
+            throw new Exception("Tous les champs doivent être remplis.");
         }
+        // Vous pouvez ajouter d'autres validations ici
     }
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -241,7 +242,7 @@ public class SourceController implements Initializable {
         icon.setIconSize(24);
         icon.setIconColor(Color.web("#1a73e8"));
 
-        Label title = new Label("Source #" + source.getIdSource());
+        Label title = new Label("NAME #" + source.getNom());
         title.setStyle("-fx-font-size: 18; -fx-text-fill: #202124;");
 
         header.getChildren().addAll(icon, title);

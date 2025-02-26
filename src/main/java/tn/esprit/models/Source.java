@@ -11,36 +11,39 @@ public class Source {
     private float rendement;
     private EnumEtat etat;
     private LocalDate dateInstallation;
+    private String nom; // Nouvelle variable
 
-
-    public Source(int id, EnumType type, float capacite, float rendement, EnumEtat etat, LocalDate dateInstallation) {
-        this.idSource = id; // Correction ici
+    public Source(int id, EnumType type, float capacite, float rendement, EnumEtat etat, LocalDate dateInstallation, String nom) {
+        this.idSource = id;
         this.type = type;
         this.capacite = capacite;
         this.rendement = rendement;
         this.etat = etat;
         this.dateInstallation = dateInstallation;
+        this.nom = nom; // Initialisation de la nouvelle variable
     }
-    public Source() {
 
+    public Source() {
         this.idSource = 0;
         this.type = EnumType.BATTERIE;
         this.capacite = 0.0f;
         this.rendement = 0.0f;
         this.etat = EnumEtat.ACTIF;
         this.dateInstallation = LocalDate.now();
+        this.nom = ""; // Initialisation par défaut
     }
-    public Source(EnumType type, float capacite, float rendement, EnumEtat etat, LocalDate dateInstallation) {
+
+    public Source(EnumType type, float capacite, float rendement, EnumEtat etat, LocalDate dateInstallation, String nom) {
         this.type = type;
         this.capacite = capacite;
         this.rendement = rendement;
         this.etat = etat;
         this.dateInstallation = dateInstallation;
+        this.nom = nom; // Initialisation de la nouvelle variable
     }
 
-
     public int getIdSource() { return idSource; }
-    public void setIdSource(int idSource) { this.idSource = idSource; } // Correction ici
+    public void setIdSource(int idSource) { this.idSource = idSource; }
 
     public EnumType getType() { return type; }
     public void setType(EnumType type) { this.type = type; }
@@ -57,6 +60,9 @@ public class Source {
     public LocalDate getDateInstallation() { return dateInstallation; }
     public void setDateInstallation(LocalDate dateInstallation) { this.dateInstallation = dateInstallation; }
 
+    public String getNom() { return nom; } // Getter pour le nom
+    public void setNom(String nom) { this.nom = nom; } // Setter pour le nom
+
     @Override
     public String toString() {
         return "Source{" +
@@ -66,6 +72,7 @@ public class Source {
                 ", rendement=" + rendement +
                 ", etat=" + etat +
                 ", dateInstallation=" + dateInstallation +
+                ", nom='" + nom + '\'' + // Ajout du nom dans la méthode toString
                 '}';
     }
 }

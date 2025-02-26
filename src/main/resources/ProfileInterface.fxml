@@ -52,8 +52,8 @@
                     <!-- Lampadaire ID -->
                     <TextField fx:id="txtLampadaireId" promptText="Lampadaire ID" styleClass="modern-input"/>
 
-                    <!-- Source ID -->
-                    <ComboBox fx:id="comboBoxSourceId" promptText="Source ID" styleClass="modern-input"/>
+                    <!-- Source (nom) -->
+                    <ComboBox fx:id="comboBoxSourceName" promptText="Sélectionnez une source" styleClass="modern-input"/>
 
                     <!-- Boutons modernisés -->
                     <HBox spacing="15" styleClass="button-container">

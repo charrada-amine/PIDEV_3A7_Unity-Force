@@ -7,9 +7,9 @@ import com.twilio.type.PhoneNumber;
 public class SmsUtil {
 
     // Remplacez ces valeurs par vos informations Twilio
-    private static final String ACCOUNT_SID = "ACd082b1781600008a8a8d612982b394b7";
-    private static final String AUTH_TOKEN = "a4a78d7dfce5aca8810a963d3f76ea01";
-    private static final String TWILIO_PHONE_NUMBER = "+17628155615"; // Format : +17628155615
+    private static final String ACCOUNT_SID = "ACd066291dd6fcd3c2f8cacaec16258f8c";
+    private static final String AUTH_TOKEN = "d63d23052d61d5ad78c487e913c5367f";
+    private static final String TWILIO_PHONE_NUMBER = "+12626002737"; // Format : +17628155615
 
     // Initialisation de Twilio
     static {
