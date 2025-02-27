@@ -1,5 +1,4 @@
-package tn.esprit.models;
-
+package tn.esprit.Enumerations;
 
 public enum TypeCapteur {
     MOUVEMENT,

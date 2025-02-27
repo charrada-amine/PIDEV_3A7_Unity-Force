@@ -2,6 +2,7 @@ package tn.esprit.services;
 
 import tn.esprit.utils.MyDatabase;
 import tn.esprit.models.DonneeTemperature;
+import tn.esprit.utils.MyDatabase2;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -13,7 +14,7 @@ public class ServiceTemperature {
     private Connection connection;
 
     public ServiceTemperature() {
-        this.connection = new MyDatabase().getCnx();
+        this.connection = new MyDatabase2().getCnx();
     }
 
     public void add(DonneeTemperature donnee) {

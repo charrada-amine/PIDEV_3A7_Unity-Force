@@ -10,9 +10,11 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.geometry.Insets;
+import javafx.stage.FileChooser;
 import tn.esprit.models.*;
 import tn.esprit.services.*;
 
+import java.io.File;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -26,8 +28,13 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import java.io.IOException;
+import tn.esprit.utils.EmailSend;
 
+import java.io.IOException;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import java.io.FileOutputStream;
+import java.io.IOException;
 public class GestionDonneesController implements Initializable {
 
     @FXML
@@ -51,6 +58,10 @@ public class GestionDonneesController implements Initializable {
     @FXML
     private Label valeurIndicationLabel;
 
+    @FXML
+    private ComboBox<String> searchTypeComboBox; // Pour choisir le type de capteur
+    @FXML
+    private ComboBox<String> searchCapteurIdComboBox; // Changé de Integer à String
     private final ServiceMouvement serviceMouvement = new ServiceMouvement();
     private final ServiceTemperature serviceTemperature = new ServiceTemperature();
     private final ServiceConsommation serviceConsommation = new ServiceConsommation();
@@ -73,6 +84,14 @@ public class GestionDonneesController implements Initializable {
             updateValeurIndication();
             updateCapteurIds(); // Mettre à jour les ID des capteurs
         });
+        // Initialiser les nouveaux ComboBox pour la recherche
+        searchTypeComboBox.getItems().addAll("MOUVEMENT", "TEMPERATURE", "LUMINOSITE", "CONSOMMATION_ENERGIE");
+        searchTypeComboBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            updateSearchCapteurIds(newVal); // Mettre à jour les ID des capteurs en fonction du type choisi
+        });
+
+        // Ajouter l'option "Tous" dans le ComboBox des ID de capteur
+        //searchCapteurIdComboBox.getItems().add(-1); // -1 représente "Tous"
     }
 
     private void updateCapteurIds() {
@@ -81,7 +100,7 @@ public class GestionDonneesController implements Initializable {
             // Récupérer tous les capteurs de la base de données
             List<Capteur> capteurs = serviceCapteur.getAll();
 
-            // Filtrer les capteurs pour ne garder que ceux du type sélectionné
+
             List<Capteur> filteredCapteurs = capteurs.stream()
                     .filter(capteur -> capteur.getType().name().equals(selectedType)) // Comparer avec le type sélectionné
                     .collect(Collectors.toList());
@@ -118,6 +137,7 @@ public class GestionDonneesController implements Initializable {
                     break;
                 case "TEMPERATURE":
                     serviceTemperature.add(new DonneeTemperature(0, date, heure, capteurId, Float.parseFloat(valeurStr)));
+                    checkTemperatureAndSendEmail(valeurStr);
                     break;
                 case "CONSOMMATION_ENERGIE":
                     serviceConsommation.add(new DonneeConsommation(0, date, heure, capteurId, Float.parseFloat(valeurStr)));
@@ -310,7 +330,252 @@ public class GestionDonneesController implements Initializable {
             System.err.println("Erreur lors du chargement de GestionCapteur.fxml : " + e.getMessage());
         }
     }
+    private void showSuccessAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Succès");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
 
     public void handleBack(ActionEvent actionEvent) {
+    }
+    @FXML
+    private void handleGestionCapteur(ActionEvent event) {
+        switchScene(event, "/GestionCapteur.fxml");
+    }
+
+    @FXML
+    private void handleGestionCitoyen(ActionEvent event) {
+        switchScene(event, "/GestionCitoyen.fxml");
+    }
+
+    @FXML
+    private void handleGestionDonnee(ActionEvent event) {
+        switchScene(event, "/GestionDonnee.fxml");
+    }
+
+    @FXML
+    private void handleGestionIntervention(ActionEvent event) {
+        switchScene(event, "/GestionIntervention.fxml");
+    }
+
+    @FXML
+    private void handleGestionLampadaire(ActionEvent event) {
+        switchScene(event, "/GestionLampadaire.fxml");
+    }
+
+    @FXML
+    private void handleGestionReclamation(ActionEvent event) {
+        switchScene(event, "/GestionReclamation.fxml");
+    }
+
+    @FXML
+    private void handleGestionResponsable(ActionEvent event) {
+        switchScene(event, "/GestionResponsable.fxml");
+    }
+
+    @FXML
+    private void handleGestionTechnicien(ActionEvent event) {
+        switchScene(event, "/GestionTechnicien.fxml");
+    }
+
+    @FXML
+    private void handleGestionUtilisateur(ActionEvent event) {
+        switchScene(event, "/GestionUtilisateur.fxml");
+    }
+
+    @FXML
+    private void handleGestionZone(ActionEvent event) {
+        switchScene(event, "/GestionZone.fxml");
+    }
+
+    @FXML
+    private void handleProfileInterface(ActionEvent event) {
+        switchScene(event, "/ProfileInterface.fxml");
+    }
+
+    @FXML
+    private void handleSourceInterface(ActionEvent event) {
+        switchScene(event, "/SourceInterface.fxml");
+    }
+
+    @FXML
+    private void handleBack() {
+        // Logique pour revenir à la page précédente
+        System.out.println("Retour à la page précédente");
+    }
+
+    private void switchScene(ActionEvent event, String fxmlPath) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+
+            // Récupère la scène actuelle et met à jour son contenu
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void checkTemperatureAndSendEmail(String valeurStr) {
+        try {
+            // Conversion de la chaîne en nombre flottant
+            float temperatureValeur = Float.parseFloat(valeurStr);
+
+            // Vérification si la température est supérieure à 50
+            if (temperatureValeur > 50) {
+                String to = "mohamedkarim.ouertatani@esprit.tn";
+                String subject = "Alerte : Température élevée détectée !";
+                String body = "Attention ! Une température élevée de " + temperatureValeur +
+                        "°C a été détectée.\nMerci de prendre les mesures nécessaires.";
+
+                // Envoi de l'email
+                EmailSend.sendEmail(to, subject, body);
+
+
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Erreur : La valeur de température n'est pas un nombre valide.");
+        }
+    }
+    public static void showAlert(String title, String message) {
+        System.out.println("⚠️ " + title + " : " + message);
+    }
+
+    @FXML
+    private void handleExportDonnees() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Enregistrer le fichier Excel");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Fichiers Excel", "*.xlsx"));
+        fileChooser.setInitialFileName("donnees_export.xlsx");
+
+        File file = fileChooser.showSaveDialog(null);
+        if (file != null) {
+            try {
+                Workbook workbook = new XSSFWorkbook();
+                Sheet sheet = workbook.createSheet("Donnees");
+
+                // Créer l'en-tête
+                Row headerRow = sheet.createRow(0);
+                headerRow.createCell(0).setCellValue("ID");
+                headerRow.createCell(1).setCellValue("Type");
+                headerRow.createCell(2).setCellValue("Date de collecte");
+                headerRow.createCell(3).setCellValue("Heure de collecte");
+                headerRow.createCell(4).setCellValue("Capteur ID");
+                headerRow.createCell(5).setCellValue("Valeur");
+
+                // Remplir les données
+                int rowNum = 1;
+                for (Donnee donnee : donneeList) {
+                    Row row = sheet.createRow(rowNum++);
+                    row.createCell(0).setCellValue(donnee.getId());
+                    row.createCell(1).setCellValue(getTypeString(donnee));
+                    row.createCell(2).setCellValue(donnee.getDateCollecte().toString());
+                    row.createCell(3).setCellValue(donnee.getHeureCollecte().toString());
+                    row.createCell(4).setCellValue(donnee.getCapteurId());
+                    row.createCell(5).setCellValue(getValeurString(donnee));
+                }
+
+                // Ajuster la largeur des colonnes
+                for (int i = 0; i < 6; i++) {
+                    sheet.autoSizeColumn(i);
+                }
+
+                // Écrire le fichier
+                FileOutputStream fileOut = new FileOutputStream(file);
+                workbook.write(fileOut);
+                fileOut.close();
+                workbook.close();
+
+                showSuccessAlert("Exportation réussie ! Les données ont été exportées dans :\n" + file.getAbsolutePath());
+            } catch (IOException e) {
+                showAlert("Erreur", "Une erreur est survenue lors de l'exportation des données.");
+                e.printStackTrace();
+            }
+        }
+    }
+    private boolean sortAscending = false; // Par défaut, tri descendant
+
+    @FXML
+    private void handleSortByDate() {
+        // Trier les données par date de collecte
+        donneeList.sort((d1, d2) -> {
+            if (d1.getDateCollecte() == null || d2.getDateCollecte() == null) {
+                return 0; // Ne pas trier si une date est null
+            }
+            if (sortAscending) {
+                return d1.getDateCollecte().compareTo(d2.getDateCollecte()); // Tri ascendant
+            } else {
+                return d2.getDateCollecte().compareTo(d1.getDateCollecte()); // Tri descendant
+            }
+        });
+
+        // Inverser l'état du tri pour la prochaine fois
+        sortAscending = !sortAscending;
+
+        // Mettre à jour l'affichage
+        donneeCardContainer.getChildren().clear();
+        for (Donnee donnee : donneeList) {
+            VBox card = createDonneeCard(donnee);
+            donneeCardContainer.getChildren().add(card);
+        }
+
+        showSuccessAlert("Données triées par date de collecte (" + (sortAscending ? "ascendant" : "descendant") + ").");
+    }
+
+    private void updateSearchCapteurIds(String type) {
+        searchCapteurIdComboBox.getItems().clear(); // Effacer les anciens ID
+        searchCapteurIdComboBox.getItems().add("Tous"); // Ajouter l'option "Tous"
+
+        if (type != null) {
+            // Récupérer tous les capteurs de la base de données
+            List<Capteur> capteurs = serviceCapteur.getAll();
+
+            // Filtrer les capteurs par type
+            List<Capteur> filteredCapteurs = capteurs.stream()
+                    .filter(capteur -> capteur.getType().name().equals(type))
+                    .collect(Collectors.toList());
+
+            // Ajouter les ID des capteurs filtrés au ComboBox
+            for (Capteur capteur : filteredCapteurs) {
+                searchCapteurIdComboBox.getItems().add(String.valueOf(capteur.getId())); // Convertir l'ID en String
+            }
+        }
+    }
+    @FXML
+    private void handleSearch() {
+        String selectedType = searchTypeComboBox.getValue();
+        String selectedCapteurIdStr = searchCapteurIdComboBox.getValue();
+
+        if (selectedType == null || selectedCapteurIdStr == null) {
+            showAlert("Erreur", "Veuillez sélectionner un type et un ID de capteur.");
+            return;
+        }
+
+        // Filtrer les données en fonction du type et de l'ID sélectionnés
+        List<Donnee> filteredDonnees = donneeList.stream()
+                .filter(donnee -> {
+                    String donneeType = getTypeString(donnee);
+                    boolean matchesType = donneeType.equals(selectedType);
+
+                    // Si "Tous" est sélectionné, ignorer le filtre par ID
+                    boolean matchesCapteurId = selectedCapteurIdStr.equals("Tous") ||
+                            String.valueOf(donnee.getCapteurId()).equals(selectedCapteurIdStr);
+
+                    return matchesType && matchesCapteurId;
+                })
+                .collect(Collectors.toList());
+
+        // Mettre à jour l'affichage avec les données filtrées
+        donneeCardContainer.getChildren().clear();
+        for (Donnee donnee : filteredDonnees) {
+            VBox card = createDonneeCard(donnee);
+            donneeCardContainer.getChildren().add(card);
+        }
+
+        showSuccessAlert("Résultats de la recherche : " + filteredDonnees.size() + " donnée(s) trouvée(s).");
     }
 }
