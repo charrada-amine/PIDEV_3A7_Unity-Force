@@ -36,13 +36,20 @@
                             <FontIcon iconLiteral="fas-eye-slash" iconSize="20" />
                         </graphic>
                     </ToggleButton>
-                    <Hyperlink fx:id="forgotPasswordLink" text="Mot de passe oublié ?" onAction="#handleForgotPassword"
-                               style="-fx-font-size: 14.0; -fx-text-fill: #007BFF;" />
-
                 </HBox>
+                <Hyperlink fx:id="forgotPasswordLink" text="Mot de passe oublié ?" onAction="#handleForgotPassword"
+                           style="-fx-font-size: 14.0; -fx-text-fill: #007BFF;" />
 
                 <!-- Bouton de connexion -->
                 <Button text="Se connecter" onAction="#handleLogin" prefWidth="300.0" prefHeight="50.0" style="-fx-font-size: 18.0;" />
+
+                <!-- Champs de réinitialisation du mot de passe (initialement invisibles) -->
+                <TextField fx:id="codeField" promptText="Code de vérification" prefWidth="270.0" maxWidth="270.0" prefHeight="40.0" style="-fx-font-size: 18.0;" visible="false" managed="false"/>
+                <Button fx:id="validateCodeButton" text="Valider le code" onAction="#handleValidateCode" prefWidth="300.0" prefHeight="50.0" style="-fx-font-size: 18.0;" visible="false" managed="false"/>
+
+                <PasswordField fx:id="newPasswordField" promptText="Nouveau mot de passe" prefWidth="270.0" maxWidth="270.0" prefHeight="40.0" style="-fx-font-size: 18.0;" visible="false" managed="false"/>
+                <PasswordField fx:id="confirmPasswordField" promptText="Confirmer le mot de passe" prefWidth="270.0" maxWidth="270.0" prefHeight="40.0" style="-fx-font-size: 18.0;" visible="false" managed="false"/>
+                <Button fx:id="changePasswordButton" text="Changer le mot de passe" onAction="#handleChangePassword" prefWidth="300.0" prefHeight="50.0" style="-fx-font-size: 18.0;" visible="false" managed="false"/>
             </VBox>
         </VBox>
     </center>

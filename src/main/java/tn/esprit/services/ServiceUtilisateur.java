@@ -6,11 +6,13 @@ import tn.esprit.models.utilisateur;
 import tn.esprit.models.Role;
 import tn.esprit.models.Specialite;
 import java.util.Scanner;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.text.SimpleDateFormat;
 
@@ -20,8 +22,26 @@ public class ServiceUtilisateur {
     public ServiceUtilisateur() {
         cnx = MyDatabase.getInstance().getCnx();
     }
+
+
+    public class PasswordEncryptor {
+
+        public static String encryptPassword(String password) {
+            try {
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                byte[] hash = digest.digest(password.getBytes());
+                StringBuilder hexString = new StringBuilder();
+                for (byte b : hash) {
+                    hexString.append(String.format("%02x", b));
+                }
+                return hexString.toString();  // Retourner le mot de passe crypté
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+    }
     public void add(utilisateur utilisateur, Specialite specialite, List<String> modules, int zoneId) {
-        // Vérifier que tous les champs obligatoires sont non vides
         if (utilisateur.getNom() == null || utilisateur.getNom().trim().isEmpty()) {
             System.out.println("❌ Le nom est obligatoire !");
             return;
@@ -38,16 +58,11 @@ public class ServiceUtilisateur {
             System.out.println("❌ Le mot de passe est obligatoire !");
             return;
         }
-        if (utilisateur.getRole() == null) {
-            System.out.println("❌ Le rôle est obligatoire !");
-            return;
-        }
-        if (utilisateur.getDateinscription() == null) {
-            System.out.println("❌ La date d'inscription est obligatoire !");
-            return;
-        }
 
-        // Préparer la requête pour insérer l'utilisateur dans la base de données
+        // 🔹 Hasher le mot de passe en MD5
+        String encryptedPassword = PasswordEncryptor.encryptPassword(utilisateur.getMotdepasse());
+        utilisateur.setMotdepasse(encryptedPassword);
+
         String qry = "INSERT INTO utilisateur (nom, prenom, email, motdepasse, role, dateinscription) VALUES (?, ?, ?, ?, ?, ?)";
 
         try {
@@ -55,88 +70,21 @@ public class ServiceUtilisateur {
             pstm.setString(1, utilisateur.getNom());
             pstm.setString(2, utilisateur.getPrenom());
             pstm.setString(3, utilisateur.getEmail());
-            pstm.setString(4, utilisateur.getMotdepasse());
-            pstm.setString(5, utilisateur.getRole().toString()); // Convertir l'énumération en chaîne de caractères
+            pstm.setString(4, encryptedPassword);
+            pstm.setString(5, utilisateur.getRole().toString());
+
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             String dateSansHeure = sdf.format(utilisateur.getDateinscription());
             pstm.setDate(6, java.sql.Date.valueOf(dateSansHeure));
 
             int affectedRows = pstm.executeUpdate();
             if (affectedRows > 0) {
-                ResultSet generatedKeys = pstm.getGeneratedKeys();
-                if (generatedKeys.next()) {
-                    utilisateur.setId_utilisateur(generatedKeys.getInt(1)); // Set the generated user id
-
-                    // Si le rôle est "technicien", ajouter la spécialité
-                    if (utilisateur.getRole() == Role.technicien && specialite != null) {
-                        // Ajouter la spécialité pour le technicien dans la base de données
-                        String technicienQuery = "INSERT INTO technicien (id_technicien, specialite) VALUES (?, ?)";
-                        try {
-                            PreparedStatement technicienStmt = cnx.prepareStatement(technicienQuery);
-                            technicienStmt.setInt(1, utilisateur.getId_utilisateur()); // Référence à l'ID de l'utilisateur
-                            technicienStmt.setString(2, specialite.toString()); // Spécialité
-                            int rowsAffected = technicienStmt.executeUpdate();
-
-                            if (rowsAffected > 0) {
-                                System.out.println("✅ Technicien ajouté avec spécialité : " + specialite);
-                            } else {
-                                System.out.println("❌ Échec de l'ajout du technicien.");
-                            }
-                        } catch (SQLException e) {
-                            System.out.println("❌ Erreur SQL : " + e.getMessage());
-                        }
-                    }
-
-                    // Si le rôle est "responsable", ajouter les modules
-                    if (utilisateur.getRole() == Role.responsable && !modules.isEmpty()) {
-                        // Convertir la liste des modules en une chaîne séparée par des virgules
-                        String modulesStr = String.join(", ", modules);
-
-                        // Enregistrer le responsable et les modules dans la base de données
-                        String responsableQuery = "INSERT INTO responsable (id_responsable, modules) VALUES (?, ?)";
-                        try {
-                            PreparedStatement responsableStmt = cnx.prepareStatement(responsableQuery);
-                            responsableStmt.setInt(1, utilisateur.getId_utilisateur());  // Référence à l'ID de l'utilisateur
-                            responsableStmt.setString(2, modulesStr);  // Utiliser la chaîne de modules
-                            int rowsAffected = responsableStmt.executeUpdate();
-
-                            if (rowsAffected > 0) {
-                                System.out.println("✅ Modules ajoutés avec succès pour le responsable.");
-                            } else {
-                                System.out.println("❌ Échec de l'ajout des modules pour le responsable.");
-                            }
-                        } catch (SQLException e) {
-                            System.out.println("❌ Erreur SQL : " + e.getMessage());
-                        }
-                    }
-
-                    // Si le rôle est "citoyen", ajouter le zoneId
-                    if (utilisateur.getRole() == Role.citoyen) {
-                        // Ajouter le citoyen avec son zoneId dans la base de données
-                        String citoyenQuery = "INSERT INTO citoyen (id_citoyen, zoneId) VALUES (?, ?)";
-                        try {
-                            PreparedStatement citoyenStmt = cnx.prepareStatement(citoyenQuery);
-                            citoyenStmt.setInt(1, utilisateur.getId_utilisateur()); // Référence à l'ID de l'utilisateur
-                            citoyenStmt.setInt(2, zoneId);  // ZoneId pour le citoyen
-                            int rowsAffected = citoyenStmt.executeUpdate();
-
-                            if (rowsAffected > 0) {
-                                System.out.println("✅ Citoyen ajouté avec zoneId : " + zoneId);
-                            } else {
-                                System.out.println("❌ Échec de l'ajout du citoyen.");
-                            }
-                        } catch (SQLException e) {
-                            System.out.println("❌ Erreur SQL : " + e.getMessage());
-                        }
-                    }
-                }
+                System.out.println("✅ Utilisateur ajouté avec succès !");
             }
         } catch (SQLException e) {
             System.out.println("❌ Erreur SQL : " + e.getMessage());
         }
     }
-
-
 
 
     public void deleteById(int id) {
@@ -434,28 +382,37 @@ public class ServiceUtilisateur {
     }*/
 
     public utilisateur getByEmailAndPassword(String email, String password) {
-        String query = "SELECT * FROM utilisateur WHERE email = ? AND motdepasse = ?";
-        try (PreparedStatement ps = cnx.prepareStatement(query)) {
-            ps.setString(1, email);
-            ps.setString(2, password);
-            ResultSet rs = ps.executeQuery();
+        String qry = "SELECT * FROM utilisateur WHERE email = ?";
+        try {
+            PreparedStatement pstm = cnx.prepareStatement(qry);
+            pstm.setString(1, email);
+            ResultSet rs = pstm.executeQuery();
 
             if (rs.next()) {
-                return new utilisateur(
-                        rs.getInt("id_utilisateur"),
-                        rs.getString("nom"),
-                        rs.getString("prenom"),
-                        rs.getString("email"),
-                        rs.getString("motdepasse"),
-                        Role.valueOf(rs.getString("role")), // Conversion String -> Enum Role
-                        rs.getDate("dateInscription") // Remplace "date_inscription" par le vrai nom de la colonne
-                );
+                String hashedPassword = rs.getString("motdepasse");  // Récupérer le mot de passe haché
+
+                // 🔹 Comparer le mot de passe avec son hash MD5
+                if (hashedPassword.equals(PasswordEncryptor.encryptPassword(password))) {
+                    System.out.println("✅ Connexion réussie !");
+                    return new utilisateur(
+                            rs.getInt("id_utilisateur"),
+                            rs.getString("nom"),
+                            rs.getString("prenom"),
+                            rs.getString("email"),
+                            hashedPassword,
+                            Role.valueOf(rs.getString("role")),
+                            rs.getDate("dateinscription")
+                    );
+                } else {
+                    System.out.println("❌ Mot de passe incorrect !");
+                }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("❌ Erreur SQL : " + e.getMessage());
         }
         return null;
     }
+
 }
 
 
