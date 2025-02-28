@@ -12,18 +12,15 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
-import tn.esprit.models.citoyen;
-import tn.esprit.models.technicien;
-import tn.esprit.models.Specialite;
+import tn.esprit.models.*;
 
 import javafx.geometry.Pos;
 
-import tn.esprit.models.utilisateur;
 import tn.esprit.services.ServiceTechnicien;
 import tn.esprit.services.ServiceUtilisateur;
 import tn.esprit.utils.MyDatabase;
-import tn.esprit.models.Role; // Adaptez le chemin selon votre projet.
 
+import javax.swing.text.JTextComponent;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -36,6 +33,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class GestionTechnicienController {
+    @FXML
+    private Label welcomeLabel;
 
     @FXML
     private TextField  nameField, prenomField, emailField, passwordField;
@@ -73,7 +72,17 @@ public class GestionTechnicienController {
         } else {
             System.err.println("Erreur : 'specialiteCombo' est nul.");
         }
+        // Récupérer l'utilisateur de la session
+        utilisateur user = Session.getCurrentUser();
 
+        // Vérifier si un utilisateur est connecté
+        if (user != null) {
+            // Afficher le nom et le prénom de l'utilisateur
+            welcomeLabel.setText("Bienvenue, " + user.getNom() + " " + user.getPrenom());
+        } else {
+            // Si aucun utilisateur n'est connecté, afficher un message générique
+            welcomeLabel.setText("Bienvenue, invité");
+        }
         // Ajouter un écouteur pour basculer la visibilité du mot de passe
         togglePasswordButton.selectedProperty().addListener((obs, wasSelected, isNowSelected) -> {
             if (isNowSelected) {
@@ -239,27 +248,33 @@ public class GestionTechnicienController {
     }
     @FXML
     private void handleLogOut(ActionEvent event) {
-        // Réinitialiser ou fermer la session utilisateur
+        // Met fin à la session
+        Session.logOut();
+
+        // Afficher un message de déconnexion
         showAlert("Déconnexion", "Vous avez été déconnecté avec succès.");
 
         // Fermer la fenêtre actuelle (l'écran principal)
-        Stage currentStage = (Stage) logOutButton.getScene().getWindow();
-        currentStage.close();  // Ferme la fenêtre
+        Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        currentStage.close();
 
-        // Ouvrir la fenêtre de connexion (par exemple)
+        // Ouvrir la fenêtre de connexion
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/LoginScreen.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Login.fxml"));
             Parent root = loader.load();
 
             Stage stage = new Stage();
             stage.setTitle("Connexion");
             stage.setScene(new Scene(root));
             stage.show();
+            stage.setMaximized(true);
+
         } catch (IOException e) {
             showAlert("Erreur", "Une erreur est survenue lors de la déconnexion.");
             e.printStackTrace();
         }
     }
+
 
     private technicien getSelectedTechnicien() {
         // TODO: Implémentez la logique pour récupérer l'élément sélectionné.

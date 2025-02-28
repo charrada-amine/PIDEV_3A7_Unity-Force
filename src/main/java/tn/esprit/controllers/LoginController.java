@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
+import tn.esprit.models.Session;
 import tn.esprit.models.utilisateur;
 import tn.esprit.services.ServiceUtilisateur;
 
@@ -79,6 +80,10 @@ public class LoginController {
         if (utilisateur == null) {
             showAlert("Échec de connexion", "Email ou mot de passe incorrect.");
         } else {
+            // Enregistrer l'utilisateur dans la session
+            Session.setCurrentUser(utilisateur);
+
+            // Ouvrir l'interface en fonction du rôle
             switch (utilisateur.getRole()) {
                 case citoyen:
                     openInterface("/GestionCitoyen.fxml", "Gestion des Citoyens");
@@ -95,6 +100,7 @@ public class LoginController {
             }
         }
     }
+
     @FXML
     private void handleSignUp(ActionEvent event) {
         try {
@@ -104,6 +110,8 @@ public class LoginController {
             stage.setTitle("Inscription - Ajouter un utilisateur");
             stage.setScene(new Scene(root));
             stage.show();
+            stage.setMaximized(true);
+
         } catch (IOException e) {
             e.printStackTrace();
             showAlert("Erreur", "Impossible d'ouvrir le formulaire d'inscription.");

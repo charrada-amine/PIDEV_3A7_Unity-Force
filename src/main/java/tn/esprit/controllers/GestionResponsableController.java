@@ -14,6 +14,7 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 import tn.esprit.models.Role;
+import tn.esprit.models.Session;
 import tn.esprit.models.responsable;
 import tn.esprit.models.utilisateur;
 import tn.esprit.services.ServiceCitoyen;
@@ -32,6 +33,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class GestionResponsableController {
+    @FXML
+    private Label welcomeLabel;
     @FXML
     private Button logOutButton;  // Le bouton Log Out
     @FXML
@@ -52,7 +55,17 @@ public class GestionResponsableController {
             System.out.println("FlowPane 'responsableFlowPane' initialisé correctement.");
             loadUsers();
         }
+// Récupérer l'utilisateur de la session
+        utilisateur user = Session.getCurrentUser();
 
+        // Vérifier si un utilisateur est connecté
+        if (user != null) {
+            // Afficher le nom et le prénom de l'utilisateur
+            welcomeLabel.setText("Bienvenue, " + user.getNom() + " " + user.getPrenom());
+        } else {
+            // Si aucun utilisateur n'est connecté, afficher un message générique
+            welcomeLabel.setText("Bienvenue, invité");
+        }
         // Ajouter un écouteur pour basculer la visibilité du mot de passe
         togglePasswordButton.selectedProperty().addListener((obs, wasSelected, isNowSelected) -> {
             if (isNowSelected) {
@@ -72,22 +85,27 @@ public class GestionResponsableController {
     }
     @FXML
     private void handleLogOut(ActionEvent event) {
-        // Réinitialiser ou fermer la session utilisateur
+        // Met fin à la session
+        Session.logOut();
+
+        // Afficher un message de déconnexion
         showAlert("Déconnexion", "Vous avez été déconnecté avec succès.");
 
         // Fermer la fenêtre actuelle (l'écran principal)
-        Stage currentStage = (Stage) logOutButton.getScene().getWindow();
-        currentStage.close();  // Ferme la fenêtre
+        Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        currentStage.close();
 
-        // Ouvrir la fenêtre de connexion (par exemple)
+        // Ouvrir la fenêtre de connexion
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/LoginScreen.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Login.fxml"));
             Parent root = loader.load();
 
             Stage stage = new Stage();
             stage.setTitle("Connexion");
             stage.setScene(new Scene(root));
             stage.show();
+            stage.setMaximized(true);
+
         } catch (IOException e) {
             showAlert("Erreur", "Une erreur est survenue lors de la déconnexion.");
             e.printStackTrace();

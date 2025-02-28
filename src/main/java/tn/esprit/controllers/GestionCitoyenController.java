@@ -12,6 +12,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
+import tn.esprit.models.Session;
 import tn.esprit.models.citoyen;
 import tn.esprit.models.utilisateur;
 import javafx.geometry.Pos;
@@ -33,6 +34,8 @@ import java.util.List;
 
 public class GestionCitoyenController {
     @FXML
+    private Label welcomeLabel;
+    @FXML
     private TextField idField, nameField, prenomField, emailField, passwordField, zoneIdField;
     @FXML
     private FlowPane citoyenFlowPane; // Correspond à 'fx:id="citoyenFlowPane"' dans le FXML
@@ -53,6 +56,18 @@ public class GestionCitoyenController {
             System.out.println("FlowPane 'citoyenFlowPane' initialisé correctement.");
             loadUsers(); // Charger les citoyens
         }
+        // Récupérer l'utilisateur de la session
+        utilisateur user = Session.getCurrentUser();
+
+        // Vérifier si un utilisateur est connecté
+        if (user != null) {
+            // Afficher le nom et le prénom de l'utilisateur
+            welcomeLabel.setText("Bienvenue, " + user.getNom() + " " + user.getPrenom());
+        } else {
+            // Si aucun utilisateur n'est connecté, afficher un message générique
+            welcomeLabel.setText("Bienvenue, invité");
+        }
+
         // Ajouter un écouteur pour basculer la visibilité du mot de passe
         togglePasswordButton.selectedProperty().addListener((obs, wasSelected, isNowSelected) -> {
             if (isNowSelected) {
@@ -73,14 +88,17 @@ public class GestionCitoyenController {
     }
     @FXML
     private void handleLogOut(ActionEvent event) {
-        // Réinitialiser ou fermer la session utilisateur
+        // Met fin à la session
+        Session.logOut();
+
+        // Afficher un message de déconnexion
         showAlert("Déconnexion", "Vous avez été déconnecté avec succès.");
 
         // Fermer la fenêtre actuelle (l'écran principal)
-        Stage currentStage = (Stage) logOutButton.getScene().getWindow();
-        currentStage.close();  // Ferme la fenêtre
+        Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        currentStage.close();
 
-        // Ouvrir la fenêtre de connexion (par exemple)
+        // Ouvrir la fenêtre de connexion
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/Login.fxml"));
             Parent root = loader.load();
