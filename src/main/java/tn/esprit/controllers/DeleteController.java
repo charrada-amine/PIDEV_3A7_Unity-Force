@@ -1,9 +1,13 @@
 package tn.esprit.controllers;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.event.ActionEvent;
+import javafx.stage.Stage;
 import tn.esprit.models.Role;
 import tn.esprit.models.utilisateur;
 import tn.esprit.services.ServiceCitoyen;
@@ -11,6 +15,7 @@ import tn.esprit.services.ServiceResponsable;
 import tn.esprit.services.ServiceTechnicien;
 import tn.esprit.services.ServiceUtilisateur;
 
+import java.io.IOException;
 import java.util.Optional;
 
 public class DeleteController {
@@ -27,7 +32,6 @@ public class DeleteController {
     private final ServiceTechnicien serviceTechnicien = new ServiceTechnicien();
 
 
-    // Méthode pour gérer la suppression du citoyen
     @FXML
     private void handleDelete(ActionEvent event) {
         String email = emailField.getText().trim();
@@ -48,14 +52,42 @@ public class DeleteController {
         // Demander une confirmation avant la suppression
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
         confirmation.setTitle("Confirmation");
-        confirmation.setHeaderText("Voulez-vous vraiment supprimer l' Utilisateur : " +
+        confirmation.setHeaderText("Voulez-vous vraiment supprimer l'Utilisateur : " +
                 user.getNom() + " " + user.getPrenom() + "?");
 
         Optional<ButtonType> result = confirmation.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             serviceUtilisateur.deleteById(user.getId_utilisateur());
             showAlert("Succès", "Utilisateur supprimé avec succès !");
-            loadUsers(); // Recharger la liste après suppression
+
+            // Après la suppression, déconnecter l'utilisateur
+            handleLogOut(event);  // Appel à la méthode handleLogOut pour déconnecter l'utilisateur
+        }
+    }
+
+    @FXML
+    private void handleLogOut(ActionEvent event) {
+        // Réinitialiser ou fermer la session utilisateur
+        showAlert("Déconnexion", "Vous avez été déconnecté avec succès.");
+
+        // Fermer la fenêtre actuelle (l'écran principal)
+        Stage currentStage = (Stage) emailField.getScene().getWindow(); // Utilisation de emailField pour obtenir la scène actuelle
+        currentStage.close();  // Ferme la fenêtre
+
+        // Ouvrir la fenêtre de connexion
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Login.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Connexion");
+            stage.setScene(new Scene(root));
+            stage.show();
+            stage.setMaximized(true);
+
+        } catch (IOException e) {
+            showAlert("Erreur", "Une erreur est survenue lors de la déconnexion.");
+            e.printStackTrace();
         }
     }
 

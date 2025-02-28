@@ -82,13 +82,15 @@ public class GestionCitoyenController {
 
         // Ouvrir la fenêtre de connexion (par exemple)
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/LoginScreen.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Login.fxml"));
             Parent root = loader.load();
 
             Stage stage = new Stage();
             stage.setTitle("Connexion");
             stage.setScene(new Scene(root));
             stage.show();
+            stage.setMaximized(true);
+
         } catch (IOException e) {
             showAlert("Erreur", "Une erreur est survenue lors de la déconnexion.");
             e.printStackTrace();

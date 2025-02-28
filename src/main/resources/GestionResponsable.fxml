@@ -148,8 +148,11 @@
                                 <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
                             </graphic>
                         </Button>
-                        <Button fx:id="logOutButton" text="Log Out" onAction="#handleLogOut" />
-
+                        <Button fx:id="logOutButton" text="Log Out" onAction="#handleLogOut" >
+                            <graphic>
+                                <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
+                            </graphic>
+                        </Button>
                     </HBox>
                 </VBox>
             </VBox>
