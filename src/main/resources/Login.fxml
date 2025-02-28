@@ -3,53 +3,50 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
-<?import javafx.scene.text.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="tn.esprit.controllers.LoginController"
             style="-fx-background-color: #f4f4f4;">
+
     <!-- Colonne gauche avec fond bleu -->
     <left>
-        <VBox alignment="CENTER" prefWidth="200.0" style="-fx-background-color: #007BFF;">
-            <!-- Colonne vide -->
+        <VBox alignment="CENTER" prefWidth="250.0" style="-fx-background-color: #007BFF;">
+            <Label text="Gestion Utilisateurs" style="-fx-font-size: 20px; -fx-text-fill: white; -fx-font-weight: bold;"/>
         </VBox>
     </left>
 
     <!-- Contenu principal -->
     <center>
-        <VBox alignment="CENTER" spacing="40.0" style="-fx-padding: 20.0;">
+        <VBox alignment="CENTER" spacing="30.0" style="-fx-padding: 50.0;">
+
             <!-- Titre -->
             <HBox alignment="CENTER">
-                <Label text="Connexion" style="-fx-font-size: 36.0; -fx-font-weight: bold;"/>
+                <Label text="Connexion" style="-fx-font-size: 30.0; -fx-font-weight: bold;"/>
             </HBox>
 
             <!-- Champs de saisie -->
-            <VBox alignment="CENTER" spacing="20.0">
+            <VBox alignment="CENTER" spacing="15.0">
                 <TextField fx:id="emailField" promptText="Email" prefWidth="270.0" maxWidth="270.0" prefHeight="40.0" style="-fx-font-size: 18.0;" />
 
                 <!-- Champ du mot de passe avec bouton afficher/masquer -->
                 <HBox alignment="CENTER" spacing="10.0">
-                    <PasswordField fx:id="passwordField" promptText="Mot de passe" prefWidth="270.0" prefHeight="40.0" style="-fx-font-size: 18.0;" />
-                    <TextField fx:id="visiblePasswordField" promptText="Mot de passe" prefWidth="270.0" prefHeight="40.0" style="-fx-font-size: 18.0;" visible="false" managed="false" />
+                    <StackPane>
+                        <PasswordField fx:id="passwordField" promptText="Mot de passe" prefWidth="300.0" prefHeight="40.0" style="-fx-font-size: 16.0;" />
+                        <TextField fx:id="visiblePasswordField" promptText="Mot de passe" prefWidth="300.0" prefHeight="40.0" style="-fx-font-size: 16.0;" visible="false" managed="false" />
+                    </StackPane>
                     <ToggleButton fx:id="togglePasswordButton" style="-fx-background-color: transparent; -fx-border-width: 0;">
                         <graphic>
-                            <FontIcon iconLiteral="fas-eye-slash" iconSize="20" />
+                            <FontIcon iconLiteral="fas-eye-slash" iconSize="18" />
                         </graphic>
                     </ToggleButton>
                 </HBox>
+
                 <Hyperlink fx:id="forgotPasswordLink" text="Mot de passe oublié ?" onAction="#handleForgotPassword"
                            style="-fx-font-size: 14.0; -fx-text-fill: #007BFF;" />
 
                 <!-- Bouton de connexion -->
-                <Button text="Se connecter" onAction="#handleLogin" prefWidth="300.0" prefHeight="50.0" style="-fx-font-size: 18.0;" />
-
-                <!-- Champs de réinitialisation du mot de passe (initialement invisibles) -->
-                <TextField fx:id="codeField" promptText="Code de vérification" prefWidth="270.0" maxWidth="270.0" prefHeight="40.0" style="-fx-font-size: 18.0;" visible="false" managed="false"/>
-                <Button fx:id="validateCodeButton" text="Valider le code" onAction="#handleValidateCode" prefWidth="300.0" prefHeight="50.0" style="-fx-font-size: 18.0;" visible="false" managed="false"/>
-
-                <PasswordField fx:id="newPasswordField" promptText="Nouveau mot de passe" prefWidth="270.0" maxWidth="270.0" prefHeight="40.0" style="-fx-font-size: 18.0;" visible="false" managed="false"/>
-                <PasswordField fx:id="confirmPasswordField" promptText="Confirmer le mot de passe" prefWidth="270.0" maxWidth="270.0" prefHeight="40.0" style="-fx-font-size: 18.0;" visible="false" managed="false"/>
-                <Button fx:id="changePasswordButton" text="Changer le mot de passe" onAction="#handleChangePassword" prefWidth="300.0" prefHeight="50.0" style="-fx-font-size: 18.0;" visible="false" managed="false"/>
+                <Button fx:id="loginButton" text="Se connecter" onAction="#handleLogin" prefWidth="320.0" prefHeight="45.0"
+                        style="-fx-font-size: 18.0; -fx-background-color: #007BFF; -fx-text-fill: white;" />
             </VBox>
         </VBox>
     </center>

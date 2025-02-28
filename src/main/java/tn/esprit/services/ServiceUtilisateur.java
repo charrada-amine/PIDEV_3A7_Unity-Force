@@ -5,15 +5,17 @@ import tn.esprit.models.utilisateur;
 
 import tn.esprit.models.Role;
 import tn.esprit.models.Specialite;
-import java.util.Scanner;
+
+import java.util.*;
+
 import org.mindrot.jbcrypt.BCrypt;
 
+import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
 import java.text.SimpleDateFormat;
 
 public class ServiceUtilisateur {
@@ -380,7 +382,60 @@ public class ServiceUtilisateur {
 
         return false; // Si une erreur se produit, supposez que l'email n'existe pas
     }*/
+    // Générer un code de vérification
+    public int generateVerificationCode() {
+        return 1000 + (int) (Math.random() * 9000);
+    }
+    // Mettre à jour le mot de passe
+    public boolean updatePassword(String email, String newPassword) {
+        String encryptedPassword = PasswordEncryptor.encryptPassword(newPassword);
 
+        String query = "UPDATE utilisateur SET motdepasse = ? WHERE email = ?";
+        try (Connection cnx = MyDatabase.getInstance().getCnx();
+             PreparedStatement pstm = cnx.prepareStatement(query)) {
+            pstm.setString(1, encryptedPassword);
+            pstm.setString(2, email);
+
+            int rowsUpdated = pstm.executeUpdate();
+            return rowsUpdated > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    // Méthode pour envoyer un email
+    public void sendEmail(String toEmail, String subject, String body) throws MessagingException {
+        // Configuration des propriétés SMTP
+        Properties props = new Properties();
+        props.put("mail.smtp.host", "smtp.gmail.com"); // Serveur SMTP de Gmail
+        props.put("mail.smtp.port", "587"); // Port pour TLS
+        props.put("mail.smtp.auth", "true"); // Authentification requise
+        props.put("mail.smtp.starttls.enable", "true"); // Activation de TLS
+
+        // Authentification
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication("mellouli.youssef11@gmail.com\n", "cnvv wklj lydi psnl");
+            }
+        });
+
+        // Création du message
+        Message message = new MimeMessage(session);
+        message.setFrom(new InternetAddress("mellouli.youssef11@gmail.com\n")); // Expéditeur
+        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail)); // Destinataire
+        message.setSubject(subject); // Sujet
+        message.setText(body); // Corps du message
+
+        // Envoi du message
+        Transport.send(message);
+    }
+
+    // Valider l'email
+    public boolean isValidEmail(String email) {
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        return email.matches(emailRegex);
+    }
     public utilisateur getByEmailAndPassword(String email, String password) {
         String qry = "SELECT * FROM utilisateur WHERE email = ?";
         try {
