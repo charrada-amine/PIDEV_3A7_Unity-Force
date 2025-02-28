@@ -441,7 +441,7 @@ public class GestionTechnicienController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/Delete.fxml"));
             Parent root = loader.load();
             Stage stage = new Stage();
-            stage.setTitle("Suppression de Citoyen");
+            stage.setTitle("Suppression de Technicien");
             stage.setScene(new Scene(root));
             stage.setMaximized(true);
 

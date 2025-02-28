@@ -26,71 +26,10 @@ public class DeleteController {
     private final ServiceCitoyen serviceCitoyen = new ServiceCitoyen();
     private final ServiceTechnicien serviceTechnicien = new ServiceTechnicien();
 
-    @FXML
-    private void handleDeleteResponsable(ActionEvent event) {
-        String email = emailField.getText().trim();
-        String password = passwordField.getText().trim();
 
-        if (email.isEmpty() || password.isEmpty()) {
-            showAlert("Erreur", "L'email et le mot de passe ne peuvent pas être vides.");
-            return;
-        }
-
-        // Logique pour vérifier si le responsable existe avec cet email et mot de passe
-        utilisateur responsable = serviceUtilisateur.getByEmailAndPassword(email, password);
-        if (responsable == null || responsable.getRole() != Role.responsable) {
-            showAlert("Erreur", "Email ou mot de passe incorrect, ou utilisateur non responsable.");
-            return;
-        }
-
-        // Demander une confirmation avant la suppression
-        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmation.setTitle("Confirmation");
-        confirmation.setHeaderText("Voulez-vous vraiment supprimer le responsable : " +
-                responsable.getNom() + " " + responsable.getPrenom() + "?");
-
-        Optional<ButtonType> result = confirmation.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            // Supprimer le responsable
-            serviceResponsable.deleteById(responsable.getId_utilisateur());
-            showAlert("Succès", "Responsable supprimé avec succès !");
-            loadUsers(); // Recharger la liste après suppression
-        }
-    }
-    @FXML
-    private void handleDeleteTechnicien(ActionEvent event) {
-        String email = emailField.getText().trim();
-        String password = passwordField.getText().trim();
-
-        if (email.isEmpty() || password.isEmpty()) {
-            showAlert("Erreur", "L'email et le mot de passe ne peuvent pas être vides.");
-            return;
-        }
-
-        // Logique pour vérifier si le technicien existe avec cet email et mot de passe
-        utilisateur technicien = serviceUtilisateur.getByEmailAndPassword(email, password);
-        if (technicien == null || technicien.getRole() != Role.technicien) {
-            showAlert("Erreur", "Email ou mot de passe incorrect, ou utilisateur non technicien.");
-            return;
-        }
-
-        // Demander une confirmation avant la suppression
-        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmation.setTitle("Confirmation");
-        confirmation.setHeaderText("Voulez-vous vraiment supprimer le technicien : " +
-                technicien.getNom() + " " + technicien.getPrenom() + "?");
-
-        Optional<ButtonType> result = confirmation.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            // Supprimer le technicien
-            serviceTechnicien.deleteById(technicien.getId_utilisateur());
-            showAlert("Succès", "Technicien supprimé avec succès !");
-            loadUsers(); // Recharger la liste après suppression
-        }
-    }
     // Méthode pour gérer la suppression du citoyen
     @FXML
-    private void handleDeleteCitoyen(ActionEvent event) {
+    private void handleDelete(ActionEvent event) {
         String email = emailField.getText().trim();
         String password = passwordField.getText().trim();
 
@@ -100,8 +39,8 @@ public class DeleteController {
         }
 
         // Logique pour vérifier si le citoyen existe avec cet email et mot de passe
-        utilisateur citizen = serviceUtilisateur.getByEmailAndPassword(email, password);
-        if (citizen == null) {
+        utilisateur user = serviceUtilisateur.getByEmailAndPassword(email, password);
+        if (user == null) {
             showAlert("Erreur", "Email ou mot de passe incorrect.");
             return;
         }
@@ -109,13 +48,13 @@ public class DeleteController {
         // Demander une confirmation avant la suppression
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
         confirmation.setTitle("Confirmation");
-        confirmation.setHeaderText("Voulez-vous vraiment supprimer le citoyen : " +
-                citizen.getNom() + " " + citizen.getPrenom() + "?");
+        confirmation.setHeaderText("Voulez-vous vraiment supprimer l' Utilisateur : " +
+                user.getNom() + " " + user.getPrenom() + "?");
 
         Optional<ButtonType> result = confirmation.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            serviceCitoyen.deleteById(citizen.getId_utilisateur());
-            showAlert("Succès", "Citoyen supprimé avec succès !");
+            serviceUtilisateur.deleteById(user.getId_utilisateur());
+            showAlert("Succès", "Utilisateur supprimé avec succès !");
             loadUsers(); // Recharger la liste après suppression
         }
     }

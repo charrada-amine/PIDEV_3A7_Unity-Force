@@ -29,7 +29,7 @@
 
                 <!-- Boutons -->
                 <HBox spacing="10" alignment="CENTER">
-                    <Button text="OK" onAction="#handleDeleteCitoyen" prefWidth="140.0" prefHeight="45.0" style="-fx-font-size: 18.0; -fx-background-color: #007BFF; -fx-text-fill: white;" />
+                    <Button text="OK" onAction="#handleDelete" prefWidth="140.0" prefHeight="45.0" style="-fx-font-size: 18.0; -fx-background-color: #007BFF; -fx-text-fill: white;" />
                 </HBox>
             </VBox>
         </VBox>

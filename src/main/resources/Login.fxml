@@ -47,6 +47,11 @@
                 <!-- Bouton de connexion -->
                 <Button fx:id="loginButton" text="Se connecter" onAction="#handleLogin" prefWidth="320.0" prefHeight="45.0"
                         style="-fx-font-size: 18.0; -fx-background-color: #007BFF; -fx-text-fill: white;" />
+
+                <!-- Bouton d'inscription -->
+                <Button fx:id="signUpButton" text="Vous n'avez pas de compte ? Inscrivez-vous" onAction="#handleSignUp"
+                        prefWidth="350.0" prefHeight="45.0"
+                        style="-fx-font-size: 16.0; -fx-background-color: transparent; -fx-text-fill: #007BFF; -fx-border-color: #007BFF;" />
             </VBox>
         </VBox>
     </center>

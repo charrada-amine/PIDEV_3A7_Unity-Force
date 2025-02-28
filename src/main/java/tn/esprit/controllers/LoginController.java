@@ -95,6 +95,22 @@ public class LoginController {
             }
         }
     }
+    @FXML
+    private void handleSignUp(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AddUser.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("Inscription - Ajouter un utilisateur");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible d'ouvrir le formulaire d'inscription.");
+        }
+    }
+
+
 
     private void openInterface(String fxmlPath, String title) {
         try {
