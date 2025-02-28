@@ -42,7 +42,8 @@ public class GestionTechnicienController {
     @FXML
     private ComboBox<String> specialiteComboBox;
     @FXML
-
+    private Button logOutButton;  // Le bouton Log Out
+    @FXML
     private FlowPane technicienFlowPane; // Correspond à 'fx:id="technicienFlowPane"' dans le FXML
     private final ServiceUtilisateur serviceUtilisateur = new ServiceUtilisateur();
     private final ServiceTechnicien serviceTechnicien = new ServiceTechnicien();
@@ -236,7 +237,29 @@ public class GestionTechnicienController {
         }
         return false;
     }
+    @FXML
+    private void handleLogOut(ActionEvent event) {
+        // Réinitialiser ou fermer la session utilisateur
+        showAlert("Déconnexion", "Vous avez été déconnecté avec succès.");
 
+        // Fermer la fenêtre actuelle (l'écran principal)
+        Stage currentStage = (Stage) logOutButton.getScene().getWindow();
+        currentStage.close();  // Ferme la fenêtre
+
+        // Ouvrir la fenêtre de connexion (par exemple)
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/LoginScreen.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Connexion");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            showAlert("Erreur", "Une erreur est survenue lors de la déconnexion.");
+            e.printStackTrace();
+        }
+    }
 
     private technicien getSelectedTechnicien() {
         // TODO: Implémentez la logique pour récupérer l'élément sélectionné.
@@ -412,69 +435,22 @@ public class GestionTechnicienController {
         }
     }
 
-
     @FXML
-    private void handleDeleteTechnicien() {
-        // Créer un formulaire pour entrer l'email et le mot de passe
-        Dialog<Void> dialog = new Dialog<>();
-        dialog.setTitle("Supprimer Technicien");
-        dialog.setHeaderText("Supprimer un technicien en vérifiant son identité");
+    private void handleDeleteTechnicien(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Delete.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("Suppression de Citoyen");
+            stage.setScene(new Scene(root));
+            stage.setMaximized(true);
 
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-
-        TextField emailField = new TextField();
-        PasswordField passwordField = new PasswordField();
-
-        grid.addRow(0, new Label("Email :"), emailField);
-        grid.addRow(1, new Label("Mot de passe :"), passwordField);
-
-        dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-        dialog.setResultConverter(button -> {
-            if (button == ButtonType.OK) {
-                try {
-                    String email = emailField.getText().trim();
-                    String password = passwordField.getText().trim();
-
-                    if (email.isEmpty() || password.isEmpty()) {
-                        showAlert("Erreur", "L'email et le mot de passe ne peuvent pas être vides.");
-                        return null;
-                    }
-
-                    // Vérifier si le technicien existe avec cet email et mot de passe
-                    utilisateur technicien = serviceUtilisateur.getByEmailAndPassword(email, password);
-                    if (technicien == null) {
-                        showAlert("Erreur", "Email ou mot de passe incorrect.");
-                        return null;
-                    }
-
-                    // Demande de confirmation
-                    Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-                    confirmation.setTitle("Confirmation");
-                    confirmation.setHeaderText("Voulez-vous vraiment supprimer le technicien : " +
-                            technicien.getNom() + " " + technicien.getPrenom() + "?");
-
-                    Optional<ButtonType> result = confirmation.showAndWait();
-                    if (result.isPresent() && result.get() == ButtonType.OK) {
-                        serviceUtilisateur.deleteById(technicien.getId_utilisateur());
-                        showAlert("Succès", "Technicien supprimé avec succès !");
-                        loadUsers(); // Recharger la liste après suppression
-                    }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    showAlert("Erreur", "Une erreur est survenue lors de la suppression.");
-                }
-            }
-            return null;
-        });
-
-        dialog.showAndWait();
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger la fenêtre de suppression.");
+        }
     }
-
 
 
     private void showAlert(String title, String content) {

@@ -13,6 +13,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
+import tn.esprit.models.Role;
 import tn.esprit.models.responsable;
 import tn.esprit.models.utilisateur;
 import tn.esprit.services.ServiceCitoyen;
@@ -31,7 +32,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class GestionResponsableController {
-
+    @FXML
+    private Button logOutButton;  // Le bouton Log Out
     @FXML
     private FlowPane responsableFlowPane;
     private final ServiceResponsable serviceResponsable = new ServiceResponsable();
@@ -67,6 +69,29 @@ public class GestionResponsableController {
                 ((FontIcon) togglePasswordButton.getGraphic()).setIconLiteral("fas-eye-slash");
             }
         });
+    }
+    @FXML
+    private void handleLogOut(ActionEvent event) {
+        // Réinitialiser ou fermer la session utilisateur
+        showAlert("Déconnexion", "Vous avez été déconnecté avec succès.");
+
+        // Fermer la fenêtre actuelle (l'écran principal)
+        Stage currentStage = (Stage) logOutButton.getScene().getWindow();
+        currentStage.close();  // Ferme la fenêtre
+
+        // Ouvrir la fenêtre de connexion (par exemple)
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/LoginScreen.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Connexion");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            showAlert("Erreur", "Une erreur est survenue lors de la déconnexion.");
+            e.printStackTrace();
+        }
     }
 
     private VBox createResponsableCard(responsable responsable) {
@@ -393,58 +418,21 @@ public class GestionResponsableController {
 
     @FXML
     private void handleDeleteResponsable() {
-        // Créer un formulaire pour entrer l'email et le mot de passe du responsable
-        Dialog<Void> dialog = new Dialog<>();
-        dialog.setTitle("Supprimer Responsable");
-        dialog.setHeaderText("Supprimer un responsable en saisissant son email et son mot de passe");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Delete.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("Suppression de Citoyen");
+            stage.setScene(new Scene(root));
+            stage.setMaximized(true);
 
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-
-        TextField emailField = new TextField();
-        PasswordField passwordField = new PasswordField();
-
-        grid.addRow(0, new Label("Email :"), emailField);
-        grid.addRow(1, new Label("Mot de passe :"), passwordField);
-
-        dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-        dialog.setResultConverter(button -> {
-            if (button == ButtonType.OK) {
-                String email = emailField.getText().trim();
-                String password = passwordField.getText().trim();
-
-                if (email.isEmpty() || password.isEmpty()) {
-                    showAlert("Erreur", "L'email et le mot de passe ne peuvent pas être vides.");
-                    return null;
-                }
-
-                // Vérifier si un responsable existe avec cet email et mot de passe
-                utilisateur responsable = serviceUtilisateur.getByEmailAndPassword(email, password);
-                if (responsable != null) {
-                    // Demande de confirmation avant suppression
-                    Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-                    confirmation.setTitle("Confirmation");
-                    confirmation.setHeaderText("Voulez-vous vraiment supprimer le responsable : " +
-                            responsable.getNom() + " " + responsable.getPrenom() + "?");
-
-                    Optional<ButtonType> result = confirmation.showAndWait();
-                    if (result.isPresent() && result.get() == ButtonType.OK) {
-                        serviceResponsable.deleteById(responsable.getId_utilisateur());
-                        showAlert("Succès", "Responsable supprimé avec succès !");
-                        loadUsers(); // Recharger la liste après suppression
-                    }
-                } else {
-                    showAlert("Erreur", "Email ou mot de passe incorrect.");
-                }
-            }
-            return null;
-        });
-
-        dialog.showAndWait();
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger la fenêtre de suppression.");
+        }
     }
+
 
 
     private void showAlert(String title, String content) {

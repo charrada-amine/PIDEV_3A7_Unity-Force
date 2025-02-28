@@ -41,6 +41,9 @@ public class GestionCitoyenController {
     @FXML
     private TextField visiblePasswordField;
     @FXML
+    private Button logOutButton;  // Le bouton Log Out
+
+    @FXML
     private ToggleButton togglePasswordButton;
     @FXML
     private void initialize() {
@@ -68,6 +71,31 @@ public class GestionCitoyenController {
             }
         });
     }
+    @FXML
+    private void handleLogOut(ActionEvent event) {
+        // Réinitialiser ou fermer la session utilisateur
+        showAlert("Déconnexion", "Vous avez été déconnecté avec succès.");
+
+        // Fermer la fenêtre actuelle (l'écran principal)
+        Stage currentStage = (Stage) logOutButton.getScene().getWindow();
+        currentStage.close();  // Ferme la fenêtre
+
+        // Ouvrir la fenêtre de connexion (par exemple)
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/LoginScreen.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Connexion");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            showAlert("Erreur", "Une erreur est survenue lors de la déconnexion.");
+            e.printStackTrace();
+        }
+    }
+
+
     public boolean emailExists(String email) {
         String query = "SELECT COUNT(*) FROM utilisateur WHERE email = ?";
         PreparedStatement preparedStatement = null;
@@ -434,64 +462,19 @@ public class GestionCitoyenController {
     }
     @FXML
     private void handleDeleteCitoyen() {
-        // Créer un formulaire pour entrer l'email et le mot de passe
-        Dialog<Void> dialog = new Dialog<>();
-        dialog.setTitle("Supprimer Citoyen");
-        dialog.setHeaderText("Supprimer un citoyen en vérifiant son identité");
+           try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Delete.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("Suppression de Citoyen");
+            stage.setScene(new Scene(root));
+               stage.setMaximized(true);
 
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-
-        TextField emailField = new TextField();
-        PasswordField passwordField = new PasswordField();
-
-        grid.addRow(0, new Label("Email :"), emailField);
-        grid.addRow(1, new Label("Mot de passe :"), passwordField);
-
-        dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-        dialog.setResultConverter(button -> {
-            if (button == ButtonType.OK) {
-                try {
-                    String email = emailField.getText().trim();
-                    String password = passwordField.getText().trim();
-
-                    if (email.isEmpty() || password.isEmpty()) {
-                        showAlert("Erreur", "L'email et le mot de passe ne peuvent pas être vides.");
-                        return null;
-                    }
-
-                    // Vérifier si le citoyen existe avec cet email et mot de passe
-                    utilisateur citizen = serviceUtilisateur.getByEmailAndPassword(email, password);
-                    if (citizen == null) {
-                        showAlert("Erreur", "Email ou mot de passe incorrect.");
-                        return null;
-                    }
-
-                    // Demande de confirmation
-                    Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-                    confirmation.setTitle("Confirmation");
-                    confirmation.setHeaderText("Voulez-vous vraiment supprimer le citoyen : " +
-                            citizen.getNom() + " " + citizen.getPrenom() + "?");
-
-                    Optional<ButtonType> result = confirmation.showAndWait();
-                    if (result.isPresent() && result.get() == ButtonType.OK) {
-                        serviceCitoyen.deleteById(citizen.getId_utilisateur());
-                        showAlert("Succès", "Citoyen supprimé avec succès !");
-                        loadUsers(); // Recharger la liste après suppression
-                    }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    showAlert("Erreur", "Une erreur est survenue lors de la suppression.");
-                }
-            }
-            return null;
-        });
-
-        dialog.showAndWait();
+               stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger la fenêtre de suppression.");
+        }
     }
 
     @FXML

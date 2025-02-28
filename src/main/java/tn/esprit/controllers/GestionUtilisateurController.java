@@ -295,7 +295,7 @@ public class GestionUtilisateurController {
 
 
     @FXML
-    public void handleAddUser() {
+    public void handleAddUser() throws IOException {
         try {
             String name = nameField.getText();
             String prenom = prenomField.getText();
@@ -324,7 +324,6 @@ public class GestionUtilisateurController {
                 showAlert("Erreur", "Le mot de passe doit comporter au moins 8 caractères, un chiffre et une lettre majuscule.");
                 return;
             }
-
 
             // Afficher la valeur du rôle sélectionné
             System.out.println("Role selected: " + roleString);
@@ -367,6 +366,19 @@ public class GestionUtilisateurController {
             VBox userCard = createUserCard(user); // Créer la carte de l'utilisateur
             userFlowPane.getChildren().add(userCard); // Ajouter la carte à l'FlowPane
 
+            // Ouvrir la fenêtre PhoneNumberInput.fxml
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/PhoneNumberInput.fxml")); // Mettre le bon chemin de fichier FXML
+            Parent root = loader.load();
+
+            // Créer une scène et l'afficher
+            Stage stage = new Stage();
+            stage.setTitle("Entrer le numéro de téléphone");
+            stage.setScene(new Scene(root));
+            stage.show();
+
+            // Appeler la méthode handleSendCode sur le contrôleur du PhoneNumberInput.fxml
+            PhoneNumberInputController phoneNumberController = loader.getController();
+            phoneNumberController.handleSendCode(new ActionEvent()); // V
             // Réinitialiser les champs
             clearFields();
             showAlert("Succès", "Utilisateur ajouté avec succès.");
@@ -375,6 +387,8 @@ public class GestionUtilisateurController {
             showAlert("Erreur", "Une erreur est survenue lors de l'ajout.");
         }
     }
+
+
 
 
 

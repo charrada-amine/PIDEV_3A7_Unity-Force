@@ -44,6 +44,7 @@ public class ServiceUtilisateur {
         }
     }
     public void add(utilisateur utilisateur, Specialite specialite, List<String> modules, int zoneId) {
+        // Vérifier que tous les champs obligatoires sont non vides
         if (utilisateur.getNom() == null || utilisateur.getNom().trim().isEmpty()) {
             System.out.println("❌ Le nom est obligatoire !");
             return;
@@ -60,11 +61,20 @@ public class ServiceUtilisateur {
             System.out.println("❌ Le mot de passe est obligatoire !");
             return;
         }
+        if (utilisateur.getRole() == null) {
+            System.out.println("❌ Le rôle est obligatoire !");
+            return;
+        }
+        if (utilisateur.getDateinscription() == null) {
+            System.out.println("❌ La date d'inscription est obligatoire !");
+            return;
+        }
 
-        // 🔹 Hasher le mot de passe en MD5
-        String encryptedPassword = PasswordEncryptor.encryptPassword(utilisateur.getMotdepasse());
+        // 🔹 Hashage du mot de passe avant de l'insérer dans la base de données
+        String encryptedPassword = PasswordEncryptor.encryptPassword(utilisateur.getMotdepasse()); // Utiliser votre méthode de hashage ici
         utilisateur.setMotdepasse(encryptedPassword);
 
+        // Préparer la requête pour insérer l'utilisateur dans la base de données
         String qry = "INSERT INTO utilisateur (nom, prenom, email, motdepasse, role, dateinscription) VALUES (?, ?, ?, ?, ?, ?)";
 
         try {
@@ -72,16 +82,81 @@ public class ServiceUtilisateur {
             pstm.setString(1, utilisateur.getNom());
             pstm.setString(2, utilisateur.getPrenom());
             pstm.setString(3, utilisateur.getEmail());
-            pstm.setString(4, encryptedPassword);
-            pstm.setString(5, utilisateur.getRole().toString());
-
+            pstm.setString(4, encryptedPassword); // Utiliser le mot de passe hashé
+            pstm.setString(5, utilisateur.getRole().toString()); // Convertir l'énumération en chaîne de caractères
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             String dateSansHeure = sdf.format(utilisateur.getDateinscription());
             pstm.setDate(6, java.sql.Date.valueOf(dateSansHeure));
 
             int affectedRows = pstm.executeUpdate();
             if (affectedRows > 0) {
-                System.out.println("✅ Utilisateur ajouté avec succès !");
+                ResultSet generatedKeys = pstm.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    utilisateur.setId_utilisateur(generatedKeys.getInt(1)); // Set the generated user id
+
+                    // Si le rôle est "technicien", ajouter la spécialité
+                    if (utilisateur.getRole() == Role.technicien && specialite != null) {
+                        // Ajouter la spécialité pour le technicien dans la base de données
+                        String technicienQuery = "INSERT INTO technicien (id_technicien, specialite) VALUES (?, ?)";
+                        try {
+                            PreparedStatement technicienStmt = cnx.prepareStatement(technicienQuery);
+                            technicienStmt.setInt(1, utilisateur.getId_utilisateur()); // Référence à l'ID de l'utilisateur
+                            technicienStmt.setString(2, specialite.toString()); // Spécialité
+                            int rowsAffected = technicienStmt.executeUpdate();
+
+                            if (rowsAffected > 0) {
+                                System.out.println("✅ Technicien ajouté avec spécialité : " + specialite);
+                            } else {
+                                System.out.println("❌ Échec de l'ajout du technicien.");
+                            }
+                        } catch (SQLException e) {
+                            System.out.println("❌ Erreur SQL : " + e.getMessage());
+                        }
+                    }
+
+                    // Si le rôle est "responsable", ajouter les modules
+                    if (utilisateur.getRole() == Role.responsable && !modules.isEmpty()) {
+                        // Convertir la liste des modules en une chaîne séparée par des virgules
+                        String modulesStr = String.join(", ", modules);
+
+                        // Enregistrer le responsable et les modules dans la base de données
+                        String responsableQuery = "INSERT INTO responsable (id_responsable, modules) VALUES (?, ?)";
+                        try {
+                            PreparedStatement responsableStmt = cnx.prepareStatement(responsableQuery);
+                            responsableStmt.setInt(1, utilisateur.getId_utilisateur());  // Référence à l'ID de l'utilisateur
+                            responsableStmt.setString(2, modulesStr);  // Utiliser la chaîne de modules
+                            int rowsAffected = responsableStmt.executeUpdate();
+
+                            if (rowsAffected > 0) {
+                                System.out.println("✅ Modules ajoutés avec succès pour le responsable.");
+                            } else {
+                                System.out.println("❌ Échec de l'ajout des modules pour le responsable.");
+                            }
+                        } catch (SQLException e) {
+                            System.out.println("❌ Erreur SQL : " + e.getMessage());
+                        }
+                    }
+
+                    // Si le rôle est "citoyen", ajouter le zoneId
+                    if (utilisateur.getRole() == Role.citoyen) {
+                        // Ajouter le citoyen avec son zoneId dans la base de données
+                        String citoyenQuery = "INSERT INTO citoyen (id_citoyen, zoneId) VALUES (?, ?)";
+                        try {
+                            PreparedStatement citoyenStmt = cnx.prepareStatement(citoyenQuery);
+                            citoyenStmt.setInt(1, utilisateur.getId_utilisateur()); // Référence à l'ID de l'utilisateur
+                            citoyenStmt.setInt(2, zoneId);  // ZoneId pour le citoyen
+                            int rowsAffected = citoyenStmt.executeUpdate();
+
+                            if (rowsAffected > 0) {
+                                System.out.println("✅ Citoyen ajouté avec zoneId : " + zoneId);
+                            } else {
+                                System.out.println("❌ Échec de l'ajout du citoyen.");
+                            }
+                        } catch (SQLException e) {
+                            System.out.println("❌ Erreur SQL : " + e.getMessage());
+                        }
+                    }
+                }
             }
         } catch (SQLException e) {
             System.out.println("❌ Erreur SQL : " + e.getMessage());
