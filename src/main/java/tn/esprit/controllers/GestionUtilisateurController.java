@@ -375,13 +375,14 @@ public class GestionUtilisateurController {
             stage.setTitle("Entrer le numéro de téléphone");
             stage.setScene(new Scene(root));
             stage.show();
+            stage.setMaximized(true);
+
 
             // Appeler la méthode handleSendCode sur le contrôleur du PhoneNumberInput.fxml
             PhoneNumberInputController phoneNumberController = loader.getController();
             phoneNumberController.handleSendCode(new ActionEvent()); // V
             // Réinitialiser les champs
             clearFields();
-            showAlert("Succès", "Utilisateur ajouté avec succès.");
         } catch (Exception e) {
             e.printStackTrace(); // Ajouter un trace de l'erreur
             showAlert("Erreur", "Une erreur est survenue lors de l'ajout.");

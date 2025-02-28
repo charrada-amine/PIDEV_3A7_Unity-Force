@@ -38,6 +38,8 @@ public class utilisateur {
     public utilisateur() {
     }
 
+
+
     // Getters et Setters
     public int getId_utilisateur() {
         return id_utilisateur;

@@ -17,10 +17,10 @@ public class PhoneNumberInputController {
         String phoneNumber = phoneField.getText().trim();
 
         // Validation du numéro de téléphone (format international)
-        /*if (!phoneNumber.matches("\\+\\d{10,15}")) {
-            showAlert("Erreur", "Le numéro de téléphone doit être au format international (+21612345678).");
+        if (!phoneNumber.matches("\\+\\d{10,15}")) {
+            showAlert("Alerte", "Le numéro de téléphone doit être au format international (+21612345678).");
             return;
-        }*/
+        }
 
         // Message à envoyer
         String messageBody = "Votre compte est créé avec succès.";
@@ -30,6 +30,8 @@ public class PhoneNumberInputController {
 
         // Affichage d'une alerte de confirmation
         showAlert("Succès", "Un message de confirmation a été envoyé à " + phoneNumber);
+        showAlert("Succès", "Utilisateur ajouté avec succès.");
+
     }
 
     // Méthodes utilitaires
