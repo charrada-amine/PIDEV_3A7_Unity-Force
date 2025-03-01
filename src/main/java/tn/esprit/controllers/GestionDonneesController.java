@@ -1,5 +1,6 @@
 package tn.esprit.controllers;
 
+import com.fazecast.jSerialComm.SerialPort;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -18,6 +19,7 @@ import java.io.File;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -210,7 +212,7 @@ public class GestionDonneesController implements Initializable {
         card.getStyleClass().add("donnee-card");
 
         // Labels avec classes CSS
-        Label idLabel = new Label("ID: " + donnee.getId());
+        //Label idLabel = new Label("ID: " + donnee.getId());
         Label dateLabel = new Label("Date: " + donnee.getDateCollecte());
         Label heureLabel = new Label("Heure: " + donnee.getHeureCollecte());
         Label capteurIdLabel = new Label("Capteur ID: " + donnee.getCapteurId());
@@ -218,7 +220,7 @@ public class GestionDonneesController implements Initializable {
         Label typeLabel = new Label("Type: " + getTypeString(donnee));
 
         // Appliquer une classe CSS aux labels
-        idLabel.getStyleClass().add("donnee-label");
+        //idLabel.getStyleClass().add("donnee-label");
         dateLabel.getStyleClass().add("donnee-label");
         heureLabel.getStyleClass().add("donnee-label");
         capteurIdLabel.getStyleClass().add("donnee-label");
@@ -230,8 +232,8 @@ public class GestionDonneesController implements Initializable {
         grid.setHgap(10);
         grid.setVgap(5);
 
-        grid.add(new Label("ID:"), 0, 0);
-        grid.add(idLabel, 1, 0);
+        //grid.add(new Label("ID:"), 0, 0);
+        //grid.add(idLabel, 1, 0);
         grid.add(new Label("Date:"), 0, 1);
         grid.add(dateLabel, 1, 1);
         grid.add(new Label("Heure:"), 0, 2);
@@ -577,5 +579,72 @@ public class GestionDonneesController implements Initializable {
         }
 
         showSuccessAlert("Résultats de la recherche : " + filteredDonnees.size() + " donnée(s) trouvée(s).");
+    }
+    @FXML
+    private void handleRecupererDonneeArduino() {
+        SerialPort[] ports = SerialPort.getCommPorts();
+        if (ports.length == 0) {
+            showAlert("Erreur", "Aucun port série trouvé !");
+            return;
+        }
+
+        // Sélectionner le premier port disponible
+        SerialPort port = ports[0];
+        port.setBaudRate(9600); // Configurer le débit binaire (baud rate)
+        port.openPort();
+
+        // Lire les données ligne par ligne
+        StringBuilder data = new StringBuilder();
+        boolean dataReceived = false;
+
+        // Attendre un court instant pour permettre à l'Arduino d'envoyer des données
+        try {
+            Thread.sleep(1000); // Attendre 1 seconde
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // Lire les données disponibles
+        while (port.bytesAvailable() > 0) {
+            byte[] buffer = new byte[port.bytesAvailable()];
+            port.readBytes(buffer, buffer.length);
+            data.append(new String(buffer));
+        }
+
+        // Fermer le port série après la lecture
+        port.closePort();
+
+        // Nettoyer les données reçues
+        String receivedData = data.toString().trim();
+
+        // Vérifier si les données contiennent une ligne valide
+        if (receivedData.contains(",")) {
+            // Extraire la dernière ligne reçue
+            String[] lines = receivedData.split("\n");
+            String lastLine = lines[lines.length - 1].trim(); // Prendre la dernière ligne
+
+            // Diviser la ligne en type et valeur
+            String[] parts = lastLine.split(",");
+            if (parts.length == 2) {
+                String type = parts[0].trim().toUpperCase(); // Convertir en majuscules pour correspondre au ComboBox
+                String valeur = parts[1].trim();
+
+                // Vérifier le type et remplir les champs automatiquement
+                if (type.equals("TEMPERATURE") || type.equals("LUMINOSITE") || type.equals("MOUVEMENT") || type.equals("CONSOMMATION_ENERGIE")) {
+                    typeCapteurComboBox.setValue(type); // Sélectionner le type dans le ComboBox
+                    valeurField.setText(valeur); // Remplir le champ de valeur
+                    dateCollectePicker.setValue(LocalDate.now()); // Remplir la date actuelle
+                    heureCollecteField.setText(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))); // Formater l'heure
+
+                    showSuccessAlert("Données récupérées avec succès : " + lastLine);
+                } else {
+                    showAlert("Erreur", "Type de capteur non reconnu : " + type);
+                }
+            } else {
+                showAlert("Erreur", "Format de données incorrect : " + lastLine);
+            }
+        } else {
+            showAlert("Erreur", "Aucune donnée valide reçue : " + receivedData);
+        }
     }
 }
