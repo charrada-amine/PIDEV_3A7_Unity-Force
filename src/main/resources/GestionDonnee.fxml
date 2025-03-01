@@ -143,6 +143,37 @@
                         </graphic>
                     </Button>
                 </HBox>
+                <HBox spacing="15" styleClass="button-container">
+                    <Button text="Exporter" onAction="#handleExportDonnees" styleClass="action-button,export">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-file-export" iconSize="16" iconColor="white"/>
+                        </graphic>
+                    </Button>
+                    <Button text="Trier par date" onAction="#handleSortByDate" styleClass="action-button,sort">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-sort-amount-down" iconSize="16" iconColor="white"/>
+                        </graphic>
+                    </Button>
+
+                </HBox>
+                <!-- Nouveaux éléments pour la recherche -->
+                <HBox spacing="10" styleClass="search-container">
+                    <ComboBox fx:id="searchTypeComboBox" promptText="Choisir un type" styleClass="modern-input"/>
+                    <ComboBox fx:id="searchCapteurIdComboBox" promptText="Choisir un ID" styleClass="modern-input"/>
+                    <Button text="Chercher" onAction="#handleSearch" styleClass="action-button,search">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-search" iconSize="16" iconColor="white"/>
+                        </graphic>
+                    </Button>
+                </HBox>
+                <HBox spacing="15" styleClass="button-container">
+                    <!-- Bouton pour récupérer les données de l'Arduino -->
+                    <Button text="Récupérer depuis Arduino" onAction="#handleRecupererDonneeArduino" styleClass="action-button,search">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-microchip" iconSize="16" iconColor="white"/>
+                        </graphic>
+                    </Button>
+                </HBox>
             </VBox>
 
             <!-- Zone des cartes des données -->

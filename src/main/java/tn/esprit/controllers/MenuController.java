@@ -1,7 +1,9 @@
 package tn.esprit.controllers;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -48,79 +50,101 @@ public class MenuController {
     private Button btnSourceInterface;
 
     @FXML
-    private void handleGestionCapteur() {
-        switchScene("/GestionCapteur.fxml", btnGestionCapteur);
-    }
+    private Button btnAccueil; // Nouveau bouton pour revenir à l'accueil
 
+    // Handler pour le bouton de gestion des capteurs
     @FXML
-    private void handleGestionCitoyen() {
-        switchScene("/GestionCitoyen.fxml", btnGestionCitoyen);
+    private void handleGestionCapteur(ActionEvent event) {
+        switchScene(event, "/GestionCapteur.fxml");
     }
 
+    // Handler pour le bouton de gestion des citoyens
     @FXML
-    private void handleGestionDonnee() {
-        switchScene("/GestionDonnee.fxml", btnGestionDonnee);
+    private void handleGestionCitoyen(ActionEvent event) {
+        switchScene(event, "/GestionCitoyen.fxml");
     }
 
+    // Handler pour le bouton de gestion des données
     @FXML
-    private void handleGestionIntervention() {
-        switchScene("/GestionIntervention.fxml", btnGestionIntervention);
+    private void handleGestionDonnee(ActionEvent event) {
+        switchScene(event, "/GestionDonnee.fxml");
     }
 
+    // Handler pour le bouton de gestion des interventions
     @FXML
-    private void handleGestionLampadaire() {
-        switchScene("/GestionLampadaire.fxml", btnGestionLampadaire);
+    private void handleGestionIntervention(ActionEvent event) {
+        switchScene(event, "/GestionIntervention.fxml");
     }
 
+    // Handler pour le bouton de gestion des lampadaires
     @FXML
-    private void handleGestionReclamation() {
-        switchScene("/GestionReclamation.fxml", btnGestionReclamation);
+    private void handleGestionLampadaire(ActionEvent event) {
+        switchScene(event, "/GestionLampadaire.fxml");
     }
 
+    // Handler pour le bouton de gestion des réclamations
     @FXML
-    private void handleGestionResponsable() {
-        switchScene("/GestionResponsable.fxml", btnGestionResponsable);
+    private void handleGestionReclamation(ActionEvent event) {
+        switchScene(event, "/GestionReclamation.fxml");
     }
 
+    // Handler pour le bouton de gestion des responsables
     @FXML
-    private void handleGestionTechnicien() {
-        switchScene("/GestionTechnicien.fxml", btnGestionTechnicien);
+    private void handleGestionResponsable(ActionEvent event) {
+        switchScene(event, "/GestionResponsable.fxml");
     }
 
+    // Handler pour le bouton de gestion des techniciens
     @FXML
-    private void handleGestionUtilisateur() {
-        switchScene("/GestionUtilisateur.fxml", btnGestionUtilisateur);
+    private void handleGestionTechnicien(ActionEvent event) {
+        switchScene(event, "/GestionTechnicien.fxml");
     }
 
+    // Handler pour le bouton de gestion des utilisateurs
     @FXML
-    private void handleGestionZone() { // Nouvelle méthode
-        switchScene("/GestionZone.fxml", btnGestionZone);
+    private void handleGestionUtilisateur(ActionEvent event) {
+        switchScene(event, "/GestionUtilisateur.fxml");
     }
 
+    // Handler pour le bouton de gestion des zones
     @FXML
-    private void handleProfileInterface() {
-        switchScene("/ProfileInterface.fxml", btnProfileInterface);
+    private void handleGestionZone(ActionEvent event) {
+        switchScene(event, "/GestionZone.fxml");
     }
 
+    // Handler pour le bouton de gestion du profil
     @FXML
-    private void handleSourceInterface() {
-        switchScene("/SourceInterface.fxml", btnSourceInterface);
+    private void handleProfileInterface(ActionEvent event) {
+        switchScene(event, "/ProfileInterface.fxml");
     }
 
-    private void switchScene(String fxmlPath, Button button) {
+    // Handler pour le bouton des sources
+    @FXML
+    private void handleSourceInterface(ActionEvent event) {
+        switchScene(event, "/SourceInterface.fxml");
+    }
+
+    // Handler pour revenir à la page d'accueil (Menu)
+    @FXML
+    private void handleAccueil(ActionEvent event) {
+        switchScene(event, "/Menu.fxml");
+    }
+
+    // Méthode pour revenir à la page précédente (en option, à personnaliser)
+    @FXML
+    private void handleBack() {
+        System.out.println("Retour à la page précédente");
+    }
+
+    // Méthode de commutation de scène (load des FXML et mise à jour de la scène)
+    private void switchScene(ActionEvent event, String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
-            Stage stage = (Stage) button.getScene().getWindow();
 
-            // Définir la scène sans taille fixe
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-
-            // Permettre le redimensionnement de la fenêtre
-            stage.setResizable(true);
-
-            stage.show();
+            // Récupère la scène actuelle et met à jour son contenu
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.getScene().setRoot(root);
         } catch (IOException e) {
             e.printStackTrace();
         }

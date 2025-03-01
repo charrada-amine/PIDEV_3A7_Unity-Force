@@ -6,8 +6,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.geometry.Insets;
+import javafx.stage.FileChooser;
+import org.kordamp.ikonli.javafx.FontIcon;
 import tn.esprit.models.Capteur;
 import tn.esprit.models.Capteur.EtatCapteur;
 import tn.esprit.models.Capteur.TypeCapteur;
@@ -17,11 +20,20 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.scene.layout.FlowPane;
+
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.stream.Collectors;
 
 public class GestionCapteurController implements Initializable {
 
@@ -43,6 +55,11 @@ public class GestionCapteurController implements Initializable {
     @FXML
     private FlowPane capteurCardContainer;
 
+    // Déclarer les ComboBox
+    @FXML
+    private ComboBox<String> searchCriteriaComboBox; // Pour choisir le critère (type ou état)
+    @FXML
+    private ComboBox<String> searchValueComboBox;   // Pour choisir la valeur (type ou état)
 
 
 
@@ -57,6 +74,15 @@ public class GestionCapteurController implements Initializable {
         // Initialiser les ComboBox
         typeComboBox.setItems(FXCollections.observableArrayList(TypeCapteur.values()));
         etatComboBox.setItems(FXCollections.observableArrayList(EtatCapteur.values()));
+        // Initialiser les ComboBox pour le type et l'état
+        typeComboBox.setItems(FXCollections.observableArrayList(TypeCapteur.values()));
+        etatComboBox.setItems(FXCollections.observableArrayList(EtatCapteur.values()));
+
+        // Initialiser la ComboBox des critères de recherche
+        searchCriteriaComboBox.setItems(FXCollections.observableArrayList("Type", "État"));
+        searchCriteriaComboBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            updateSearchValueComboBox(newVal);
+        });
 
 
         // Charger les capteurs
@@ -79,28 +105,83 @@ public class GestionCapteurController implements Initializable {
 
     private VBox createCapteurCard(Capteur capteur) {
         VBox card = new VBox();
-        card.setSpacing(5);
-        card.setPadding(new Insets(10));
-        card.setPrefWidth(200); // Ajoute une largeur
-        card.setPrefHeight(100); // Ajoute une hauteur
-        card.setStyle("-fx-border-color: gray; -fx-background-color: white; -fx-background-radius: 5; -fx-border-radius: 5;");
+        card.setSpacing(10);
+        card.setPadding(new Insets(15));
+        card.setPrefWidth(220); // Largeur de la carte
+        card.setPrefHeight(120); // Hauteur de la carte
 
-        Label idLabel = new Label("ID: " + capteur.getId());
-        Label typeLabel = new Label("Type: " + capteur.getType());
-        Label etatLabel = new Label("État: " + capteur.getEtat());
-        Label dateLabel = new Label("Date d'installation: " + capteur.getDateinstallation());
-        Label lampadaireIdLabel = new Label("Lampadaire ID: " + capteur.getLampadaireId());
+        // Appliquer une classe CSS pour un style uniforme
+        card.getStyleClass().add("capteur-card");
 
-        idLabel.setStyle("-fx-text-fill: black;");  // Force la couleur du texte
-        typeLabel.setStyle("-fx-text-fill: black;");
-        etatLabel.setStyle("-fx-text-fill: black;");
-        dateLabel.setStyle("-fx-text-fill: black;");
-        lampadaireIdLabel.setStyle("-fx-text-fill: black;");
+        // Créer un GridPane pour organiser les labels et les icônes
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(5);
 
+        // Ajouter des icônes à gauche des labels
+        FontIcon idIcon = new FontIcon("fas-hashtag");
+        FontIcon typeIcon = new FontIcon("fas-tag");
+        FontIcon etatIcon = new FontIcon("fas-power-off");
+        FontIcon dateIcon = new FontIcon("fas-calendar-alt");
+        FontIcon lampadaireIcon = new FontIcon("fas-lightbulb");
+
+        // Modifier l'affichage de l'ID avec un préfixe
+        String prefix = "";
+        TypeCapteur type = capteur.getType(); // Récupérer le type de capteur
+
+        // Utiliser le nom de l'énumération pour déterminer le préfixe
+        switch (type) {
+            case MOUVEMENT:
+                prefix = "mv";
+                break;
+            case LUMINOSITE:
+                prefix = "lum";
+                break;
+            case TEMPERATURE:
+                prefix = "temp";
+                break;
+            case CONSOMMATION_ENERGIE:
+                prefix = "coe";
+                break;
+            default:
+                prefix = "ref";
+                break;
+        }
+        String idText = "Référence: " + prefix + capteur.getId();
+
+        // Labels avec icônes
+        Label idLabel = createLabelWithIcon(idText, idIcon);
+        Label typeLabel = createLabelWithIcon("Type: " + type.name().toLowerCase(), typeIcon);
+        Label etatLabel = createLabelWithIcon("État: " + capteur.getEtat(), etatIcon);
+        Label dateLabel = createLabelWithIcon("Date d'installation: " + capteur.getDateinstallation(), dateIcon);
+        Label lampadaireIdLabel = createLabelWithIcon("Lampadaire ID: " + capteur.getLampadaireId(), lampadaireIcon);
+
+        // Ajouter les labels au GridPane
+        grid.add(idLabel, 0, 0);
+        grid.add(typeLabel, 0, 1);
+        grid.add(etatLabel, 0, 2);
+        grid.add(dateLabel, 0, 3);
+        grid.add(lampadaireIdLabel, 0, 4);
+
+        // Ajouter un effet visuel au survol
+        card.setOnMouseEntered(event -> card.setStyle("-fx-background-color: #f0f0f0;"));
+        card.setOnMouseExited(event -> card.setStyle("-fx-background-color: white;"));
+
+        // Gestionnaire d'événements pour sélectionner un capteur
         card.setOnMouseClicked(event -> selectCapteur(capteur));
 
-        card.getChildren().addAll(idLabel, typeLabel, etatLabel, dateLabel, lampadaireIdLabel);
+        // Ajouter le GridPane à la carte
+        card.getChildren().add(grid);
+        card.setUserData(capteur);
         return card;
+    }
+
+    // Méthode pour créer un label avec une icône
+    private Label createLabelWithIcon(String text, FontIcon icon) {
+        Label label = new Label(text);
+        label.setGraphic(icon);
+        label.getStyleClass().add("capteur-label");
+        return label;
     }
 
 
@@ -322,6 +403,12 @@ public class GestionCapteurController implements Initializable {
         System.out.println("Retour à la page précédente");
     }
 
+    // Nouveau handler pour le bouton Accueil
+    @FXML
+    private void handleAccueil(ActionEvent event) {
+        switchScene(event, "/Menu.fxml");
+    }
+
     private void switchScene(ActionEvent event, String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
@@ -333,6 +420,139 @@ public class GestionCapteurController implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    private void handleExportCapteurs() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Enregistrer le fichier Excel");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Fichiers Excel", "*.xlsx"));
+        fileChooser.setInitialFileName("capteurs_export.xlsx");
+
+        File file = fileChooser.showSaveDialog(null);
+        if (file != null) {
+            try {
+                Workbook workbook = new XSSFWorkbook();
+                Sheet sheet = workbook.createSheet("Capteurs");
+
+                // Créer l'en-tête
+                Row headerRow = sheet.createRow(0);
+                headerRow.createCell(0).setCellValue("ID");
+                headerRow.createCell(1).setCellValue("Type");
+                headerRow.createCell(2).setCellValue("État");
+                headerRow.createCell(3).setCellValue("Date d'installation");
+                headerRow.createCell(4).setCellValue("Lampadaire ID");
+
+                // Remplir les données
+                int rowNum = 1;
+                for (Capteur capteur : serviceCapteur.getAll()) {
+                    Row row = sheet.createRow(rowNum++);
+                    row.createCell(0).setCellValue(capteur.getId());
+                    row.createCell(1).setCellValue(capteur.getType().toString());
+                    row.createCell(2).setCellValue(capteur.getEtat().toString());
+                    row.createCell(3).setCellValue(capteur.getDateinstallation().toString());
+                    row.createCell(4).setCellValue(capteur.getLampadaireId());
+                }
+
+                // Ajuster la largeur des colonnes
+                for (int i = 0; i < 5; i++) {
+                    sheet.autoSizeColumn(i);
+                }
+
+                // Écrire le fichier
+                FileOutputStream fileOut = new FileOutputStream(file);
+                workbook.write(fileOut);
+                fileOut.close();
+                workbook.close();
+
+                showSuccessAlert("Exportation réussie ! Les capteurs ont été exportés dans :\n" + file.getAbsolutePath());
+            } catch (IOException e) {
+                showAlert("Erreur", "Une erreur est survenue lors de l'exportation des capteurs.");
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private boolean sortAscending = false; // Par défaut, tri descendant
+
+    @FXML
+    private void handleSortByDate() {
+        // Récupérer la liste des capteurs
+        List<Capteur> capteurs = serviceCapteur.getAll();
+
+        // Trier les capteurs par date d'installation
+        capteurs.sort((c1, c2) -> {
+            if (c1.getDateinstallation() == null || c2.getDateinstallation() == null) {
+                return 0; // Ne pas trier si une date est null
+            }
+            if (sortAscending) {
+                return c1.getDateinstallation().compareTo(c2.getDateinstallation()); // Tri ascendant
+            } else {
+                return c2.getDateinstallation().compareTo(c1.getDateinstallation()); // Tri descendant
+            }
+        });
+
+        // Inverser l'état du tri pour la prochaine fois
+        sortAscending = !sortAscending;
+
+        // Mettre à jour l'affichage
+        capteurCardContainer.getChildren().clear();
+        for (Capteur capteur : capteurs) {
+            VBox card = createCapteurCard(capteur);
+            capteurCardContainer.getChildren().add(card);
+        }
+
+        showSuccessAlert("Capteurs triés par date d'installation (" + (sortAscending ? "ascendant" : "descendant") + ").");
+    }
+
+
+
+
+    // Mettre à jour la ComboBox des valeurs en fonction du critère sélectionné
+    private void updateSearchValueComboBox(String criteria) {
+        searchValueComboBox.getItems().clear();
+        if ("Type".equals(criteria)) {
+            for (TypeCapteur type : TypeCapteur.values()) {
+                searchValueComboBox.getItems().add(type.toString());
+            }
+        } else if ("État".equals(criteria)) {
+            for (EtatCapteur etat : EtatCapteur.values()) {
+                searchValueComboBox.getItems().add(etat.toString());
+            }
+        }
+    }
+
+    // Méthode pour gérer la recherche
+    @FXML
+    private void handleSearch() {
+        String criteria = searchCriteriaComboBox.getValue();
+        String value = searchValueComboBox.getValue();
+
+        if (criteria == null || value == null) {
+            showAlert("Erreur", "Veuillez sélectionner un critère et une valeur.");
+            return;
+        }
+
+        // Filtrer les capteurs en fonction du critère et de la valeur
+        List<Capteur> filteredCapteurs = serviceCapteur.getAll().stream()
+                .filter(capteur -> {
+                    if ("Type".equals(criteria)) {
+                        return capteur.getType().toString().equals(value);
+                    } else if ("État".equals(criteria)) {
+                        return capteur.getEtat().toString().equals(value);
+                    }
+                    return false;
+                })
+                .collect(Collectors.toList());
+
+        // Mettre à jour l'affichage avec les capteurs filtrés
+        capteurCardContainer.getChildren().clear();
+        for (Capteur capteur : filteredCapteurs) {
+            VBox card = createCapteurCard(capteur);
+            capteurCardContainer.getChildren().add(card);
+        }
+
+        showSuccessAlert("Résultats de la recherche : " + filteredCapteurs.size() + " capteur(s) trouvé(s).");
     }
 
 }
