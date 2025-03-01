@@ -179,6 +179,21 @@
                                 <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
                             </graphic>
                         </Button>
+                        <HBox spacing="10">
+                            <Button text="Trier par rôle" onAction="#handleShowRoleFilter" styleClass="action-button,sort"/>
+                            <ComboBox fx:id="roleFilterComboBox" visible="false" onAction="#handleFilterByRole">
+                                <items>
+                                    <FXCollections fx:factory="observableArrayList">
+                                        <String fx:value="Tous" />
+                                        <String fx:value="Citoyen" />
+                                        <String fx:value="Responsable" />
+                                        <String fx:value="Technicien" />
+                                    </FXCollections>
+                                </items>
+                            </ComboBox>
+                        </HBox>
+
+
                     </HBox>
                 </VBox>
             </VBox>

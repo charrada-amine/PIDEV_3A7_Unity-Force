@@ -36,8 +36,11 @@ import tn.esprit.services.ServiceUtilisateur;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class GestionUtilisateurController {
+    @FXML
+    private VBox utilisateurListContainer;
 
     @FXML
     private TextField idField, nameField, prenomField, emailField, passwordField, zoneIdField, modulesField;
@@ -60,7 +63,8 @@ public class GestionUtilisateurController {
     @FXML
     private Button responsableButton; // Bouton pour les Responsables
     private Button AccueilButton;  // Bouton pour les Citoyens
-
+    @FXML
+    private ComboBox<String> roleFilterComboBox;
 
     @FXML
     private ScrollPane scrollPane;
@@ -641,7 +645,34 @@ public class GestionUtilisateurController {
 
         dialog.showAndWait();
     }
+    @FXML
+    private void handleShowRoleFilter() {
+        // Afficher le ComboBox quand on clique sur le bouton
+        roleFilterComboBox.setVisible(true);
+    }
 
+    @FXML
+    private void handleFilterByRole() {
+        String selectedRole = roleFilterComboBox.getValue();
+        if (selectedRole == null || userFlowPane == null) return;
+
+        // Récupérer tous les utilisateurs
+        List<utilisateur> utilisateurs = serviceUtilisateur.getAllUtilisateurs();
+
+        // Filtrer par rôle (sauf si "Tous" est sélectionné)
+        if (!"Tous".equals(selectedRole)) {
+            utilisateurs = utilisateurs.stream()
+                    .filter(u -> u.getRole().name().equalsIgnoreCase(selectedRole))
+                    .collect(Collectors.toList());
+        }
+
+        // Mettre à jour l'affichage
+        userFlowPane.getChildren().clear();
+        for (utilisateur user : utilisateurs) {
+            VBox card = createUserCard(user);
+            userFlowPane.getChildren().add(card);
+        }
+    }
     // Réinitialiser les champs
     @FXML
     public void handleClear() {
