@@ -247,3 +247,47 @@
     -fx-background-color: linear-gradient(to right, #d88222, #cc6008);
     -fx-effect: dropshadow(gaussian, rgba(172, 71, 4, 0.3), 10, 0, 0, 4);
 }
+/* Style des cartes */
+.donnee-card {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 10);
+    -fx-padding: 15;
+}
+
+/* Style des labels */
+.donnee-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #555;
+    -fx-alignment: center-left;
+}
+
+/* Effet de survol */
+.donnee-card:hover {
+    -fx-background-color: #f0f0f0;
+}
+/* Style des cartes de capteurs */
+.capteur-card {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 10);
+    -fx-padding: 15;
+}
+
+/* Style des labels des capteurs */
+.capteur-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #555; /* Couleur du texte */
+    -fx-alignment: center-left;
+}
+
+/* Effet de survol */
+.capteur-card:hover {
+    -fx-background-color: #f0f0f0;
+}

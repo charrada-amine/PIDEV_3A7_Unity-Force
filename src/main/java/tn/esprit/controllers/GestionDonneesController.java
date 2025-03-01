@@ -7,11 +7,14 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.geometry.Insets;
 import javafx.stage.FileChooser;
+import org.kordamp.ikonli.javafx.FontIcon;
 import tn.esprit.models.*;
 import tn.esprit.services.*;
 
@@ -102,25 +105,55 @@ public class GestionDonneesController implements Initializable {
             // Récupérer tous les capteurs de la base de données
             List<Capteur> capteurs = serviceCapteur.getAll();
 
-
+            // Filtrer les capteurs par type
             List<Capteur> filteredCapteurs = capteurs.stream()
-                    .filter(capteur -> capteur.getType().name().equals(selectedType)) // Comparer avec le type sélectionné
+                    .filter(capteur -> capteur.getType().name().equals(selectedType))
                     .collect(Collectors.toList());
 
             // Effacer les anciens ID du ComboBox
             capteurIdComboBox.getItems().clear();
 
-            // Ajouter les ID des capteurs filtrés au ComboBox
+            // Ajouter les ID des capteurs filtrés au ComboBox avec leur préfixe
             for (Capteur capteur : filteredCapteurs) {
-                capteurIdComboBox.getItems().add(capteur.getId());
+                String prefix = getPrefixForType(capteur.getType()); // Obtenir le préfixe en fonction du type
+                String reference = prefix + capteur.getId(); // Construire la référence
+                capteurIdComboBox.getItems().add(capteur.getId()); // Ajouter l'ID au ComboBox
+                capteurIdComboBox.setButtonCell(new ListCell<Integer>() {
+                    @Override
+                    protected void updateItem(Integer item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (item == null || empty) {
+                            setText("Sélectionnez une référence");
+                        } else {
+                            // Afficher la référence (préfixe + ID) dans le ComboBox
+                            setText(prefix + item);
+                        }
+                    }
+                });
             }
 
             // Si aucun capteur n'est trouvé, afficher un message dans le ComboBox
             if (filteredCapteurs.isEmpty()) {
                 capteurIdComboBox.setPromptText("Aucun capteur trouvé pour ce type");
             } else {
-                capteurIdComboBox.setPromptText("Sélectionnez un ID");
+                capteurIdComboBox.setPromptText("Sélectionnez une référence");
             }
+        }
+    }
+
+    // Méthode pour obtenir le préfixe en fonction du type de capteur
+    private String getPrefixForType(Capteur.TypeCapteur type) {
+        switch (type) {
+            case MOUVEMENT:
+                return "mv";
+            case LUMINOSITE:
+                return "lum";
+            case TEMPERATURE:
+                return "temp";
+            case CONSOMMATION_ENERGIE:
+                return "coe";
+            default:
+                return "ref";
         }
     }
 
@@ -129,10 +162,10 @@ public class GestionDonneesController implements Initializable {
         String type = typeCapteurComboBox.getValue();
         LocalDate date = dateCollectePicker.getValue();
         LocalTime heure = LocalTime.parse(heureCollecteField.getText());
-        int capteurId = capteurIdComboBox.getValue(); // Récupérer l'ID sélectionné dans le ComboBox
+        Integer capteurId = capteurIdComboBox.getValue(); // Récupérer l'ID sélectionné
         String valeurStr = valeurField.getText();
 
-        if (type != null && date != null && heure != null && !valeurStr.isEmpty()) {
+        if (type != null && date != null && heure != null && !valeurStr.isEmpty() && capteurId != null) {
             switch (type) {
                 case "MOUVEMENT":
                     serviceMouvement.add(new DonneeMouvement(0, date, heure, capteurId, Boolean.parseBoolean(valeurStr)));
@@ -211,39 +244,31 @@ public class GestionDonneesController implements Initializable {
         // Appliquer une classe CSS pour un style uniforme
         card.getStyleClass().add("donnee-card");
 
-        // Labels avec classes CSS
-        //Label idLabel = new Label("ID: " + donnee.getId());
-        Label dateLabel = new Label("Date: " + donnee.getDateCollecte());
-        Label heureLabel = new Label("Heure: " + donnee.getHeureCollecte());
-        Label capteurIdLabel = new Label("Capteur ID: " + donnee.getCapteurId());
-        Label valeurLabel = new Label("Valeur: " + getValeurString(donnee));
-        Label typeLabel = new Label("Type: " + getTypeString(donnee));
-
-        // Appliquer une classe CSS aux labels
-        //idLabel.getStyleClass().add("donnee-label");
-        dateLabel.getStyleClass().add("donnee-label");
-        heureLabel.getStyleClass().add("donnee-label");
-        capteurIdLabel.getStyleClass().add("donnee-label");
-        valeurLabel.getStyleClass().add("donnee-label");
-        typeLabel.getStyleClass().add("donnee-label");
-
-        // Organiser les labels dans un GridPane pour un alignement propre
+        // Créer un GridPane pour organiser les labels et les icônes
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(5);
 
-        //grid.add(new Label("ID:"), 0, 0);
-        //grid.add(idLabel, 1, 0);
-        grid.add(new Label("Date:"), 0, 1);
-        grid.add(dateLabel, 1, 1);
-        grid.add(new Label("Heure:"), 0, 2);
-        grid.add(heureLabel, 1, 2);
-        grid.add(new Label("Capteur ID:"), 0, 3);
-        grid.add(capteurIdLabel, 1, 3);
-        grid.add(new Label("Valeur:"), 0, 4);
-        grid.add(valeurLabel, 1, 4);
-        grid.add(new Label("Type:"), 0, 5);
-        grid.add(typeLabel, 1, 5);
+        // Ajouter des icônes à gauche des labels
+        FontIcon dateIcon = new FontIcon("fas-calendar-alt");
+        FontIcon timeIcon = new FontIcon("fas-clock");
+        FontIcon sensorIcon = new FontIcon("fas-microchip");
+        FontIcon valueIcon = new FontIcon("fas-chart-line");
+        FontIcon typeIcon = new FontIcon("fas-tag");
+
+        // Labels avec icônes
+        Label dateLabel = createLabelWithIcon("Date: " + donnee.getDateCollecte(), dateIcon);
+        Label heureLabel = createLabelWithIcon("Heure: " + donnee.getHeureCollecte(), timeIcon);
+        Label capteurIdLabel = createLabelWithIcon("Capteur ID: " + donnee.getCapteurId(), sensorIcon);
+        Label valeurLabel = createLabelWithIcon("Valeur: " + getValeurString(donnee), valueIcon);
+        Label typeLabel = createLabelWithIcon("Type: " + getTypeString(donnee), typeIcon);
+
+        // Ajouter les labels au GridPane
+        grid.add(dateLabel, 0, 0);
+        grid.add(heureLabel, 0, 1);
+        grid.add(capteurIdLabel, 0, 2);
+        grid.add(valeurLabel, 0, 3);
+        grid.add(typeLabel, 0, 4);
 
         // Ajouter un effet visuel au survol
         card.setOnMouseEntered(event -> card.setStyle("-fx-background-color: #f0f0f0;"));
@@ -252,10 +277,18 @@ public class GestionDonneesController implements Initializable {
         // Gestionnaire d'événements pour sélectionner une donnée
         card.setOnMouseClicked(event -> selectDonnee(donnee));
 
-        // Ajouter les éléments dans la carte
+        // Ajouter le GridPane à la carte
         card.getChildren().add(grid);
         card.setUserData(donnee);
         return card;
+    }
+
+    // Méthode pour créer un label avec une icône
+    private Label createLabelWithIcon(String text, FontIcon icon) {
+        Label label = new Label(text);
+        label.setGraphic(icon);
+        label.getStyleClass().add("donnee-label");
+        return label;
     }
 
 

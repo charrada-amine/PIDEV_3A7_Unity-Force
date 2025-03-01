@@ -6,9 +6,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.geometry.Insets;
 import javafx.stage.FileChooser;
+import org.kordamp.ikonli.javafx.FontIcon;
 import tn.esprit.models.Capteur;
 import tn.esprit.models.Capteur.EtatCapteur;
 import tn.esprit.models.Capteur.TypeCapteur;
@@ -103,28 +105,83 @@ public class GestionCapteurController implements Initializable {
 
     private VBox createCapteurCard(Capteur capteur) {
         VBox card = new VBox();
-        card.setSpacing(5);
-        card.setPadding(new Insets(10));
-        card.setPrefWidth(200); // Ajoute une largeur
-        card.setPrefHeight(100); // Ajoute une hauteur
-        card.setStyle("-fx-border-color: gray; -fx-background-color: white; -fx-background-radius: 5; -fx-border-radius: 5;");
+        card.setSpacing(10);
+        card.setPadding(new Insets(15));
+        card.setPrefWidth(220); // Largeur de la carte
+        card.setPrefHeight(120); // Hauteur de la carte
 
-        Label idLabel = new Label("ID: " + capteur.getId());
-        Label typeLabel = new Label("Type: " + capteur.getType());
-        Label etatLabel = new Label("État: " + capteur.getEtat());
-        Label dateLabel = new Label("Date d'installation: " + capteur.getDateinstallation());
-        Label lampadaireIdLabel = new Label("Lampadaire ID: " + capteur.getLampadaireId());
+        // Appliquer une classe CSS pour un style uniforme
+        card.getStyleClass().add("capteur-card");
 
-        idLabel.setStyle("-fx-text-fill: black;");  // Force la couleur du texte
-        typeLabel.setStyle("-fx-text-fill: black;");
-        etatLabel.setStyle("-fx-text-fill: black;");
-        dateLabel.setStyle("-fx-text-fill: black;");
-        lampadaireIdLabel.setStyle("-fx-text-fill: black;");
+        // Créer un GridPane pour organiser les labels et les icônes
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(5);
 
+        // Ajouter des icônes à gauche des labels
+        FontIcon idIcon = new FontIcon("fas-hashtag");
+        FontIcon typeIcon = new FontIcon("fas-tag");
+        FontIcon etatIcon = new FontIcon("fas-power-off");
+        FontIcon dateIcon = new FontIcon("fas-calendar-alt");
+        FontIcon lampadaireIcon = new FontIcon("fas-lightbulb");
+
+        // Modifier l'affichage de l'ID avec un préfixe
+        String prefix = "";
+        TypeCapteur type = capteur.getType(); // Récupérer le type de capteur
+
+        // Utiliser le nom de l'énumération pour déterminer le préfixe
+        switch (type) {
+            case MOUVEMENT:
+                prefix = "mv";
+                break;
+            case LUMINOSITE:
+                prefix = "lum";
+                break;
+            case TEMPERATURE:
+                prefix = "temp";
+                break;
+            case CONSOMMATION_ENERGIE:
+                prefix = "coe";
+                break;
+            default:
+                prefix = "ref";
+                break;
+        }
+        String idText = "Référence: " + prefix + capteur.getId();
+
+        // Labels avec icônes
+        Label idLabel = createLabelWithIcon(idText, idIcon);
+        Label typeLabel = createLabelWithIcon("Type: " + type.name().toLowerCase(), typeIcon);
+        Label etatLabel = createLabelWithIcon("État: " + capteur.getEtat(), etatIcon);
+        Label dateLabel = createLabelWithIcon("Date d'installation: " + capteur.getDateinstallation(), dateIcon);
+        Label lampadaireIdLabel = createLabelWithIcon("Lampadaire ID: " + capteur.getLampadaireId(), lampadaireIcon);
+
+        // Ajouter les labels au GridPane
+        grid.add(idLabel, 0, 0);
+        grid.add(typeLabel, 0, 1);
+        grid.add(etatLabel, 0, 2);
+        grid.add(dateLabel, 0, 3);
+        grid.add(lampadaireIdLabel, 0, 4);
+
+        // Ajouter un effet visuel au survol
+        card.setOnMouseEntered(event -> card.setStyle("-fx-background-color: #f0f0f0;"));
+        card.setOnMouseExited(event -> card.setStyle("-fx-background-color: white;"));
+
+        // Gestionnaire d'événements pour sélectionner un capteur
         card.setOnMouseClicked(event -> selectCapteur(capteur));
 
-        card.getChildren().addAll(idLabel, typeLabel, etatLabel, dateLabel, lampadaireIdLabel);
+        // Ajouter le GridPane à la carte
+        card.getChildren().add(grid);
+        card.setUserData(capteur);
         return card;
+    }
+
+    // Méthode pour créer un label avec une icône
+    private Label createLabelWithIcon(String text, FontIcon icon) {
+        Label label = new Label(text);
+        label.setGraphic(icon);
+        label.getStyleClass().add("capteur-label");
+        return label;
     }
 
 

@@ -168,7 +168,7 @@
                 </HBox>
                 <HBox spacing="15" styleClass="button-container">
                     <!-- Bouton pour récupérer les données de l'Arduino -->
-                    <Button text="Récupérer depuis Arduino" onAction="#handleRecupererDonneeArduino" styleClass="action-button,arduino">
+                    <Button text="Récupérer depuis Arduino" onAction="#handleRecupererDonneeArduino" styleClass="action-button,search">
                         <graphic>
                             <FontIcon iconLiteral="fas-microchip" iconSize="16" iconColor="white"/>
                         </graphic>
