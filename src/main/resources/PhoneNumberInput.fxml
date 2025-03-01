@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.esprit.controllers.PhoneNumberInputController"
+            style="-fx-background-color: #f4f4f4;">
+
+    <!-- Colonne gauche avec fond bleu -->
+    <left>
+        <VBox alignment="CENTER" prefWidth="250.0" style="-fx-background-color: #007BFF;">
+            <Label text="Vérification" style="-fx-font-size: 20px; -fx-text-fill: white; -fx-font-weight: bold;"/>
+        </VBox>
+    </left>
+
+    <!-- Contenu principal -->
+    <center>
+        <VBox alignment="CENTER" spacing="25.0" style="-fx-padding: 50.0;">
+
+            <!-- Titre -->
+            <Label text="Entrez votre numéro de téléphone" style="-fx-font-size: 24.0; -fx-font-weight: bold;"/>
+
+            <!-- Champ de saisie -->
+            <VBox alignment="CENTER" spacing="15.0">
+                <TextField fx:id="phoneField" promptText="Numéro de téléphone" prefWidth="270.0" maxWidth="270.0" prefHeight="40.0" style="-fx-font-size: 18.0;" />
+
+                <!-- Bouton d'envoi du code -->
+                <Button fx:id="sendCodeButton" text="Confirmer" onAction="#handleSendCode"
+                        prefWidth="320.0" prefHeight="45.0"
+                        style="-fx-font-size: 18.0; -fx-background-color: #007BFF; -fx-text-fill: white;" />
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

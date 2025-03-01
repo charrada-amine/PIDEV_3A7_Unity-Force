@@ -36,8 +36,11 @@ import tn.esprit.services.ServiceUtilisateur;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class GestionUtilisateurController {
+    @FXML
+    private VBox utilisateurListContainer;
 
     @FXML
     private TextField idField, nameField, prenomField, emailField, passwordField, zoneIdField, modulesField;
@@ -60,7 +63,8 @@ public class GestionUtilisateurController {
     @FXML
     private Button responsableButton; // Bouton pour les Responsables
     private Button AccueilButton;  // Bouton pour les Citoyens
-
+    @FXML
+    private ComboBox<String> roleFilterComboBox;
 
     @FXML
     private ScrollPane scrollPane;
@@ -223,13 +227,13 @@ public class GestionUtilisateurController {
         card.setStyle("-fx-border-color: #ddd; -fx-border-width: 1; -fx-padding: 10; -fx-background-color: #f9f9f9; -fx-alignment: center;");
 
         // Champ ID (non modifiable)
-        Label idLabel = new Label("ID:");
+        /*Label idLabel = new Label("ID:");
         idLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: black;");
         TextField idField = new TextField(String.valueOf(user.getId_utilisateur()));
         idField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         idField.setEditable(false); // Non modifiable
         HBox idBox = new HBox(10, idLabel, idField);
-        idBox.setAlignment(Pos.CENTER_LEFT);
+        idBox.setAlignment(Pos.CENTER_LEFT);*/
 
         // Champ Nom
         Label nameLabel = new Label("Nom:");
@@ -259,13 +263,13 @@ public class GestionUtilisateurController {
         emailBox.setAlignment(Pos.CENTER_LEFT);
 
         // Champ Mot de passe
-        Label passwordLabel = new Label("Mot de passe:");
+        /*Label passwordLabel = new Label("Mot de passe:");
         passwordLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
         TextField mdpfield = new TextField(user.getMotdepasse());
         mdpfield.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         mdpfield.setEditable(false);
         HBox mdpBox = new HBox(10, passwordLabel, mdpfield);
-        mdpBox.setAlignment(Pos.CENTER_LEFT);
+        mdpBox.setAlignment(Pos.CENTER_LEFT);*/
 
         // Champ Rôle
         Label roleLabel = new Label("Rôle:");
@@ -288,14 +292,14 @@ public class GestionUtilisateurController {
         dateInscriptionBox.setAlignment(Pos.CENTER_LEFT);
 
         // Ajouter les HBoxes à la carte
-        card.getChildren().addAll(idBox, nameBox, prenomBox, emailBox, mdpBox, roleBox, dateInscriptionBox);
+        card.getChildren().addAll(nameBox, prenomBox, emailBox,  roleBox, dateInscriptionBox);
 
         return card;
     }
 
 
     @FXML
-    public void handleAddUser() {
+    public void handleAddUser() throws IOException {
         try {
             String name = nameField.getText();
             String prenom = prenomField.getText();
@@ -324,7 +328,6 @@ public class GestionUtilisateurController {
                 showAlert("Erreur", "Le mot de passe doit comporter au moins 8 caractères, un chiffre et une lettre majuscule.");
                 return;
             }
-
 
             // Afficher la valeur du rôle sélectionné
             System.out.println("Role selected: " + roleString);
@@ -367,14 +370,30 @@ public class GestionUtilisateurController {
             VBox userCard = createUserCard(user); // Créer la carte de l'utilisateur
             userFlowPane.getChildren().add(userCard); // Ajouter la carte à l'FlowPane
 
+            // Ouvrir la fenêtre PhoneNumberInput.fxml
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/PhoneNumberInput.fxml")); // Mettre le bon chemin de fichier FXML
+            Parent root = loader.load();
+
+            // Créer une scène et l'afficher
+            Stage stage = new Stage();
+            stage.setTitle("Entrer le numéro de téléphone");
+            stage.setScene(new Scene(root));
+            stage.show();
+            stage.setMaximized(true);
+
+
+            // Appeler la méthode handleSendCode sur le contrôleur du PhoneNumberInput.fxml
+            PhoneNumberInputController phoneNumberController = loader.getController();
+            phoneNumberController.handleSendCode(new ActionEvent()); // V
             // Réinitialiser les champs
             clearFields();
-            showAlert("Succès", "Utilisateur ajouté avec succès.");
         } catch (Exception e) {
             e.printStackTrace(); // Ajouter un trace de l'erreur
             showAlert("Erreur", "Une erreur est survenue lors de l'ajout.");
         }
     }
+
+
 
 
 
@@ -626,7 +645,34 @@ public class GestionUtilisateurController {
 
         dialog.showAndWait();
     }
+    @FXML
+    private void handleShowRoleFilter() {
+        // Afficher le ComboBox quand on clique sur le bouton
+        roleFilterComboBox.setVisible(true);
+    }
 
+    @FXML
+    private void handleFilterByRole() {
+        String selectedRole = roleFilterComboBox.getValue();
+        if (selectedRole == null || userFlowPane == null) return;
+
+        // Récupérer tous les utilisateurs
+        List<utilisateur> utilisateurs = serviceUtilisateur.getAllUtilisateurs();
+
+        // Filtrer par rôle (sauf si "Tous" est sélectionné)
+        if (!"Tous".equals(selectedRole)) {
+            utilisateurs = utilisateurs.stream()
+                    .filter(u -> u.getRole().name().equalsIgnoreCase(selectedRole))
+                    .collect(Collectors.toList());
+        }
+
+        // Mettre à jour l'affichage
+        userFlowPane.getChildren().clear();
+        for (utilisateur user : utilisateurs) {
+            VBox card = createUserCard(user);
+            userFlowPane.getChildren().add(card);
+        }
+    }
     // Réinitialiser les champs
     @FXML
     public void handleClear() {

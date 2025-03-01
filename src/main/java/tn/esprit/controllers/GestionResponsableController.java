@@ -12,6 +12,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import org.kordamp.ikonli.javafx.FontIcon;
+import tn.esprit.models.Role;
+import tn.esprit.models.Session;
 import tn.esprit.models.responsable;
 import tn.esprit.models.utilisateur;
 import tn.esprit.services.ServiceCitoyen;
@@ -30,13 +33,20 @@ import java.util.List;
 import java.util.Optional;
 
 public class GestionResponsableController {
-
+    @FXML
+    private Label welcomeLabel;
+    @FXML
+    private Button logOutButton;  // Le bouton Log Out
     @FXML
     private FlowPane responsableFlowPane;
     private final ServiceResponsable serviceResponsable = new ServiceResponsable();
     private final ServiceUtilisateur serviceUtilisateur = new ServiceUtilisateur();
     @FXML
     private TextField idField, nameField, prenomField, emailField, passwordField, modulesField ;
+    @FXML
+    private TextField visiblePasswordField;
+    @FXML
+    private ToggleButton togglePasswordButton;
     @FXML
     private void initialize() {
         if (responsableFlowPane == null) {
@@ -45,20 +55,75 @@ public class GestionResponsableController {
             System.out.println("FlowPane 'responsableFlowPane' initialisé correctement.");
             loadUsers();
         }
+// Récupérer l'utilisateur de la session
+        utilisateur user = Session.getCurrentUser();
+
+        // Vérifier si un utilisateur est connecté
+        if (user != null) {
+            // Afficher le nom et le prénom de l'utilisateur
+            welcomeLabel.setText("Bienvenue, " + user.getNom() + " " + user.getPrenom());
+        } else {
+            // Si aucun utilisateur n'est connecté, afficher un message générique
+            welcomeLabel.setText("Bienvenue, invité");
+        }
+        // Ajouter un écouteur pour basculer la visibilité du mot de passe
+        togglePasswordButton.selectedProperty().addListener((obs, wasSelected, isNowSelected) -> {
+            if (isNowSelected) {
+                // Afficher le mot de passe en clair
+                visiblePasswordField.setText(passwordField.getText());
+                visiblePasswordField.setVisible(true);
+                passwordField.setVisible(false);
+                ((FontIcon) togglePasswordButton.getGraphic()).setIconLiteral("fas-eye");
+            } else {
+                // Masquer le mot de passe
+                passwordField.setText(visiblePasswordField.getText());
+                passwordField.setVisible(true);
+                visiblePasswordField.setVisible(false);
+                ((FontIcon) togglePasswordButton.getGraphic()).setIconLiteral("fas-eye-slash");
+            }
+        });
+    }
+    @FXML
+    private void handleLogOut(ActionEvent event) {
+        // Met fin à la session
+        Session.logOut();
+
+        // Afficher un message de déconnexion
+        showAlert("Déconnexion", "Vous avez été déconnecté avec succès.");
+
+        // Fermer la fenêtre actuelle (l'écran principal)
+        Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        currentStage.close();
+
+        // Ouvrir la fenêtre de connexion
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Login.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Connexion");
+            stage.setScene(new Scene(root));
+            stage.show();
+            stage.setMaximized(true);
+
+        } catch (IOException e) {
+            showAlert("Erreur", "Une erreur est survenue lors de la déconnexion.");
+            e.printStackTrace();
+        }
     }
 
     private VBox createResponsableCard(responsable responsable) {
         VBox card = new VBox(10);
         card.setStyle("-fx-border-color: #ddd; -fx-border-width: 1; -fx-padding: 10; -fx-background-color: #f9f9f9; -fx-alignment: center;");
 
-        // Champ ID (non modifiable)
+        /*// Champ ID (non modifiable)
         Label idLabel = new Label("ID:");
         idLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: black;");
         TextField idField = new TextField(String.valueOf(responsable.getId_utilisateur()));
         idField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         idField.setEditable(false);
         HBox idBox = new HBox(10, idLabel, idField); // Aligner le label et le champ ID
-        idBox.setAlignment(Pos.CENTER_LEFT); // Aligner à gauche
+        idBox.setAlignment(Pos.CENTER_LEFT); // Aligner à gauche*/
 
         // Champ Nom (non modifiable)
         Label nameLabel = new Label("Nom:");
@@ -88,13 +153,13 @@ public class GestionResponsableController {
         emailBox.setAlignment(Pos.CENTER_LEFT);
 
         // Champ Mot de passe (non modifiable)
-        Label passwordLabel = new Label("Mot de passe:");
+      /*  Label passwordLabel = new Label("Mot de passe:");
         passwordLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
         TextField passwordField = new TextField(responsable.getMotdepasse());
         passwordField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         passwordField.setEditable(false);
         HBox passwordBox = new HBox(10, passwordLabel, passwordField); // Aligner le label et le champ Mot de passe
-        passwordBox.setAlignment(Pos.CENTER_LEFT);
+        passwordBox.setAlignment(Pos.CENTER_LEFT);*/
 
         // Champ Date d'inscription (non modifiable)
         Label dateInscriptionLabel = new Label("Date d'inscription:");
@@ -117,11 +182,9 @@ public class GestionResponsableController {
 
         // Ajouter les HBoxes à la carte
         card.getChildren().addAll(
-                idBox,
                 nameBox,
                 prenomBox,
                 emailBox,
-                passwordBox,
                 dateInscriptionBox,
                 modulesBox
         );
@@ -289,64 +352,42 @@ public class GestionResponsableController {
     @FXML
     private void handleUpdateResponsable() {
         try {
-            // Récupérer l'ID du responsable
-            String userIdText = idField.getText();
-            if (userIdText.isEmpty()) {
-                showAlert("Erreur", "L'ID de l'utilisateur/responsable ne peut pas être vide.");
+            // Récupérer et valider l'email
+            String email = emailField.getText().trim();
+            if (email.isEmpty() || !email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                showAlert("Erreur", "L'email doit être valide.");
                 return;
             }
 
-            int userId;
-            try {
-                userId = Integer.parseInt(userIdText);
-                if (userId <= 0) {
-                    showAlert("Erreur", "L'ID doit être un nombre entier positif.");
-                    return;
-                }
-            } catch (NumberFormatException e) {
-                showAlert("Erreur", "L'ID doit être un nombre entier.");
+            // Récupérer et valider le mot de passe
+            String password = togglePasswordButton.isSelected() ? visiblePasswordField.getText().trim() : passwordField.getText().trim();
+            if (password.isEmpty()) {
+                showAlert("Erreur", "Le mot de passe ne peut pas être vide.");
                 return;
             }
 
-            // Vérifier si l'utilisateur existe
-            utilisateur existingUser = serviceUtilisateur.getUtilisateurById(userId);
-            if (existingUser == null) {
-                showAlert("Erreur", "Aucun utilisateur trouvé avec cet ID.");
+            // Vérifier si le responsable existe avec cet email et mot de passe
+            utilisateur responsable = serviceUtilisateur.getByEmailAndPassword(email, password);
+            if (responsable == null) {
+                showAlert("Erreur", "Email ou mot de passe incorrect.");
                 return;
             }
 
-            // Récupérer et valider les champs
+            // Récupérer et valider le nouveau nom
             String newName = nameField.getText().trim();
             if (newName.isEmpty() || !newName.matches("[A-Za-zÀ-ÖØ-öø-ÿ\\s-]+")) {
                 showAlert("Erreur", "Le nom doit contenir uniquement des lettres et ne peut pas être vide.");
                 return;
             }
 
+            // Récupérer et valider le nouveau prénom
             String newPrenom = prenomField.getText().trim();
             if (newPrenom.isEmpty() || !newPrenom.matches("[A-Za-zÀ-ÖØ-öø-ÿ\\s-]+")) {
                 showAlert("Erreur", "Le prénom doit contenir uniquement des lettres et ne peut pas être vide.");
                 return;
             }
 
-            String newEmail = emailField.getText().trim();
-            if (newEmail.isEmpty() || !newEmail.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-                showAlert("Erreur", "L'email doit être valide.");
-                return;
-            }
-            if (!newEmail.equals(existingUser.getEmail()) && emailExists(newEmail)) {
-                showAlert("Erreur", "L'email est déjà utilisé.");
-                return;
-            }
-
-            String newPassword = passwordField.getText().trim();
-            if (newPassword.isEmpty() || newPassword.length() < 8
-                    || !newPassword.matches(".*\\d.*")
-                    || !newPassword.matches(".*[A-Z].*")) {
-                showAlert("Erreur", "Le mot de passe doit comporter au moins 8 caractères, un chiffre et une lettre majuscule.");
-                return;
-            }
-
-            // Validation des modules
+            // Récupérer et valider les modules
             String modulesText = modulesField.getText().trim();
             if (modulesText.isEmpty()) {
                 showAlert("Erreur", "Les modules ne peuvent pas être vides.");
@@ -362,85 +403,55 @@ public class GestionResponsableController {
             }
             String formattedModules = String.join(",", modulesArray);
 
-            // Mise à jour des champs dans le service
-            serviceUtilisateur.updateFieldResponsable(userId, "nom", newName);
-            serviceUtilisateur.updateFieldResponsable(userId, "prenom", newPrenom);
-            serviceUtilisateur.updateFieldResponsable(userId, "email", newEmail);
-            serviceUtilisateur.updateFieldResponsable(userId, "motdepasse", newPassword);
-            serviceUtilisateur.updateFieldResponsable(userId, "modules", formattedModules);
+            // Mettre à jour les champs autorisés (nom, prénom, modules)
+            serviceUtilisateur.updateFieldResponsable(responsable.getId_utilisateur(), "nom", newName);
+            serviceUtilisateur.updateFieldResponsable(responsable.getId_utilisateur(), "prenom", newPrenom);
+            serviceUtilisateur.updateFieldResponsable(responsable.getId_utilisateur(), "modules", formattedModules);
 
-            // Recharger les utilisateurs pour refléter la modification
+            // Recharger la liste des responsables
             loadUsers();
 
             // Réinitialiser les champs
             clearFields();
 
-            // Confirmation de la modification
+            // Afficher confirmation
             showAlert("Succès", "Responsable modifié avec succès.");
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Erreur", "Une erreur est survenue lors de la modification.");
         }
     }
+
     private void clearFields() {
-        idField.clear();
         nameField.clear();
         prenomField.clear();
         emailField.clear();
         passwordField.clear();
         modulesField.clear(); // Réinitialiser le champ des modules
+        togglePasswordButton.setSelected(false); // Désactiver le basculement
+
     }
 
 
 
     @FXML
     private void handleDeleteResponsable() {
-        // Créer un formulaire pour entrer l'ID du responsable
-        Dialog<Void> dialog = new Dialog<>();
-        dialog.setTitle("Supprimer Responsable");
-        dialog.setHeaderText("Supprimer un responsable par son ID");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Delete.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("Suppression de Responsable");
+            stage.setScene(new Scene(root));
+            stage.setMaximized(true);
 
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-
-        TextField responsableIdField = new TextField();
-        grid.addRow(0, new Label("ID Responsable :"), responsableIdField);
-
-        dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-        dialog.setResultConverter(button -> {
-            if (button == ButtonType.OK) {
-                try {
-                    int id = Integer.parseInt(responsableIdField.getText());
-                    utilisateur responsable = serviceResponsable.getResponsableById(id);
-
-                    if (responsable != null) {
-                        // Demande de confirmation
-                        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-                        confirmation.setTitle("Confirmation");
-                        confirmation.setHeaderText("Voulez-vous vraiment supprimer le responsable : " +
-                                responsable.getNom() + " " + responsable.getPrenom() + "?");
-
-                        Optional<ButtonType> result = confirmation.showAndWait();
-                        if (result.isPresent() && result.get() == ButtonType.OK) {
-                            serviceResponsable.deleteById(id);
-                            showAlert("Succès", "Responsable supprimé avec succès !");
-                            loadUsers(); // Recharger la liste après suppression
-                        }
-                    } else {
-                        showAlert("Erreur", "Responsable avec l'ID " + id + " introuvable.");
-                    }
-                } catch (NumberFormatException e) {
-                    showAlert("Erreur", "Veuillez entrer un ID valide.");
-                }
-            }
-            return null;
-        });
-
-        dialog.showAndWait();
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger la fenêtre de suppression.");
+        }
     }
+
+
 
     private void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.WARNING);

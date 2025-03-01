@@ -1,5 +1,6 @@
 package tn.esprit.services;
 
+import tn.esprit.models.utilisateur;
 import tn.esprit.utils.MyDatabase;
 import tn.esprit.Enumerations.Role;
 import tn.esprit.models.responsable;
@@ -16,7 +17,7 @@ public class ServiceResponsable {
         cnx = MyDatabase.getInstance().getCnx();
     }
 
-// Méthode pour ajouter un responsable
+    // Méthode pour ajouter un responsable
 /*public void addResponsable(responsable resp) {
     String qry = "INSERT INTO responsable (id_utilisateur, modules) VALUES (?, ?)";
 
@@ -35,39 +36,39 @@ public class ServiceResponsable {
         System.out.println("❌ Erreur SQL : " + e.getMessage());
     }
 */
-public responsable getResponsableById(int idResponsable) {
-    responsable responsable = null;
+    public responsable getResponsableById(int idResponsable) {
+        responsable responsable = null;
 
-    // Requête SQL pour récupérer les informations d'un responsable
-    String qry = "SELECT r.id_responsable, u.nom, u.prenom, u.email, u.motdepasse, u.dateInscription, r.modules " +
-            "FROM utilisateur u " +
-            "JOIN responsable r ON u.id_utilisateur = r.id_responsable " + // Corrigé : Relation correcte
-            "WHERE r.id_responsable = ?";
+        // Requête SQL pour récupérer les informations d'un responsable
+        String qry = "SELECT r.id_responsable, u.nom, u.prenom, u.email, u.motdepasse, u.dateInscription, r.modules " +
+                "FROM utilisateur u " +
+                "JOIN responsable r ON u.id_utilisateur = r.id_responsable " + // Corrigé : Relation correcte
+                "WHERE r.id_responsable = ?";
 
-    try {
-        PreparedStatement pstm = cnx.prepareStatement(qry);
-        pstm.setInt(1, idResponsable);
-        ResultSet rs = pstm.executeQuery();
+        try {
+            PreparedStatement pstm = cnx.prepareStatement(qry);
+            pstm.setInt(1, idResponsable);
+            ResultSet rs = pstm.executeQuery();
 
-        if (rs.next()) {
-            // Construction de l'objet responsable avec les données récupérées
-            responsable = new responsable(
-                    rs.getString("nom"),
-                    rs.getString("prenom"),
-                    rs.getString("email"),
-                    rs.getString("motdepasse"),
-                    rs.getDate("dateInscription"),
-                    Arrays.asList(rs.getString("modules").split(",\\s*")) // Conversion des modules en liste
-            );
-        } else {
-            System.out.println("⚠️ Responsable avec l'ID " + idResponsable + " introuvable.");
+            if (rs.next()) {
+                // Construction de l'objet responsable avec les données récupérées
+                responsable = new responsable(
+                        rs.getString("nom"),
+                        rs.getString("prenom"),
+                        rs.getString("email"),
+                        rs.getString("motdepasse"),
+                        rs.getDate("dateInscription"),
+                        Arrays.asList(rs.getString("modules").split(",\\s*")) // Conversion des modules en liste
+                );
+            } else {
+                System.out.println("⚠️ Responsable avec l'ID " + idResponsable + " introuvable.");
+            }
+        } catch (SQLException e) {
+            System.out.println("❌ Erreur SQL lors de la récupération du responsable : " + e.getMessage());
         }
-    } catch (SQLException e) {
-        System.out.println("❌ Erreur SQL lors de la récupération du responsable : " + e.getMessage());
-    }
 
-    return responsable;
-}
+        return responsable;
+    }
 
     public List<responsable> getAllResponsables() {
         List<responsable> responsables = new ArrayList<>();
@@ -218,6 +219,7 @@ public responsable getResponsableById(int idResponsable) {
 
         return modules;
     }
+
 
 
 
