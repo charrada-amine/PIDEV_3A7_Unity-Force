@@ -12,7 +12,7 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 
 public class CameraIpUpdateServer {
-    private static final int PORT = 8081; // Changé de 8080 à 8081
+    private static final int PORT = 8081;
     private static final ServiceCamera serviceCamera = new ServiceCamera();
 
     public static void startServer() throws Exception {

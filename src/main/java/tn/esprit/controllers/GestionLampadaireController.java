@@ -1,4 +1,5 @@
 package tn.esprit.controllers;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -56,6 +57,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
+import tn.esprit.utils.TrafficUpdateServer;
 
 public class GestionLampadaireController implements Initializable {
 
@@ -74,6 +76,7 @@ public class GestionLampadaireController implements Initializable {
     @FXML private VBox mapContainer;
     @FXML private WebView globalMapView;
     @FXML private VBox globalMapContainer;
+    @FXML private Label trafficStatusLabel;
 
     private final ServiceLampadaire serviceLampadaire = new ServiceLampadaire();
     private final ServiceZone serviceZone = new ServiceZone();
@@ -120,6 +123,19 @@ public class GestionLampadaireController implements Initializable {
         });
         cbCamera.valueProperty().addListener((obs, oldVal, newVal) -> resetFieldError(cbCamera, lblCameraError));
 
+        trafficStatusLabel.setText("Statut du trafic: En attente...");
+        trafficStatusLabel.setStyle(
+                "-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #202124; " +
+                        "-fx-background-color: #f8f9fa; -fx-padding: 8; -fx-background-radius: 8;"
+        );
+
+        try {
+            TrafficUpdateServer.startServer(trafficStatusLabel, this);
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de démarrer le serveur de trafic: " + e.getMessage());
+        }
+
         loadData();
         globalMapContainer.setVisible(true);
         globalMapContainer.setManaged(true);
@@ -128,6 +144,19 @@ public class GestionLampadaireController implements Initializable {
 
     private void loadData() {
         lampadaires.setAll(serviceLampadaire.getAll());
+        // Ajouter un lampadaire de test si aucun n'existe
+        if (lampadaires.isEmpty()) {
+            Lampadaire testLamp = new Lampadaire();
+            testLamp.setTypeLampadaire("LED Test");
+            testLamp.setPuissance(100);
+            testLamp.setEtat(EtatLampadaire.ACTIF);
+            testLamp.setLatitude(36.8);
+            testLamp.setLongitude(10.2);
+            testLamp.setIdCamera(1); // Associe à cameraId 1
+            lampadaires.add(testLamp);
+        }
+        System.out.println("Lampadaires chargés: " + lampadaires.size());
+        lampadaires.forEach(l -> System.out.println("ID Caméra: " + l.getIdCamera() + ", Lat: " + l.getLatitude() + ", Lng: " + l.getLongitude()));
         javafx.application.Platform.runLater(this::initializeGlobalMap);
     }
 
@@ -525,25 +554,28 @@ public class GestionLampadaireController implements Initializable {
                 globalMapView.setPrefHeight(600);
                 globalMapView.setPrefWidth(1200);
                 globalMapContainer.getChildren().add(globalMapView);
+                System.out.println("Nouvelle instance de WebView créée");
             } else {
                 globalMapContainer.getChildren().clear();
                 globalMapContainer.getChildren().add(globalMapView);
+                System.out.println("WebView existant réutilisé");
             }
 
             WebEngine webEngine = globalMapView.getEngine();
             webEngine.setJavaScriptEnabled(true);
             webEngine.setOnAlert(event -> {
-                String data = event.getData();
-                System.out.println("JavaScript Alert: " + data);
-                if (data.startsWith("LAMPADAIRE_DETAILS:")) {
-                    String jsonDetails = data.substring("LAMPADAIRE_DETAILS:".length());
+                System.out.println("JavaScript Alert: " + event.getData());
+                if (event.getData().startsWith("LAMPADAIRE_DETAILS:")) {
+                    String jsonDetails = event.getData().substring("LAMPADAIRE_DETAILS:".length());
                     javafx.application.Platform.runLater(() -> showLampadaireDetails(jsonDetails));
                 }
             });
             webEngine.setOnError(event -> System.out.println("JavaScript Error: " + event.getMessage()));
             webEngine.loadContent(getGlobalMapHtml());
+            System.out.println("Contenu de la carte chargé");
 
             webEngine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+                System.out.println("État de chargement de la carte: " + newState);
                 if (newState == Worker.State.SUCCEEDED) {
                     System.out.println("Carte globale chargée avec succès");
                     StringBuilder markersJson = new StringBuilder("[");
@@ -577,6 +609,7 @@ public class GestionLampadaireController implements Initializable {
                         e.printStackTrace();
                     }
                     globalMapInitialized = true;
+                    System.out.println("globalMapInitialized défini à true");
                 } else if (newState == Worker.State.FAILED) {
                     System.out.println("Échec du chargement de la carte");
                 }
@@ -633,11 +666,31 @@ public class GestionLampadaireController implements Initializable {
                 "            marker.on('click', function(e) {\n" +
                 "                alert('LAMPADAIRE_DETAILS:' + JSON.stringify(details));\n" +
                 "            });\n" +
+                "            return marker;\n" +
                 "        }\n" +
                 "        function addMarkers(markers) {\n" +
                 "            markers.forEach(function(m) {\n" +
                 "                addMarker(m.lat, m.lng, m.title, m.content, m.color, {lat: m.lat, lng: m.lng, title: m.title, content: m.content, color: m.color});\n" +
                 "            });\n" +
+                "        }\n" +
+                "        function highlightLampadaire(lat, lng) {\n" +
+                "            alert('Animation déclenchée pour lat=' + lat + ', lng=' + lng);\n" +
+                "            map.setView([lat, lng], 15);\n" +
+                "            var circle = L.circle([lat, lng], {\n" +
+                "                color: 'red',\n" +
+                "                fillColor: '#f03',\n" +
+                "                fillOpacity: 0.5,\n" +
+                "                radius: 50\n" +
+                "            }).addTo(map);\n" +
+                "            var opacity = 0.5;\n" +
+                "            var interval = setInterval(function() {\n" +
+                "                opacity = (opacity === 0.5) ? 0 : 0.5;\n" +
+                "                circle.setStyle({fillOpacity: opacity});\n" +
+                "            }, 500);\n" +
+                "            setTimeout(function() {\n" +
+                "                clearInterval(interval);\n" +
+                "                map.removeLayer(circle);\n" +
+                "            }, 3000);\n" +
                 "        }\n" +
                 "    </script>\n" +
                 "</body>\n" +
@@ -806,46 +859,40 @@ public class GestionLampadaireController implements Initializable {
         streamContainer.setStyle("-fx-background-color: white; -fx-background-radius: 16; -fx-border-radius: 16;");
         streamContainer.setEffect(new DropShadow(10, Color.gray(0.2)));
 
-        // Utilisation d'une ImageView pour afficher le flux
         ImageView imageView = new ImageView();
         imageView.setFitWidth(640);
         imageView.setFitHeight(480);
         imageView.setPreserveRatio(true);
 
-        // Thread pour extraire les frames MJPEG
         Thread streamThread = new Thread(() -> {
             try {
                 URL url = new URL(streamUrl);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestProperty("User-Agent", "Mozilla/5.0");
-                connection.setConnectTimeout(5000); // Timeout de 5 secondes
+                connection.setConnectTimeout(5000);
                 InputStream inputStream = connection.getInputStream();
                 ByteArrayOutputStream buffer = new ByteArrayOutputStream();
                 int nRead;
                 byte[] data = new byte[16384];
-                byte[] boundary = "--123456789000000000000987654321".getBytes(); // Correspond à la boundary dans le code ESP32
+                byte[] boundary = "--123456789000000000000987654321".getBytes();
 
                 while (!Thread.currentThread().isInterrupted() && (nRead = inputStream.read(data, 0, data.length)) != -1) {
                     buffer.write(data, 0, nRead);
                     byte[] content = buffer.toByteArray();
 
-                    // Recherche de la boundary pour extraire une frame JPEG
                     int boundaryIndex = indexOf(content, boundary);
                     if (boundaryIndex != -1) {
                         int nextBoundaryIndex = indexOf(content, boundary, boundaryIndex + boundary.length);
                         if (nextBoundaryIndex != -1) {
-                            // Trouver la fin de l'en-tête
                             int headerEnd = indexOf(content, new byte[]{0x0D, 0x0A, 0x0D, 0x0A}, boundaryIndex);
                             if (headerEnd != -1) {
                                 int imageStart = headerEnd + 4;
                                 int imageEnd = nextBoundaryIndex;
                                 byte[] imageData = Arrays.copyOfRange(content, imageStart, imageEnd);
 
-                                // Mettre à jour l'ImageView sur le thread UI
                                 Image image = new Image(new ByteArrayInputStream(imageData));
                                 javafx.application.Platform.runLater(() -> imageView.setImage(image));
                             }
-                            // Réinitialiser le buffer pour la prochaine frame
                             buffer.reset();
                             buffer.write(content, nextBoundaryIndex, content.length - nextBoundaryIndex);
                         }
@@ -858,7 +905,7 @@ public class GestionLampadaireController implements Initializable {
                 javafx.application.Platform.runLater(() -> showAlert("Erreur", "Impossible de charger le flux : " + e.getMessage()));
             }
         });
-        streamThread.setDaemon(true); // S'arrête quand l'application se ferme
+        streamThread.setDaemon(true);
         streamThread.start();
 
         streamContainer.getChildren().add(imageView);
@@ -869,7 +916,7 @@ public class GestionLampadaireController implements Initializable {
         Button closeStreamButton = new Button("Fermer");
         closeStreamButton.setStyle("-fx-background-color: #5f6368; -fx-text-fill: white; -fx-font-weight: 700; -fx-padding: 8 16; -fx-background-radius: 8;");
         closeStreamButton.setOnAction(e -> {
-            streamThread.interrupt(); // Arrêter le thread
+            streamThread.interrupt();
             streamDialog.close();
         });
 
@@ -883,7 +930,6 @@ public class GestionLampadaireController implements Initializable {
         streamDialog.showAndWait();
     }
 
-    // Méthodes utilitaires pour la recherche dans les bytes
     private int indexOf(byte[] source, byte[] pattern) {
         return indexOf(source, pattern, 0);
     }
@@ -897,5 +943,57 @@ public class GestionLampadaireController implements Initializable {
             return i;
         }
         return -1;
+    }
+
+    public void highlightLampadaireWithCamera(int cameraId) {
+        System.out.println("Appel de highlightLampadaireWithCamera pour cameraId: " + cameraId);
+        Lampadaire lampadaire = lampadaires.stream()
+                .filter(l -> l.getIdCamera() == cameraId)
+                .findFirst()
+                .orElse(null);
+
+        if (lampadaire != null) {
+            System.out.println("Lampadaire trouvé: " + lampadaire.getTypeLampadaire() + " à " + lampadaire.getLatitude() + ", " + lampadaire.getLongitude());
+            WebEngine webEngine = globalMapView.getEngine();
+            if (webEngine != null) {
+                if (!globalMapInitialized) {
+                    System.out.println("Carte non encore initialisée, réinitialisation...");
+                    javafx.application.Platform.runLater(() -> {
+                        initializeGlobalMap();
+                        try { Thread.sleep(1000); } catch (Exception e) {} // Attendre 1 seconde pour le chargement
+                        executeHighlightScript(webEngine, lampadaire.getLatitude(), lampadaire.getLongitude());
+                    });
+                } else {
+                    executeHighlightScript(webEngine, lampadaire.getLatitude(), lampadaire.getLongitude());
+                }
+            } else {
+                System.out.println("WebEngine est null");
+            }
+
+            Timeline blinkAnimation = new Timeline(
+                    new KeyFrame(Duration.millis(300), new KeyValue(trafficStatusLabel.opacityProperty(), 0)),
+                    new KeyFrame(Duration.millis(600), new KeyValue(trafficStatusLabel.opacityProperty(), 1))
+            );
+            blinkAnimation.setCycleCount(6);
+            System.out.println("Déclenchement de l'animation du label");
+            blinkAnimation.play();
+        } else {
+            System.out.println("Aucun lampadaire trouvé pour la caméra ID: " + cameraId);
+        }
+    }
+
+    private void executeHighlightScript(WebEngine webEngine, double lat, double lng) {
+        String js = String.format(Locale.US,
+                "highlightLampadaire(%f, %f);",
+                lat, lng
+        );
+        System.out.println("Exécution du JS: " + js);
+        try {
+            webEngine.executeScript(js);
+            System.out.println("Script JS exécuté avec succès");
+        } catch (Exception e) {
+            System.out.println("Erreur lors de l'exécution du script JS: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
