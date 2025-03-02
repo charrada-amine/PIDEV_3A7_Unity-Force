@@ -12,7 +12,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import tn.esprit.Enumerations.Role;
-import tn.esprit.Enumerations.Specialite;
+import tn.esprit.models.Specialite;
 import java.util.Scanner;
 
 import java.sql.*;

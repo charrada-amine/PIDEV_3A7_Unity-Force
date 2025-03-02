@@ -1,7 +1,7 @@
 package tn.esprit.services;
 
 import tn.esprit.models.technicien;
-import tn.esprit.Enumerations.Specialite;
+import tn.esprit.models.Specialite;
 import tn.esprit.utils.MyDatabase;
 import tn.esprit.Enumerations.Role;
 

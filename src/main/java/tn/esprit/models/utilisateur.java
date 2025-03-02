@@ -1,7 +1,7 @@
 package tn.esprit.models;
 
-import tn.esprit.models.Role;
 
+import tn.esprit.Enumerations.Role;
 import java.util.Date;
 
 public class utilisateur {
