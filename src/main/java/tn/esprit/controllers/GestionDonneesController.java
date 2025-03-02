@@ -14,11 +14,13 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.geometry.Insets;
 import javafx.stage.FileChooser;
+import org.json.JSONObject;
 import org.kordamp.ikonli.javafx.FontIcon;
 import tn.esprit.models.*;
 import tn.esprit.services.*;
 
-import java.io.File;
+import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -35,10 +37,9 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import tn.esprit.utils.EmailSend;
 
-import java.io.IOException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import java.io.FileOutputStream;
+
 import java.io.IOException;
 public class GestionDonneesController implements Initializable {
 
@@ -614,7 +615,7 @@ public class GestionDonneesController implements Initializable {
         showSuccessAlert("Résultats de la recherche : " + filteredDonnees.size() + " donnée(s) trouvée(s).");
     }
     @FXML
-    private void handleRecupererDonneeArduino() {
+    private void handleRecupererDonneeArduino2() {
         SerialPort[] ports = SerialPort.getCommPorts();
         if (ports.length == 0) {
             showAlert("Erreur", "Aucun port série trouvé !");
@@ -680,4 +681,43 @@ public class GestionDonneesController implements Initializable {
             showAlert("Erreur", "Aucune donnée valide reçue : " + receivedData);
         }
     }
+    @FXML
+    private void handleRecupererDonneeArduino() {
+        DataReceiver dataReceiver = new DataReceiver();
+        String receivedData = dataReceiver.fetchDataFromServer();
+
+        // Afficher la réponse brute pour débogage
+        System.out.println("Données reçues : " + receivedData);
+
+        // Vérifier si les données contiennent une ligne valide
+        if (receivedData != null && receivedData.contains(",")) {
+            // Extraire la dernière ligne reçue
+            String[] lines = receivedData.split("\n");
+            String lastLine = lines[lines.length - 1].trim(); // Prendre la dernière ligne
+
+            // Diviser la ligne en type et valeur
+            String[] parts = lastLine.split(",");
+            if (parts.length == 2) {
+                String type = parts[0].trim().toUpperCase(); // Convertir en majuscules pour correspondre au ComboBox
+                String valeur = parts[1].trim();
+
+                // Vérifier le type et remplir les champs automatiquement
+                if (type.equals("TEMPERATURE") || type.equals("LUMINOSITE") || type.equals("MOUVEMENT") || type.equals("CONSOMMATION_ENERGIE")) {
+                    typeCapteurComboBox.setValue(type); // Sélectionner le type dans le ComboBox
+                    valeurField.setText(valeur); // Remplir le champ de valeur
+                    dateCollectePicker.setValue(LocalDate.now()); // Remplir la date actuelle
+                    heureCollecteField.setText(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))); // Formater l'heure
+
+                    showSuccessAlert("Données récupérées avec succès : " + lastLine);
+                } else {
+                    showAlert("Erreur", "Type de capteur non reconnu : " + type);
+                }
+            } else {
+                showAlert("Erreur", "Format de données incorrect : " + lastLine);
+            }
+        } else {
+            showAlert("Erreur", "Aucune donnée valide reçue : " + receivedData);
+        }
+    }
+
 }
