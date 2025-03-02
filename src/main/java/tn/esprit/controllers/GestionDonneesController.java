@@ -442,6 +442,12 @@ public class GestionDonneesController implements Initializable {
         System.out.println("Retour à la page précédente");
     }
 
+    // Nouveau handler pour le bouton Accueil
+    @FXML
+    private void handleAccueil(ActionEvent event) {
+        switchScene(event, "/Menu.fxml");
+    }
+
     private void switchScene(ActionEvent event, String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
@@ -672,6 +678,86 @@ public class GestionDonneesController implements Initializable {
                     showSuccessAlert("Données récupérées avec succès : " + lastLine);
                 } else {
                     showAlert("Erreur", "Type de capteur non reconnu : " + type);
+                }
+            } else {
+                showAlert("Erreur", "Format de données incorrect : " + lastLine);
+            }
+        } else {
+            showAlert("Erreur", "Aucune donnée valide reçue : " + receivedData);
+        }
+    }
+    @FXML
+    private void handleRecupererDonneeMouvement() {
+        DataReceiver dataReceiver = new DataReceiver();
+        String receivedData = dataReceiver.fetchDataFromServer();
+
+        // Afficher la réponse brute pour débogage
+        System.out.println("Données reçues : " + receivedData);
+
+        // Vérifier si les données contiennent une ligne valide
+        if (receivedData != null && receivedData.contains(",")) {
+            // Extraire la dernière ligne reçue
+            String[] lines = receivedData.split("\n");
+            String lastLine = lines[lines.length - 1].trim(); // Prendre la dernière ligne
+
+            // Diviser la ligne en type et valeur
+            String[] parts = lastLine.split(",");
+            if (parts.length == 4) { // Maintenant, il y a 4 parties : temperature, valeur, motion, valeur
+                String type1 = parts[0].trim().toUpperCase(); // "TEMPERATURE"
+                String valeur1 = parts[1].trim(); // Valeur de la température
+                String type2 = parts[2].trim().toUpperCase(); // "MOTION"
+                String valeur2 = parts[3].trim(); // Valeur du mouvement (true/false)
+
+                // Afficher les données de mouvement
+                if (type2.equals("MOTION")) {
+                    typeCapteurComboBox.setValue("MOUVEMENT"); // Sélectionner le type "MOUVEMENT" dans le ComboBox
+                    valeurField.setText(valeur2); // Remplir le champ de valeur avec l'état du mouvement
+                    dateCollectePicker.setValue(LocalDate.now()); // Remplir la date actuelle
+                    heureCollecteField.setText(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))); // Formater l'heure
+
+                    showSuccessAlert("Données de mouvement récupérées avec succès : " + valeur2);
+                } else {
+                    showAlert("Erreur", "Type de capteur non reconnu : " + type2);
+                }
+            } else {
+                showAlert("Erreur", "Format de données incorrect : " + lastLine);
+            }
+        } else {
+            showAlert("Erreur", "Aucune donnée valide reçue : " + receivedData);
+        }
+    }
+    @FXML
+    private void handleRecupererDonneeTemperature() {
+        DataReceiver dataReceiver = new DataReceiver();
+        String receivedData = dataReceiver.fetchDataFromServer();
+
+        // Afficher la réponse brute pour débogage
+        System.out.println("Données reçues : " + receivedData);
+
+        // Vérifier si les données contiennent une ligne valide
+        if (receivedData != null && receivedData.contains(",")) {
+            // Extraire la dernière ligne reçue
+            String[] lines = receivedData.split("\n");
+            String lastLine = lines[lines.length - 1].trim(); // Prendre la dernière ligne
+
+            // Diviser la ligne en type et valeur
+            String[] parts = lastLine.split(",");
+            if (parts.length == 4) { // Maintenant, il y a 4 parties : temperature, valeur, motion, valeur
+                String type1 = parts[0].trim().toUpperCase(); // "TEMPERATURE"
+                String valeur1 = parts[1].trim(); // Valeur de la température
+                String type2 = parts[2].trim().toUpperCase(); // "MOTION"
+                String valeur2 = parts[3].trim(); // Valeur du mouvement (true/false)
+
+                // Afficher les données de température
+                if (type1.equals("TEMPERATURE")) {
+                    typeCapteurComboBox.setValue("TEMPERATURE"); // Sélectionner le type "TEMPERATURE" dans le ComboBox
+                    valeurField.setText(valeur1); // Remplir le champ de valeur avec la température
+                    dateCollectePicker.setValue(LocalDate.now()); // Remplir la date actuelle
+                    heureCollecteField.setText(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))); // Formater l'heure
+
+                    showSuccessAlert("Données de température récupérées avec succès : " + valeur1);
+                } else {
+                    showAlert("Erreur", "Type de capteur non reconnu : " + type1);
                 }
             } else {
                 showAlert("Erreur", "Format de données incorrect : " + lastLine);

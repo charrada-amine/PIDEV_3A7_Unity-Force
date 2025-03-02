@@ -520,9 +520,14 @@ public class ServiceUtilisateur {
 
             if (rs.next()) {
                 String hashedPassword = rs.getString("motdepasse");  // Récupérer le mot de passe haché
+                String encryptedPassword = PasswordEncryptor.encryptPassword(password);  // Hachage du mot de passe fourni
 
-                // 🔹 Comparer le mot de passe avec son hash MD5
-                if (hashedPassword.equals(PasswordEncryptor.encryptPassword(password))) {
+                // 🔹 Afficher les mots de passe pour le débogage (ne laissez pas dans le code final)
+                System.out.println("Mot de passe saisi haché : " + encryptedPassword);
+                System.out.println("Mot de passe en base de données : " + hashedPassword);
+
+                // Comparer le mot de passe haché
+                if (hashedPassword.equals(encryptedPassword)) {
                     System.out.println("✅ Connexion réussie !");
                     return new utilisateur(
                             rs.getInt("id_utilisateur"),
@@ -536,12 +541,15 @@ public class ServiceUtilisateur {
                 } else {
                     System.out.println("❌ Mot de passe incorrect !");
                 }
+            } else {
+                System.out.println("❌ Aucun utilisateur trouvé avec cet email.");
             }
         } catch (SQLException e) {
             System.out.println("❌ Erreur SQL : " + e.getMessage());
         }
         return null;
     }
+
 
 }
 

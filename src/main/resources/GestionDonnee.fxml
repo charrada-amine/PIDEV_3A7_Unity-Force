@@ -16,6 +16,11 @@
             <Label text="Gestion Urbaine" styleClass="nav-title"/>
 
             <!-- Boutons de navigation -->
+            <Button text="Accueil" styleClass="nav-button" onAction="#handleAccueil">
+                <graphic>
+                    <FontIcon iconLiteral="fas-home" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
             <Button text="Capteurs" styleClass="nav-button" onAction="#handleGestionCapteur">
                 <graphic>
                     <FontIcon iconLiteral="fas-microchip" iconSize="16" iconColor="#ffffff"/>
@@ -168,14 +173,18 @@
                 </HBox>
                 <HBox spacing="15" styleClass="button-container">
                     <!-- Bouton pour récupérer les données de l'Arduino -->
-                    <Button text="Récupérer depuis Arduino" onAction="#handleRecupererDonneeArduino" styleClass="action-button,search">
+                    <Button text="Recuperer Donnee Temperature" onAction="#handleRecupererDonneeTemperature" styleClass="action-button,search">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-microchip" iconSize="16" iconColor="white"/>
+                        </graphic>
+                    </Button>
+                    <Button text="Recuperer Donnee Mouvement" onAction="#handleRecupererDonneeMouvement" styleClass="action-button,search">
                         <graphic>
                             <FontIcon iconLiteral="fas-microchip" iconSize="16" iconColor="white"/>
                         </graphic>
                     </Button>
                 </HBox>
             </VBox>
-
             <!-- Zone des cartes des données -->
             <ScrollPane fx:id="donneeScrollPane" fitToWidth="true" hbarPolicy="NEVER"
                         style="-fx-background: transparent; -fx-border-width: 0;"
