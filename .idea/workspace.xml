@@ -46,7 +46,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/karim/OneDrive/Bureau/document/PIwebjava/noorcityPI",
+    "last_opened_file_path": "C:/Users/karim/OneDrive/Bureau/document/PIwebjava/PIDEV_NOORCITY",
     "list.type.of.created.stylesheet": "CSS",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -130,6 +130,10 @@
       <workItem from="1740948446387" duration="549000" />
       <workItem from="1740949020138" duration="2268000" />
       <workItem from="1740958653741" duration="1113000" />
+      <workItem from="1740960368605" duration="1407000" />
+      <workItem from="1740962180599" duration="19000" />
+      <workItem from="1740988739148" duration="643000" />
+      <workItem from="1740994418658" duration="80000" />
     </task>
     <servers />
   </component>
@@ -141,7 +145,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/tn/esprit/controllers/GestionUtilisateurController.java</url>
-          <line>369</line>
+          <line>387</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>

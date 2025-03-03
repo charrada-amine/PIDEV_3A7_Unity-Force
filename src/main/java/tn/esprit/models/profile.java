@@ -9,7 +9,6 @@ public class profile {
     private int sourceId; // Clé étrangère vers la table Source
     private int lampadaireId;
 
-    // Constructeur
     public profile(int idprofile, String consommationJour, String consommationMois, String coutEstime, String dureeActivite, int sourceId, int lampadaireId) {
         this.idprofile = idprofile;
         this.consommationJour = consommationJour;
@@ -19,9 +18,7 @@ public class profile {
         this.sourceId = sourceId;
         this.lampadaireId = lampadaireId;
     }
-    // No-argument constructor
     public profile() {
-        // Optionally, set default values if needed
         this.consommationJour = "";
         this.consommationMois = "";
         this.coutEstime = "";
@@ -31,7 +28,6 @@ public class profile {
     }
 
 
-    // Constructeur
     public profile( String consommationJour, String consommationMois, String coutEstime, String dureeActivite, int sourceId, int lampadaireId) {
 
         this.consommationJour = consommationJour;
@@ -42,7 +38,6 @@ public class profile {
         this.lampadaireId = lampadaireId;
     }
 
-    // Getters et Setters
     public int getIdprofile() { return idprofile; }
     public void setIdprofile(int idprofile) { this.idprofile = idprofile; }
 

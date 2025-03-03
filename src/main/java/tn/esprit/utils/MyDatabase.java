@@ -12,7 +12,7 @@ public class MyDatabase {
     private Connection cnx;
 
     // Rendre les variables statiques
-    private static final String URL = "jdbc:mysql://127.0.0.1:3306/noorcity";
+    private static final String URL = "jdbc:mysql://127.0.0.1:3306/projetpi_3a";
 
     private static final String USER = "root";
     private static final String PASSWORD = "";

@@ -17,6 +17,11 @@
             <Label text="Gestion Urbaine" styleClass="nav-title"/>
 
             <!-- Boutons de navigation -->
+            <Button text="Accueil" styleClass="nav-button" onAction="#handleAccueil">
+                <graphic>
+                    <FontIcon iconLiteral="fas-home" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
             <Button text="Capteurs" styleClass="nav-button" onAction="#handleGestionCapteur">
                 <graphic>
                     <FontIcon iconLiteral="fas-microchip" iconSize="16" iconColor="#ffffff"/>
@@ -105,6 +110,9 @@
                 <Label text="Gestion des Sources" style="-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #202124;"/>
 
                 <VBox spacing="20">
+
+                    <TextField fx:id="tfNom" promptText="Nom de la source" styleClass="modern-input"/>
+
                     <!-- Type de source -->
                     <ComboBox fx:id="cbType" promptText="Type" styleClass="modern-input"/>
 
@@ -137,6 +145,27 @@
                                 <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
                             </graphic>
                         </Button>
+                    </HBox>
+                    <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10;">
+                        <TextField fx:id="tfSearch" promptText="Rechercher par nom..."
+                                   style="-fx-pref-width: 200;
+                      -fx-background-radius: 20;
+                      -fx-border-radius: 20;
+                      -fx-border-color: #1a73e8;
+                      -fx-border-width: 1;
+                      -fx-padding: 5 10;
+                      -fx-font-size: 14;
+                      -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);"/>
+
+                        <Button text="Rechercher" onAction="#handleSearch"
+                                style="-fx-background-color: #1a73e8;
+                   -fx-text-fill: white;
+                   -fx-background-radius: 20;
+                   -fx-border-radius: 20;
+                   -fx-padding: 5 15;
+                   -fx-font-size: 14;
+                   -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);
+                   -fx-cursor: hand;"/>
                     </HBox>
                 </VBox>
             </VBox>
