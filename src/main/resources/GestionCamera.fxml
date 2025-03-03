@@ -13,9 +13,14 @@
     <left>
         <VBox prefWidth="240" styleClass="nav-bar">
             <Label text="Gestion Urbaine" styleClass="nav-title"/>
-            <Button text="Caméras" styleClass="nav-button" disable="true">
+            <Button text="Zones" styleClass="nav-button" onAction="#handleNavigateToZones">
                 <graphic>
-                    <FontIcon iconLiteral="fas-camera" iconSize="16" iconColor="#ffffff"/>
+                    <FontIcon iconLiteral="fas-map-marker" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Vue Citoyen" styleClass="nav-button" onAction="#handleNavigateToZoneCitoyen">
+                <graphic>
+                    <FontIcon iconLiteral="fas-users" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
             <Button text="Lampadaires" styleClass="nav-button" onAction="#handleNavigateToLampadaires">
@@ -23,9 +28,14 @@
                     <FontIcon iconLiteral="fas-lightbulb" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-            <Button text="Zones" styleClass="nav-button" onAction="#handleNavigateToZones">
+            <Button text="Carte Lampadaires" styleClass="nav-button" onAction="#handleNavigateToLampadaireMap">
                 <graphic>
-                    <FontIcon iconLiteral="fas-map-marker" iconSize="16" iconColor="#ffffff"/>
+                    <FontIcon iconLiteral="fas-map" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Caméras" styleClass="nav-button" onAction="#handleNavigateToCameras">
+                <graphic>
+                    <FontIcon iconLiteral="fas-camera" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
             <Button text="Retour" styleClass="nav-button" onAction="#handleBack">
@@ -45,15 +55,12 @@
                         <!-- Formulaire -->
                         <VBox spacing="20" styleClass="card" prefWidth="380">
                             <Label text="Gestion des Caméras" style="-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #202124;"/>
-
                             <VBox spacing="10">
                                 <TextField fx:id="tfUrlFlux" promptText="URL du flux (ex. rtsp://...)" styleClass="modern-input"/>
                                 <Label fx:id="lblUrlFluxError" styleClass="error-message" visible="false"/>
-
-                                <TextField fx:id="tfIpAddress" promptText="Adresse IP (ex. 192.168.1.100)" styleClass="modern-input"/> <!-- Ajout -->
-                                <Label fx:id="lblIpError" styleClass="error-message" visible="false"/> <!-- Ajout -->
+                                <TextField fx:id="tfIpAddress" promptText="Adresse IP (ex. 192.168.1.100)" styleClass="modern-input"/>
+                                <Label fx:id="lblIpError" styleClass="error-message" visible="false"/>
                             </VBox>
-
                             <HBox spacing="15" styleClass="button-container">
                                 <Button text="Ajouter" onAction="#handleAdd" styleClass="action-button,add">
                                     <graphic>
@@ -73,10 +80,14 @@
                             </HBox>
                         </VBox>
 
-                        <!-- Liste des caméras -->
-                        <VBox styleClass="card" spacing="15" HBox.hgrow="ALWAYS">
+                        <!-- Liste des caméras sous forme de cartes -->
+                        <VBox spacing="15" HBox.hgrow="ALWAYS">
                             <Label text="Liste des Caméras" style="-fx-font-size: 20px; -fx-font-weight: 700; -fx-text-fill: #202124;"/>
-                            <ListView fx:id="lvCameras" prefHeight="400" style="-fx-background-color: #f8f9fa; -fx-border-color: #dadce0; -fx-border-width: 1;" HBox.hgrow="ALWAYS"/>
+                            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="modern-scroll" VBox.vgrow="ALWAYS">
+                                <content>
+                                    <FlowPane fx:id="cardContainer" hgap="20" vgap="20" prefWidth="600" style="-fx-padding: 15;"/>
+                                </content>
+                            </ScrollPane>
                         </VBox>
                     </HBox>
                 </VBox>

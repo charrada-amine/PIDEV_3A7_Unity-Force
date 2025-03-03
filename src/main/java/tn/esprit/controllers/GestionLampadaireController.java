@@ -1,5 +1,6 @@
 package tn.esprit.controllers;
 
+import com.sun.net.httpserver.HttpServer; // Ajout de cet import si nécessaire
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -130,7 +131,8 @@ public class GestionLampadaireController implements Initializable {
         );
 
         try {
-            TrafficUpdateServer.startServer(trafficStatusLabel, this);
+            // Modifiez l'appel pour inclure le port (par exemple, 8089)
+            TrafficUpdateServer.startServer(trafficStatusLabel, this, 8089);
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Erreur", "Impossible de démarrer le serveur de trafic: " + e.getMessage());
@@ -227,41 +229,24 @@ public class GestionLampadaireController implements Initializable {
 
     @FXML
     private void handleNavigateToZones(ActionEvent event) {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/GestionZone.fxml"));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            showAlert("Erreur", "Impossible de charger la gestion des zones");
-        }
+        navigateTo(event, "/GestionZone.fxml", "gestion des zones");
     }
 
     @FXML
     private void handleNavigateToCameras(ActionEvent event) {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/tn/esprit/views/GestionCamera.fxml"));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            showAlert("Erreur", "Impossible de charger la gestion des caméras");
-        }
+        navigateTo(event, "/GestionCamera.fxml", "gestion des caméras");
     }
-
+    @FXML
+    private void handleNavigateToZoneCitoyen(ActionEvent event) {
+        navigateTo(event, "/ZoneCitoyenView.fxml", "vue citoyen");
+    }
+    @FXML
+    private void handleNavigateToLampadaireMap(ActionEvent event) {
+        navigateTo(event, "/LampadaireMapView.fxml", "carte des lampadaires");
+    }
     @FXML
     private void handleNavigateToLampadaires(ActionEvent event) {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/GestionLampadaire.fxml"));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            showAlert("Erreur", "Impossible de charger la gestion des lampadaires");
-        }
+        navigateTo(event, "/GestionLampadaire.fxml", "gestion des lampadaires");
     }
 
     @FXML
@@ -718,7 +703,17 @@ public class GestionLampadaireController implements Initializable {
         row.setPadding(new Insets(0, 0, 0, 10));
         return row;
     }
-
+    private void navigateTo(ActionEvent event, String fxmlPath, String destination) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger la " + destination);
+        }
+    }
     private void showLampadaireDetails(String jsonDetails) {
         try {
             JSONObject details = new JSONObject(jsonDetails);
@@ -996,4 +991,5 @@ public class GestionLampadaireController implements Initializable {
             e.printStackTrace();
         }
     }
+
 }

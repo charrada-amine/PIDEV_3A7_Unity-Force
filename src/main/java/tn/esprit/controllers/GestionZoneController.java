@@ -356,14 +356,26 @@ public class GestionZoneController implements Initializable {
         animation.play();
     }
 
-    @FXML
-    private void handleBack(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("/MainMenu.fxml"));
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        stage.setScene(new Scene(root));
-        stage.show();
-    }
 
+    @FXML
+    private void handleNavigateToZones(ActionEvent event) {
+        navigateTo(event, "/GestionZone.fxml", "gestion des zones");
+    }
+    private void navigateTo(ActionEvent event, String fxmlPath, String destination) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger la " + destination);
+        }
+    }
+    @FXML
+    private void handleNavigateToZoneCitoyen(ActionEvent event) {
+        navigateTo(event, "/ZoneCitoyenView.fxml", "vue citoyen");
+    }
     @FXML
     private void handleNavigateToLampadaire(ActionEvent event) {
         try {
@@ -376,12 +388,20 @@ public class GestionZoneController implements Initializable {
             showAlert("Erreur", "Impossible de charger la gestion des lampadaires");
         }
     }
-
     @FXML
-    private void handleNavigateToLampadaires(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("/GestionLampadaire.fxml"));
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        stage.setScene(new Scene(root));
-        stage.show();
+    private void handleBack(ActionEvent event) {
+        navigateTo(event, "/MainMenu.fxml", "menu principal");
+    }
+    @FXML
+    private void handleNavigateToCameras(ActionEvent event) {
+        navigateTo(event, "/GestionCamera.fxml", "gestion des caméras");
+    }
+    @FXML
+    private void handleNavigateToLampadaireMap(ActionEvent event) {
+        navigateTo(event, "/LampadaireMapView.fxml", "carte des lampadaires");
+    }
+    @FXML
+    private void handleNavigateToLampadaires(ActionEvent event) {
+        navigateTo(event, "/GestionLampadaire.fxml", "gestion des lampadaires");
     }
 }

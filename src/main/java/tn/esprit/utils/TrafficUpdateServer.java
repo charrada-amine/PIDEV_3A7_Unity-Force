@@ -13,21 +13,44 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
+import java.net.ServerSocket;
+import java.nio.charset.StandardCharsets; // Ajout de l'import
 
 public class TrafficUpdateServer {
-    private static final int PORT = 8089;
+    private static final int DEFAULT_PORT = 8089; // Port par défaut, modifiable
     private static Label trafficStatusLabel;
-    private static GestionLampadaireController controller; // Référence au contrôleur
+    private static GestionLampadaireController controller;
+    private static HttpServer server; // Pour permettre l'arrêt propre
 
-    public static void startServer(Label label, GestionLampadaireController ctrl) throws Exception {
+    public static void startServer(Label label, GestionLampadaireController ctrl, int port) throws Exception {
         trafficStatusLabel = label;
-        controller = ctrl; // Stocker le contrôleur
-        HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
+        controller = ctrl;
+
+        // Vérifier si le port est disponible
+        if (isPortInUse(port)) {
+            throw new Exception("Le port " + port + " est déjà utilisé. Veuillez le libérer ou utiliser un autre port.");
+        }
+
+        server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext("/trafficUpdate", new TrafficUpdateHandler());
         server.setExecutor(null);
         server.start();
-        System.out.println("Serveur de mise à jour de trafic démarré sur le port " + PORT);
+        System.out.println("Serveur de mise à jour de trafic démarré sur le port " + port);
+    }
+
+    public static void stopServer() {
+        if (server != null) {
+            server.stop(0); // Arrête le serveur immédiatement
+            System.out.println("Serveur de trafic arrêté.");
+        }
+    }
+
+    private static boolean isPortInUse(int port) {
+        try (ServerSocket socket = new ServerSocket(port)) {
+            return false; // Port disponible
+        } catch (IOException e) {
+            return true; // Port déjà utilisé
+        }
     }
 
     static class TrafficUpdateHandler implements HttpHandler {
@@ -69,13 +92,13 @@ public class TrafficUpdateServer {
                 String response = "Mise à jour reçue";
                 exchange.sendResponseHeaders(200, response.length());
                 OutputStream os = exchange.getResponseBody();
-                os.write(response.getBytes(StandardCharsets.UTF_8));
+                os.write(response.getBytes(StandardCharsets.UTF_8)); // Utilisation de StandardCharsets
                 os.close();
             } else {
                 String response = "Méthode non supportée";
                 exchange.sendResponseHeaders(405, response.length());
                 OutputStream os = exchange.getResponseBody();
-                os.write(response.getBytes(StandardCharsets.UTF_8));
+                os.write(response.getBytes(StandardCharsets.UTF_8)); // Utilisation de StandardCharsets
                 os.close();
             }
         }

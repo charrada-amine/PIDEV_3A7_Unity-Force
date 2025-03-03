@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import javafx.scene.web.WebView?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.esprit.controllers.ZoneCitoyenViewController"
+            stylesheets="@styles/style.css">
+
+    <!-- Barre de navigation latérale -->
+    <!-- Barre de navigation latérale -->
+    <left>
+        <VBox prefWidth="240" styleClass="nav-bar">
+            <Label text="Gestion Urbaine - Citoyen" styleClass="nav-title"/>
+            <Button text="Zones" styleClass="nav-button" onAction="#handleNavigateToZones">
+                <graphic>
+                    <FontIcon iconLiteral="fas-map-marker" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Lampadaires" styleClass="nav-button" onAction="#handleNavigateToLampadaires">
+                <graphic>
+                    <FontIcon iconLiteral="fas-lightbulb" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Carte Lampadaires" styleClass="nav-button" onAction="#handleNavigateToLampadaireMap">
+                <graphic>
+                    <FontIcon iconLiteral="fas-map" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Caméras" styleClass="nav-button" onAction="#handleNavigateToCameras">
+                <graphic>
+                    <FontIcon iconLiteral="fas-camera" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Retour" styleClass="nav-button" onAction="#handleBack">
+                <graphic>
+                    <FontIcon iconLiteral="fas-arrow-left" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+        </VBox>
+    </left>
+    <!-- Contenu principal -->
+    <center>
+        <VBox spacing="20" style="-fx-padding: 25;">
+            <!-- Première ligne : Carte en plein écran -->
+            <StackPane styleClass="full-map-container" VBox.vgrow="ALWAYS">
+                <WebView fx:id="mapView" minWidth="600" minHeight="400" StackPane.alignment="CENTER"/>
+            </StackPane>
+
+            <!-- Deuxième ligne : Liste des zones -->
+            <VBox spacing="15" VBox.vgrow="ALWAYS">
+                <Label text="Zones Urbaines" styleClass="section-title"/>
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="modern-scroll" VBox.vgrow="ALWAYS">
+                    <FlowPane fx:id="cardContainer" hgap="25" vgap="25" style="-fx-padding: 15;"/>
+                </ScrollPane>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

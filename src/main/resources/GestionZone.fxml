@@ -14,14 +14,29 @@
     <left>
         <VBox prefWidth="240" styleClass="nav-bar">
             <Label text="Gestion Urbaine" styleClass="nav-title"/>
-            <Button text="Zones" styleClass="nav-button" onAction="#handleNavigateToLampadaire">
+            <Button text="Zones" styleClass="nav-button" onAction="#handleNavigateToZones">
                 <graphic>
                     <FontIcon iconLiteral="fas-map-marker" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
             <Button text="Lampadaires" styleClass="nav-button" onAction="#handleNavigateToLampadaires">
                 <graphic>
-                    <FontIcon iconLiteral="far-lightbulb" iconSize="16" iconColor="#ffffff"/>
+                    <FontIcon iconLiteral="fas-lightbulb" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Carte Lampadaires" styleClass="nav-button" onAction="#handleNavigateToLampadaireMap">
+                <graphic>
+                    <FontIcon iconLiteral="fas-map" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Vue Citoyen" styleClass="nav-button" onAction="#handleNavigateToZoneCitoyen">
+                <graphic>
+                    <FontIcon iconLiteral="fas-users" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Caméras" styleClass="nav-button" onAction="#handleNavigateToCameras">
+                <graphic>
+                    <FontIcon iconLiteral="fas-camera" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
             <Button text="Retour" styleClass="nav-button" onAction="#handleBack">
