@@ -212,35 +212,82 @@
     -fx-padding: 25 0 0 0;
     -fx-alignment: center;
 }
-/* *************************************************************** */
-/* Bouton Exporter */
+.donnee-card {
+    -fx-border-color: #4a90e2;
+    -fx-border-radius: 8px;
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 5, 0, 0, 3);
+    -fx-transition: all 0.3s ease-in-out;
+}
+
+.donnee-card:hover {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #2a6fdb;
+}
+
+.donnee-label {
+    -fx-text-fill: black; /* Texte en noir */
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.action-button.search {
+    -fx-background-color: linear-gradient(to right, #981dbb, #b751e3);
+    -fx-effect: dropshadow(gaussian, rgba(99, 4, 133, 0.3), 10, 0, 0, 4);
+}
+
 .action-button.export {
-    -fx-background-color: #e67e22; /* Orange */
-    -fx-text-fill: white; /* Texte blanc */
-    -fx-background-radius: 20; /* Coins arrondis */
-    -fx-border-radius: 20; /* Coins arrondis pour la bordure */
-    -fx-padding: 8 16; /* Espacement interne */
-    -fx-font-size: 14; /* Taille de la police */
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2); /* Ombre portée */
-    -fx-cursor: hand; /* Curseur en forme de main */
+    -fx-background-color: linear-gradient(to right, #bb9b1d, #ecc83c);
+    -fx-effect: dropshadow(gaussian, rgba(128, 107, 8, 0.3), 10, 0, 0, 4);
 }
 
-.action-button.export:hover {
-    -fx-background-color: #d35400; /* Orange plus foncé au survol */
-}
-
-/* Bouton Trier */
 .action-button.sort {
-    -fx-background-color: #9b59b6; /* Violet */
-    -fx-text-fill: white; /* Texte blanc */
-    -fx-background-radius: 20; /* Coins arrondis */
-    -fx-border-radius: 20; /* Coins arrondis pour la bordure */
-    -fx-padding: 8 16; /* Espacement interne */
-    -fx-font-size: 14; /* Taille de la police */
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2); /* Ombre portée */
-    -fx-cursor: hand; /* Curseur en forme de main */
+    -fx-background-color: linear-gradient(to right, #d88222, #cc6008);
+    -fx-effect: dropshadow(gaussian, rgba(172, 71, 4, 0.3), 10, 0, 0, 4);
+}
+/* Style des cartes */
+.donnee-card {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 10);
+    -fx-padding: 15;
 }
 
-.action-button.sort:hover {
-    -fx-background-color: #8e44ad; /* Violet plus foncé au survol */
+/* Style des labels */
+.donnee-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #555;
+    -fx-alignment: center-left;
+}
+
+/* Effet de survol */
+.donnee-card:hover {
+    -fx-background-color: #f0f0f0;
+}
+/* Style des cartes de capteurs */
+.capteur-card {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 10);
+    -fx-padding: 15;
+}
+
+/* Style des labels des capteurs */
+.capteur-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #555; /* Couleur du texte */
+    -fx-alignment: center-left;
+}
+
+/* Effet de survol */
+.capteur-card:hover {
+    -fx-background-color: #f0f0f0;
 }

@@ -1,27 +1,161 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx/fxml/1"
+            fx:controller="tn.esprit.controllers.MenuController"
+            stylesheets="@styles/style.css">
 
-<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="tn.esprit.controller.MenuController"
-      spacing="20" alignment="CENTER"
-      style="-fx-padding: 30; -fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-border-width: 2; -fx-border-radius: 15; -fx-background-radius: 15;">
+    <!-- Barre de navigation latérale -->
+    <left>
+        <VBox prefWidth="240" styleClass="nav-bar">
+            <Label text="Gestion Urbaine" styleClass="nav-title"/>
 
-    <!-- Titre -->
-    <Label text="Menu Principal"
-           style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #333333;"/>
+            <!-- Boutons de navigation -->
+            <Button text="Accueil" styleClass="nav-button" onAction="#handleAccueil">
+                <graphic>
+                    <FontIcon iconLiteral="fas-home" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Capteurs" styleClass="nav-button" onAction="#handleGestionCapteur">
+                <graphic>
+                    <FontIcon iconLiteral="fas-microchip" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
 
-    <!-- Boutons -->
-    <Button text="Manipulation Profile"
-            fx:id="btnProfile"
-            onAction="#handleProfile"
-            style="-fx-font-size: 16px; -fx-pref-width: 250px; -fx-pref-height: 50px; -fx-background-color: #0073e6; -fx-text-fill: white; -fx-background-radius: 10;"/>
+            <Button text="Citoyens" styleClass="nav-button" onAction="#handleGestionCitoyen">
+                <graphic>
+                    <FontIcon iconLiteral="fas-users" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
 
-    <Button text="Manipulation Source"
-            fx:id="btnSource"
-            onAction="#handleSource"
-            style="-fx-font-size: 16px; -fx-pref-width: 250px; -fx-pref-height: 50px; -fx-background-color: #00b33c; -fx-text-fill: white; -fx-background-radius: 10;"/>
+            <Button text="Données" styleClass="nav-button" onAction="#handleGestionDonnee">
+                <graphic>
+                    <FontIcon iconLiteral="fas-database" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
 
-</VBox>
+            <Button text="Interventions" styleClass="nav-button" onAction="#handleGestionIntervention">
+                <graphic>
+                    <FontIcon iconLiteral="fas-tools" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Lampadaires" styleClass="nav-button" onAction="#handleGestionLampadaire">
+                <graphic>
+                    <FontIcon iconLiteral="fas-lightbulb" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Réclamations" styleClass="nav-button" onAction="#handleGestionReclamation">
+                <graphic>
+                    <FontIcon iconLiteral="fas-exclamation-circle" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Responsables" styleClass="nav-button" onAction="#handleGestionResponsable">
+                <graphic>
+                    <FontIcon iconLiteral="fas-user-tie" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Techniciens" styleClass="nav-button" onAction="#handleGestionTechnicien">
+                <graphic>
+                    <FontIcon iconLiteral="fas-user-cog" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Utilisateurs" styleClass="nav-button" onAction="#handleGestionUtilisateur">
+                <graphic>
+                    <FontIcon iconLiteral="fas-user" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Zones" styleClass="nav-button" onAction="#handleGestionZone">
+                <graphic>
+                    <FontIcon iconLiteral="fas-map-marked-alt" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Profil" styleClass="nav-button" onAction="#handleProfileInterface">
+                <graphic>
+                    <FontIcon iconLiteral="fas-user-circle" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Sources" styleClass="nav-button" onAction="#handleSourceInterface">
+                <graphic>
+                    <FontIcon iconLiteral="fas-code-branch" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Retour" styleClass="nav-button" onAction="#handleBack">
+                <graphic>
+                    <FontIcon iconLiteral="fas-arrow-left" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+        </VBox>
+    </left>
+
+    <!-- Contenu principal -->
+    <center>
+        <HBox spacing="30" style="-fx-padding: 25;">
+            <!-- Section principale avec des paragraphes et images -->
+            <VBox spacing="20" styleClass="content-section" prefWidth="800">
+                <Label text="Lampadaires et Consommation Énergétique" style="-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #202124;"/>
+
+                <!-- Paragraphe 1 dans un cadre -->
+                <VBox style="-fx-background-color: #f4f4f4; -fx-padding: 10; -fx-border-color: #cccccc; -fx-border-width: 1;">
+                    <Text style="-fx-font-size: 16px; -fx-text-fill: #555;">
+                        Les lampadaires urbains jouent un rôle essentiel dans l'éclairage public et la sécurité. Cependant, ils
+                        sont également une source importante de consommation énergétique. Dans cet article, nous explorons
+                        l'impact environnemental et économique des lampadaires et les solutions pour les rendre plus
+                        efficaces.
+                    </Text>
+                </VBox>
+
+                <!-- Image 1 -->
+                <ImageView fitWidth="300" fitHeight="200" preserveRatio="true" pickOnBounds="true">
+                    <Image url="@image1.png" />
+                </ImageView>
+
+                <!-- Paragraphe 2 dans un cadre -->
+                <VBox style="-fx-background-color: #f4f4f4; -fx-padding: 10; -fx-border-color: #cccccc; -fx-border-width: 1;">
+                    <Text style="-fx-font-size: 16px; -fx-text-fill: #555;">
+                        Les technologies récentes permettent de réduire la consommation énergétique des lampadaires grâce à des
+                        systèmes d'éclairage LED et des capteurs de présence. De plus, l'intégration des panneaux solaires
+                        dans ces infrastructures peut permettre une autonomie énergétique, réduisant ainsi les coûts de
+                        maintenance et l'empreinte carbone.
+                    </Text>
+                </VBox>
+
+                <!-- Image 2 -->
+                <ImageView fitWidth="300" fitHeight="200" preserveRatio="true" pickOnBounds="true">
+                    <Image url="@image2.png" />
+                </ImageView>
+
+                <!-- Paragraphe 3 dans un cadre -->
+                <VBox style="-fx-background-color: #f4f4f4; -fx-padding: 10; -fx-border-color: #cccccc; -fx-border-width: 1;">
+                    <Text style="-fx-font-size: 16px; -fx-text-fill: #555;">
+                        Les capteurs intelligents peuvent également jouer un rôle crucial en ajustant l'éclairage en fonction de
+                        l'heure de la journée et de l'activité autour du lampadaire. Cela permet une gestion plus
+                        rationnelle de l'énergie, tout en assurant un éclairage optimal pour les citoyens.
+                    </Text>
+                </VBox>
+
+                <!-- Image 3 -->
+                <ImageView fitWidth="300" fitHeight="200" preserveRatio="true" pickOnBounds="true">
+                    <Image url="@image3.png" />
+                </ImageView>
+            </VBox>
+
+
+        </HBox>
+    </center>
+</BorderPane>

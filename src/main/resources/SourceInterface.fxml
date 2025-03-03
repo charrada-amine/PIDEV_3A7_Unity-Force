@@ -8,26 +8,97 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx/fxml/1"
-            fx:controller="tn.esprit.controller.SourceController"
+            fx:controller="tn.esprit.controllers.SourceController"
             stylesheets="@styles/style.css">
 
     <!-- Barre de navigation latérale -->
     <left>
         <VBox prefWidth="240" styleClass="nav-bar">
             <Label text="Gestion Urbaine" styleClass="nav-title"/>
-            <Button  fx:id="btnprofile" text="ProfileEnergetique" styleClass="nav-button" onAction="#handleShowSources">
+
+            <!-- Boutons de navigation -->
+            <Button text="Accueil" styleClass="nav-button" onAction="#handleAccueil">
                 <graphic>
-                    <FontIcon iconLiteral="far-lightbulb" iconSize="16" iconColor="#ffffff"/>
+                    <FontIcon iconLiteral="fas-home" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Capteurs" styleClass="nav-button" onAction="#handleGestionCapteur">
+                <graphic>
+                    <FontIcon iconLiteral="fas-microchip" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
 
-            <Button fx:id="btnBack" text="Retour" styleClass="nav-button" onAction="#handleBack">
+            <Button text="Citoyens" styleClass="nav-button" onAction="#handleGestionCitoyen">
+                <graphic>
+                    <FontIcon iconLiteral="fas-users" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Données" styleClass="nav-button" onAction="#handleGestionDonnee">
+                <graphic>
+                    <FontIcon iconLiteral="fas-database" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Interventions" styleClass="nav-button" onAction="#handleGestionIntervention">
+                <graphic>
+                    <FontIcon iconLiteral="fas-tools" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Lampadaires" styleClass="nav-button" onAction="#handleGestionLampadaire">
+                <graphic>
+                    <FontIcon iconLiteral="fas-lightbulb" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Réclamations" styleClass="nav-button" onAction="#handleGestionReclamation">
+                <graphic>
+                    <FontIcon iconLiteral="fas-exclamation-circle" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Responsables" styleClass="nav-button" onAction="#handleGestionResponsable">
+                <graphic>
+                    <FontIcon iconLiteral="fas-user-tie" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Techniciens" styleClass="nav-button" onAction="#handleGestionTechnicien">
+                <graphic>
+                    <FontIcon iconLiteral="fas-user-cog" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Utilisateurs" styleClass="nav-button" onAction="#handleGestionUtilisateur">
+                <graphic>
+                    <FontIcon iconLiteral="fas-user" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Zones" styleClass="nav-button" onAction="#handleGestionZone">
+                <graphic>
+                    <FontIcon iconLiteral="fas-map-marked-alt" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Profil" styleClass="nav-button" onAction="#handleProfileInterface">
+                <graphic>
+                    <FontIcon iconLiteral="fas-user-circle" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Sources" styleClass="nav-button" onAction="#handleSourceInterface">
+                <graphic>
+                    <FontIcon iconLiteral="fas-code-branch" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Retour" styleClass="nav-button" onAction="#handleBack">
                 <graphic>
                     <FontIcon iconLiteral="fas-arrow-left" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-
-
         </VBox>
     </left>
 

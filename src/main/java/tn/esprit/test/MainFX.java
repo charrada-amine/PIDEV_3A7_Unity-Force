@@ -6,27 +6,28 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-public class MainFX extends Application {
+import java.io.IOException;
 
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/Menu.fxml"));
-        primaryStage.setTitle("Gestion des Profils et Sources");
-
-        // Définir une taille fixe pour la fenêtre
-        Scene scene = new Scene(root, 1000, 700);
-
-        primaryStage.setScene(scene);
-
-
-
-        // Empêcher le redimensionnement de la fenêtre
-        primaryStage.setResizable(false);
-
-        primaryStage.show();
-    }
+public class MainFx extends Application {
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    @Override
+    public void start(Stage primaryStage) {
+        FXMLLoader loader= new FXMLLoader(getClass().getResource("/login.fxml"));
+        try {
+            Parent root =loader.load();
+            Scene scene = new Scene(root);
+            primaryStage.setScene(scene);
+            primaryStage.setTitle("hello from the other side ");
+            primaryStage.show();
+
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+
+
     }
 }
