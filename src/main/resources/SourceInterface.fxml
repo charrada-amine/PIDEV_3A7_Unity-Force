@@ -15,7 +15,7 @@
     <left>
         <VBox prefWidth="240" styleClass="nav-bar">
             <Label text="Gestion Urbaine" styleClass="nav-title"/>
-            <Button  fx:id="btnprofile" text="Profile" styleClass="nav-button" onAction="#handleShowSources">
+            <Button  fx:id="btnprofile" text="ProfileEnergetique" styleClass="nav-button" onAction="#handleShowSources">
                 <graphic>
                     <FontIcon iconLiteral="far-lightbulb" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
@@ -74,6 +74,27 @@
                                 <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
                             </graphic>
                         </Button>
+                    </HBox>
+                    <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10;">
+                        <TextField fx:id="tfSearch" promptText="Rechercher par nom..."
+                                   style="-fx-pref-width: 200;
+                      -fx-background-radius: 20;
+                      -fx-border-radius: 20;
+                      -fx-border-color: #1a73e8;
+                      -fx-border-width: 1;
+                      -fx-padding: 5 10;
+                      -fx-font-size: 14;
+                      -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);"/>
+
+                        <Button text="Rechercher" onAction="#handleSearch"
+                                style="-fx-background-color: #1a73e8;
+                   -fx-text-fill: white;
+                   -fx-background-radius: 20;
+                   -fx-border-radius: 20;
+                   -fx-padding: 5 15;
+                   -fx-font-size: 14;
+                   -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 2);
+                   -fx-cursor: hand;"/>
                     </HBox>
                 </VBox>
             </VBox>

@@ -4,12 +4,12 @@ import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
 
-public class SmsUtil {
+public class SmsUser {
 
     // Remplacez ces valeurs par vos informations Twilio
-    private static final String ACCOUNT_SID = "ACbfa0991c9e4bf8e800bdb37e013718f7";
-    private static final String AUTH_TOKEN = "a805b5686ba6654f2e83d45dd62924d1";
-    private static final String TWILIO_PHONE_NUMBER = "+15302912977"; // Format : +17628155615
+    private static final String ACCOUNT_SID = "ACc907a9d76f601d1d8791167d1475a52b";
+    private static final String AUTH_TOKEN = "eefdd48ca8b7011d14d325a4b45e5cff";
+    private static final String TWILIO_PHONE_NUMBER = "+14783126606"; // Format : +17628155615
 
     // Initialisation de Twilio
     static {
