@@ -31,12 +31,15 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class GestionResponsableController {
     @FXML
     private Label welcomeLabel;
     @FXML
     private Button logOutButton;  // Le bouton Log Out
+    @FXML
+    private FlowPane userFlowPane;
     @FXML
     private FlowPane responsableFlowPane;
     private final ServiceResponsable serviceResponsable = new ServiceResponsable();
@@ -46,13 +49,17 @@ public class GestionResponsableController {
     @FXML
     private TextField visiblePasswordField;
     @FXML
+    private ComboBox<String> roleFilterComboBox;
+
+    private String roleSelectionne = "Tous"; // Valeur par défaut
+    @FXML
     private ToggleButton togglePasswordButton;
     @FXML
     private void initialize() {
-        if (responsableFlowPane == null) {
-            System.err.println("Erreur : 'responsableFlowPane' est nul. Vérifiez le fichier FXML.");
+        if (userFlowPane == null) {
+            System.err.println("Erreur : 'userflowpane' est nul. Vérifiez le fichier FXML.");
         } else {
-            System.out.println("FlowPane 'responsableFlowPane' initialisé correctement.");
+            System.out.println("FlowPane 'userflowpane' initialisé correctement.");
             loadUsers();
         }
 // Récupérer l'utilisateur de la session
@@ -111,19 +118,85 @@ public class GestionResponsableController {
             e.printStackTrace();
         }
     }
+    private VBox createUserCard(utilisateur user) {
+        VBox card = new VBox(10);
+        card.setStyle("-fx-border-color: #ddd; -fx-border-width: 1; -fx-padding: 10; -fx-background-color: #f9f9f9; -fx-alignment: center;");
+
+        // Champ ID (non modifiable)
+        /*Label idLabel = new Label("ID:");
+        idLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: black;");
+        TextField idField = new TextField(String.valueOf(user.getId_utilisateur()));
+        idField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
+        idField.setEditable(false); // Non modifiable
+        HBox idBox = new HBox(10, idLabel, idField);
+        idBox.setAlignment(Pos.CENTER_LEFT);*/
+
+        // Champ Nom
+        Label nameLabel = new Label("Nom:");
+        nameLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
+        TextField nameField = new TextField(user.getNom());
+        nameField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
+        nameField.setEditable(false);
+        HBox nameBox = new HBox(10, nameLabel, nameField);
+        nameBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Champ Prénom
+        Label prenomLabel = new Label("Prénom:");
+        prenomLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
+        TextField prenomField = new TextField(user.getPrenom());
+        prenomField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
+        prenomField.setEditable(false);
+        HBox prenomBox = new HBox(10, prenomLabel, prenomField);
+        prenomBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Champ Email
+        Label emailLabel = new Label("Email:");
+        emailLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
+        TextField emailField = new TextField(user.getEmail());
+        emailField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
+        emailField.setEditable(false);
+        HBox emailBox = new HBox(10, emailLabel, emailField);
+        emailBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Champ Mot de passe
+        /*Label passwordLabel = new Label("Mot de passe:");
+        passwordLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
+        TextField mdpfield = new TextField(user.getMotdepasse());
+        mdpfield.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
+        mdpfield.setEditable(false);
+        HBox mdpBox = new HBox(10, passwordLabel, mdpfield);
+        mdpBox.setAlignment(Pos.CENTER_LEFT);*/
+
+        // Champ Rôle
+        Label roleLabel = new Label("Rôle:");
+        roleLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
+        TextField roleField = new TextField(user.getRole().name());
+        roleField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
+        roleField.setEditable(false);
+        HBox roleBox = new HBox(10, roleLabel, roleField);
+        roleBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Champ Date d'inscription
+        Label dateInscriptionLabel = new Label("Date d'inscription");
+        dateInscriptionLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: black;");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        String dateInscriptionString = sdf.format(user.getDateinscription());
+        TextField dateinscription = new TextField(dateInscriptionString);
+        dateinscription.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
+        dateinscription.setEditable(false);
+        HBox dateInscriptionBox = new HBox(10, dateInscriptionLabel, dateinscription);
+        dateInscriptionBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Ajouter les HBoxes à la carte
+        card.getChildren().addAll(nameBox, prenomBox, emailBox,  roleBox, dateInscriptionBox);
+
+        return card;
+    }
 
     private VBox createResponsableCard(responsable responsable) {
         VBox card = new VBox(10);
         card.setStyle("-fx-border-color: #ddd; -fx-border-width: 1; -fx-padding: 10; -fx-background-color: #f9f9f9; -fx-alignment: center;");
 
-        /*// Champ ID (non modifiable)
-        Label idLabel = new Label("ID:");
-        idLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: black;");
-        TextField idField = new TextField(String.valueOf(responsable.getId_utilisateur()));
-        idField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
-        idField.setEditable(false);
-        HBox idBox = new HBox(10, idLabel, idField); // Aligner le label et le champ ID
-        idBox.setAlignment(Pos.CENTER_LEFT); // Aligner à gauche*/
 
         // Champ Nom (non modifiable)
         Label nameLabel = new Label("Nom:");
@@ -193,37 +266,21 @@ public class GestionResponsableController {
     }
     @FXML
     private void loadUsers() {
-        if (responsableFlowPane == null) {
-            System.err.println("Erreur : 'responsableFlowPane' est nul lors de l'appel de 'loadResponsables'.");
-            return;
+        List<utilisateur> users = serviceUtilisateur.getAllUtilisateurs();
+
+        // Filtrer les utilisateurs par rôle sélectionné
+        if (!"Tous".equals(roleSelectionne)) {
+            users.removeIf(user -> !user.getRole().toString().equalsIgnoreCase(roleSelectionne));
         }
 
-        ServiceResponsable serviceResponsable = new ServiceResponsable();
-        List<responsable> responsables;
+        // Effacer les anciennes cartes
+        userFlowPane.getChildren().clear();
 
-        try {
-            responsables = serviceResponsable.getAllResponsables();
-        } catch (Exception e) {
-            System.err.println("Erreur lors de la récupération des responsables : " + e.getMessage());
-            e.printStackTrace();
-            return;
+        // Afficher les utilisateurs sous forme de cartes
+        for (utilisateur user : users) {
+            VBox card = createUserCard(user);
+            userFlowPane.getChildren().add(card);
         }
-
-        if (responsables == null || responsables.isEmpty()) {
-            System.out.println("Aucun responsable trouvé.");
-            responsableFlowPane.getChildren().clear();
-            return;
-        }
-
-        ObservableList<VBox> responsableCards = FXCollections.observableArrayList();
-
-        for (responsable r : responsables) {
-            VBox responsableCard = createResponsableCard(r);  // Utilisation de la méthode createResponsableCard
-            responsableCards.add(responsableCard);
-        }
-
-        responsableFlowPane.getChildren().clear();
-        responsableFlowPane.getChildren().addAll(responsableCards);
     }
 
 
@@ -421,6 +478,36 @@ public class GestionResponsableController {
             showAlert("Erreur", "Une erreur est survenue lors de la modification.");
         }
     }
+    @FXML
+    private void handleShowRoleFilter() {
+        // Afficher le ComboBox quand on clique sur le bouton
+        roleFilterComboBox.setVisible(true);
+    }
+
+    @FXML
+    private void handleFilterByRole() {
+        String selectedRole = roleFilterComboBox.getValue();
+        if (selectedRole == null || userFlowPane == null) return;
+
+        // Récupérer tous les utilisateurs
+        List<utilisateur> utilisateurs = serviceUtilisateur.getAllUtilisateurs();
+
+        // Filtrer par rôle (sauf si "Tous" est sélectionné)
+        if (!"Tous".equals(selectedRole)) {
+            utilisateurs = utilisateurs.stream()
+                    .filter(u -> u.getRole().name().equalsIgnoreCase(selectedRole))
+                    .collect(Collectors.toList());
+        }
+
+        // Mettre à jour l'affichage
+        userFlowPane.getChildren().clear();
+        for (utilisateur user : utilisateurs) {
+            VBox card = createUserCard(user);
+            userFlowPane.getChildren().add(card);
+        }
+    }
+
+
 
     private void clearFields() {
         nameField.clear();
@@ -524,6 +611,12 @@ public class GestionResponsableController {
     private void handleBack() {
         // Logique pour revenir à la page précédente
         System.out.println("Retour à la page précédente");
+    }
+
+    // Nouveau handler pour le bouton Accueil
+    @FXML
+    private void handleAccueil(ActionEvent event) {
+        switchScene(event, "/Menu.fxml");
     }
 
     private void switchScene(ActionEvent event, String fxmlPath) {

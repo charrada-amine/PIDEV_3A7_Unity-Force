@@ -563,6 +563,12 @@ public class GestionCitoyenController {
         System.out.println("Retour à la page précédente");
     }
 
+    // Nouveau handler pour le bouton Accueil
+    @FXML
+    private void handleAccueil(ActionEvent event) {
+        switchScene(event, "/Menu.fxml");
+    }
+
     private void switchScene(ActionEvent event, String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
@@ -575,6 +581,5 @@ public class GestionCitoyenController {
             e.printStackTrace();
         }
     }
-
 
 }

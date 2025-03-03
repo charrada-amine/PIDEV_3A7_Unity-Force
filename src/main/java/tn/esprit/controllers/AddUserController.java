@@ -81,6 +81,42 @@ public class AddUserController implements Initializable {
         });
 
     }
+    @FXML
+    private void handleReturnToLogin() {
+        try {
+            // Vérifier si le fichier FXML est bien trouvé
+            URL fxmlLocation = getClass().getResource("/Login.fxml");
+            if (fxmlLocation == null) {
+                System.out.println("Erreur : fichier Login.fxml introuvable !");
+                showAlert("Erreur", "Fichier Login.fxml introuvable !");
+                return;
+            }
+
+            // Charger le fichier FXML de la page de connexion
+            FXMLLoader loader = new FXMLLoader(fxmlLocation);
+            Parent root = loader.load();
+
+            // Créer une nouvelle scène
+            Scene scene = new Scene(root);
+
+            // Obtenir la fenêtre actuelle et la fermer
+            Stage stage = (Stage) nameField.getScene().getWindow();
+            stage.close();
+
+            // Ouvrir la fenêtre de connexion
+            Stage loginStage = new Stage();
+            loginStage.setScene(scene);
+            loginStage.setTitle("Connexion");
+            loginStage.setMaximized(true);
+            loginStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger la page de connexion.");
+        }
+    }
+
+
+
     // Gérer l'affichage des champs selon le rôle sélectionné
     private void handleRoleChange() {
         String role = roleComboBox.getValue();

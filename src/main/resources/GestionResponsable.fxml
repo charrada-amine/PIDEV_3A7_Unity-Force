@@ -146,12 +146,28 @@
                                 <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
                             </graphic>
                         </Button>
-                        <Button fx:id="logOutButton" text="Log Out" onAction="#handleLogOut" >
+                    </HBox>
+
+                    <!-- Nouvel HBox pour Log Out et Trier -->
+                    <HBox spacing="10" alignment="CENTER" style="-fx-padding: 10;">
+                        <Button text="Log Out" onAction="#handleLogOut">
                             <graphic>
-                                <FontIcon iconLiteral="fas-undo" iconSize="25" iconColor="#2d3436"/>
+                                <FontIcon iconLiteral="fas-sign-out-alt" iconSize="25" iconColor="#2d3436"/>
                             </graphic>
                         </Button>
+                        <Button text="Trier par rôle" onAction="#handleShowRoleFilter" styleClass="action-button,sort"/>
+                        <ComboBox fx:id="roleFilterComboBox" visible="false" onAction="#handleFilterByRole">
+                            <items>
+                                <FXCollections fx:factory="observableArrayList">
+                                    <String fx:value="Tous" />
+                                    <String fx:value="Citoyen" />
+                                    <String fx:value="Responsable" />
+                                    <String fx:value="Technicien" />
+                                </FXCollections>
+                            </items>
+                        </ComboBox>
                     </HBox>
+
                 </VBox>
             </VBox>
 
@@ -159,7 +175,7 @@
             <ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER"
                         style="-fx-background: transparent; -fx-border-width: 0;"
                         prefWidth="800">
-                <FlowPane fx:id="responsableFlowPane"  hgap="20" vgap="20" style="-fx-padding: 10;"/>
+                <FlowPane fx:id="userFlowPane"  hgap="20" vgap="20" style="-fx-padding: 10;"/>
             </ScrollPane>
         </HBox>
     </center>

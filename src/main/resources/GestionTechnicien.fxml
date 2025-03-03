@@ -139,29 +139,34 @@
                     </HBox>
 
 
-                    <!-- Boutons d'action -->
-                    <HBox spacing="10" alignment="CENTER" style="-fx-padding: 10;">
-                        <Button text="Modifier" onAction="#handleUpdateTechnicien" styleClass="action-button,edit">
-                            <graphic>
-                                <FontIcon iconLiteral="fas-edit" iconSize="16" iconColor="#ffffff"/>
-                            </graphic>
-                        </Button>
-                        <Button text="Supprimer" onAction="#handleDeleteTechnicien" styleClass="action-button,delete">
-                            <graphic>
-                                <FontIcon iconLiteral="fas-trash-alt" iconSize="16" iconColor="#ffffff"/>
-                            </graphic>
-                        </Button>
-                        <Button text="Réinitialiser" onAction="#handleClear" styleClass="action-button,reset">
-                            <graphic>
-                                <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
-                            </graphic>
-                        </Button>
-                        <Button fx:id="logOutButton" text="Log Out" onAction="#handleLogOut" >
-                            <graphic>
-                                <FontIcon iconLiteral="fas-undo" iconSize="25" iconColor="#2d3436"/>
-                            </graphic>
-                        </Button>
-                    </HBox>
+            <HBox spacing="10" alignment="CENTER" style="-fx-padding: 10;">
+                <Button text="Modifier" onAction="#handleUpdateTechnicien" styleClass="action-button,edit">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-edit" iconSize="16" iconColor="#ffffff"/>
+                    </graphic>
+                </Button>
+                <Button text="Supprimer" onAction="#handleDeleteTechnicien" styleClass="action-button,delete">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-trash-alt" iconSize="16" iconColor="#ffffff"/>
+                    </graphic>
+                </Button>
+            </HBox>
+
+            <!-- Nouveau HBox pour Réinitialiser et Log Out -->
+            <HBox spacing="10" alignment="CENTER" style="-fx-padding: 10;">
+                <Button text="Réinitialiser" onAction="#handleClear" styleClass="action-button,reset">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
+                    </graphic>
+                </Button>
+                <Button text="Log Out" onAction="#handleLogOut">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-sign-out-alt" iconSize="25" iconColor="#2d3436"/>
+                    </graphic>
+                </Button>
+            </HBox>
+
+
                 </VBox>
             </VBox>
 
