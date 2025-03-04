@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import javafx.scene.web.WebView?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.esprit.controllers.LampadaireMapViewController"
+            stylesheets="@styles/style.css">
+
+    <!-- Barre de navigation latérale -->
+    <left>
+        <VBox prefWidth="240" styleClass="nav-bar">
+            <Label text="Gestion Urbaine" styleClass="nav-title"/>
+            <Button text="Zones" styleClass="nav-button" onAction="#handleNavigateToZones">
+                <graphic>
+                    <FontIcon iconLiteral="fas-map-marker" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Lampadaires" styleClass="nav-button" onAction="#handleNavigateToLampadaires">
+                <graphic>
+                    <FontIcon iconLiteral="fas-lightbulb" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Carte Lampadaires" styleClass="nav-button" onAction="#handleNavigateToLampadaireMap">
+                <graphic>
+                    <FontIcon iconLiteral="fas-map" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Vue Citoyen" styleClass="nav-button" onAction="#handleNavigateToZoneCitoyen">
+                <graphic>
+                    <FontIcon iconLiteral="fas-users" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Caméras" styleClass="nav-button" onAction="#handleNavigateToCameras">
+                <graphic>
+                    <FontIcon iconLiteral="fas-camera" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Retour" styleClass="nav-button" onAction="#handleBack">
+                <graphic>
+                    <FontIcon iconLiteral="fas-arrow-left" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+        </VBox>
+    </left>
+
+    <!-- Contenu principal -->
+    <center>
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background: transparent; -fx-border-width: 0;">
+            <content>
+                <VBox spacing="30" style="-fx-padding: 25; -fx-background-color: #f1f3f4;">
+                    <!-- Carte globale et statut du trafic -->
+                    <VBox styleClass="card" spacing="20" style="-fx-background-color: white; -fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #dadce0; -fx-border-width: 1; -fx-padding: 20;" VBox.vgrow="ALWAYS">
+                        <HBox spacing="15" alignment="CENTER_LEFT">
+                            <Label text="Carte des Lampadaires" style="-fx-font-size: 22px; -fx-font-weight: 700; -fx-text-fill: #202124;"/>
+                            <Button text="Rafraîchir" onAction="#handleShowLampadaires" style="-fx-background-color: #1a73e8; -fx-text-fill: white; -fx-font-weight: 700; -fx-background-radius: 8;">
+                                <graphic>
+                                    <FontIcon iconLiteral="fas-sync-alt" iconSize="16" iconColor="white"/>
+                                </graphic>
+                            </Button>
+                        </HBox>
+                        <Label fx:id="trafficStatusLabel" text="Statut du trafic: En attente..."
+                               style="-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #202124; -fx-background-color: #f8f9fa; -fx-padding: 10; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #dadce0; -fx-border-width: 1;"/>
+                        <VBox fx:id="globalMapContainer" prefHeight="600" style="-fx-background-color: #f8f9fa; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #dadce0; -fx-border-width: 1;" VBox.vgrow="ALWAYS">
+                            <children>
+                                <WebView fx:id="globalMapView" prefHeight="600" minWidth="0" VBox.vgrow="ALWAYS"/>
+                            </children>
+                        </VBox>
+                        <HBox spacing="20" alignment="CENTER_LEFT">
+                            <HBox alignment="CENTER" spacing="8">
+                                <Label style="-fx-background-color: #34a853; -fx-min-width: 18; -fx-min-height: 18; -fx-background-radius: 9;"/>
+                                <Label text="Actif" style="-fx-text-fill: #5f6368; -fx-font-size: 14px;"/>
+                            </HBox>
+                            <HBox alignment="CENTER" spacing="8">
+                                <Label style="-fx-background-color: #fbbc04; -fx-min-width: 18; -fx-min-height: 18; -fx-background-radius: 9;"/>
+                                <Label text="En maintenance" style="-fx-text-fill: #5f6368; -fx-font-size: 14px;"/>
+                            </HBox>
+                            <HBox alignment="CENTER" spacing="8">
+                                <Label style="-fx-background-color: #ea4335; -fx-min-width: 18; -fx-min-height: 18; -fx-background-radius: 9;"/>
+                                <Label text="En panne" style="-fx-text-fill: #5f6368; -fx-font-size: 14px;"/>
+                            </HBox>
+                            <HBox alignment="CENTER" spacing="8">
+                                <Label style="-fx-background-color: #1a73e8; -fx-min-width: 18; -fx-min-height: 18; -fx-background-radius: 9;"/>
+                                <Label text="Autres états" style="-fx-text-fill: #5f6368; -fx-font-size: 14px;"/>
+                            </HBox>
+                        </HBox>
+                    </VBox>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>

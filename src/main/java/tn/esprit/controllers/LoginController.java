@@ -7,14 +7,12 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 import org.kordamp.ikonli.javafx.FontIcon;
 import tn.esprit.models.Session;
 import tn.esprit.models.utilisateur;
 import tn.esprit.services.ServiceUtilisateur;
 
 import java.io.IOException;
-
 
 public class LoginController {
 
@@ -34,9 +32,8 @@ public class LoginController {
     @FXML
     private Button loginButton;
 
-
-
-
+    @FXML
+    private Button signUpButton;
 
     private final ServiceUtilisateur serviceUtilisateur = new ServiceUtilisateur();
 
@@ -45,7 +42,6 @@ public class LoginController {
         // Initialiser les champs et boutons à invisibles
         visiblePasswordField.setVisible(false);
         visiblePasswordField.setManaged(false);
-
 
         // ToggleButton pour afficher/masquer le mot de passe
         togglePasswordButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
@@ -65,7 +61,39 @@ public class LoginController {
                 ((FontIcon) togglePasswordButton.getGraphic()).setIconLiteral("fas-eye-slash");
             }
         });
+
+        // Effet de survol pour le bouton de connexion
+        loginButton.setOnMouseEntered(event -> {
+            loginButton.setStyle("-fx-font-size: 18.0; -fx-font-family: 'Segoe UI'; " +
+                    "-fx-background-color: linear-gradient(to right, #007BFF, #003d99); " +
+                    "-fx-text-fill: white; -fx-background-radius: 10; " +
+                    "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0, 0, 3); " +
+                    "-fx-cursor: hand;");
+        });
+        loginButton.setOnMouseExited(event -> {
+            loginButton.setStyle("-fx-font-size: 18.0; -fx-font-family: 'Segoe UI'; " +
+                    "-fx-background-color: linear-gradient(to right, #007BFF, #0056b3); " +
+                    "-fx-text-fill: white; -fx-background-radius: 10; " +
+                    "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 2); " +
+                    "-fx-cursor: hand;");
+        });
+
+        // Effet de survol pour le bouton d'inscription
+        signUpButton.setOnMouseEntered(event -> {
+            signUpButton.setStyle("-fx-font-size: 16.0; -fx-font-family: 'Segoe UI'; " +
+                    "-fx-background-color: #e6f0fa; " +
+                    "-fx-text-fill: #007BFF; -fx-border-color: #007BFF; " +
+                    "-fx-border-radius: 10; -fx-background-radius: 10; " +
+                    "-fx-cursor: hand;");
+        });
+        signUpButton.setOnMouseExited(event -> {
+            signUpButton.setStyle("-fx-font-size: 16.0; -fx-font-family: 'Segoe UI'; " +
+                    "-fx-background-color: transparent; -fx-text-fill: #007BFF; " +
+                    "-fx-border-color: #007BFF; -fx-border-radius: 10; " +
+                    "-fx-background-radius: 10; -fx-cursor: hand;");
+        });
     }
+
     @FXML
     private void handleLogin(ActionEvent event) {
         String email = emailField.getText();
@@ -87,13 +115,13 @@ public class LoginController {
             // Ouvrir l'interface en fonction du rôle
             switch (utilisateur.getRole()) {
                 case citoyen:
-                    openInterface("/GestionCitoyen.fxml", "Gestion des Citoyens");
+                    openInterface("/Menu.fxml", "Gestion des Citoyens");
                     break;
                 case technicien:
-                    openInterface("/GestionTechnicien.fxml", "Gestion des Techniciens");
+                    openInterface("/Menu.fxml", "Gestion des Techniciens");
                     break;
                 case responsable:
-                    openInterface("/GestionResponsable.fxml", "Gestion des Responsables");
+                    openInterface("/Menu.fxml", "Gestion des Responsables");
                     break;
                 default:
                     showAlert("Erreur", "Rôle inconnu.");
@@ -119,7 +147,22 @@ public class LoginController {
         }
     }
 
+    @FXML
+    private void handleForgotPassword(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ForgotPasswordEmail.fxml"));
+            Parent root = loader.load();
 
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Réinitialisation du mot de passe");
+            stage.setMaximized(true);
+
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     private void openInterface(String fxmlPath, String title) {
         try {
@@ -145,27 +188,6 @@ public class LoginController {
         }
     }
 
-
-    @FXML
-    private void handleForgotPassword(ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ForgotPasswordEmail.fxml"));
-            Parent root = loader.load();
-
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root));
-            stage.setTitle("Réinitialisation du mot de passe");
-            stage.setMaximized(true);
-
-            stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-
-
-
     // Méthode pour afficher une alerte
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -183,7 +205,4 @@ public class LoginController {
         alert.setContentText(message);
         alert.showAndWait();
     }
-
-
-
 }

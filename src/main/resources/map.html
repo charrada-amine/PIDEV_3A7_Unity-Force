@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+    <style>
+        html, body {
+            height: 100%; /* Ensure the html and body take up full height */
+            margin: 0; /* Remove default margins */
+            padding: 0; /* Remove default padding */
+        }
+        #map {
+            height: 100vh; /* Full viewport height */
+            width: 100vw; /* Full viewport width */
+            background: #f8f9fa;
+        }
+        .loading {
+            text-align: center;
+            padding: 40vh 0; /* Center vertically in the viewport */
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+<div id="map">
+    <p class="loading">Chargement de la carte...</p>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+    let map;
+    let zones = [];
+
+    function initMap() {
+        if (map) return;
+
+        map = L.map('map', {
+            preferCanvas: true,
+            zoomControl: true,
+            attributionControl: false
+        }).setView([36.8, 10.2], 12);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19
+        }).addTo(map);
+
+        L.control.zoom({ position: 'topright' }).addTo(map);
+        console.log("Carte initialisée");
+    }
+
+    function loadZonesFromDB(zonesDB) {
+        if (!map) return;
+
+        // Effacer les zones existantes
+        zones.forEach(zone => map.removeLayer(zone));
+        zones = [];
+
+        // Ajouter les nouvelles zones
+        zonesDB.forEach(zone => {
+            addZone(zone.lat, zone.lng, zone.surface, zone.nom);
+        });
+    }
+
+    function addZone(lat, lng, surface, nom) {
+        if (!map) return;
+
+        let radius = Math.sqrt(surface / Math.PI);
+        let circle = L.circle([lat, lng], {
+            radius: radius,
+            color: '#ff5733',
+            fillColor: '#ff5733',
+            fillOpacity: 0.5
+        }).addTo(map);
+
+        circle.bindPopup(`<b>${nom}</b><br>Surface: ${surface} m²`);
+        zones.push(circle);
+    }
+
+    setTimeout(initMap, 500);
+</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'91aa02eb6e5169ef',t:'MTc0MTAxNDExMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+</body>
+</html>

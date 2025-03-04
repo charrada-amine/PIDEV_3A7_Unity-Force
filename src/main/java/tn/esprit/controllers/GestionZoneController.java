@@ -26,12 +26,16 @@ import javafx.util.Duration;
 import tn.esprit.models.Zone;
 import tn.esprit.services.ServiceZone;
 import java.net.URL;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
+import javafx.scene.web.WebView;
+import javafx.scene.web.WebEngine;
+import javafx.concurrent.Worker;
 
 public class GestionZoneController implements Initializable {
-
+    @FXML private WebView mapView;
     @FXML private TextField tfNom;
     @FXML private TextField tfDescription;
     @FXML private TextField tfSurface;
@@ -41,37 +45,74 @@ public class GestionZoneController implements Initializable {
     private Zone selectedZone;
     private final ServiceZone serviceZone = new ServiceZone();
     private final ObservableList<Zone> zones = FXCollections.observableArrayList();
+    private boolean isMapLoaded = false;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+
         cardContainer.setHgap(20);
         cardContainer.setVgap(20);
         cardContainer.setPadding(new Insets(20));
         loadData();
+        initializeMap();
+
+        WebEngine webEngine = mapView.getEngine();
+        webEngine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+            if (newState == Worker.State.SUCCEEDED) {
+                isMapLoaded = true;
+                System.out.println("Carte chargée avec succès au démarrage");
+                // Attendre un court délai pour laisser Leaflet s'initialiser
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(1000); // Attendre 1 seconde
+                        javafx.application.Platform.runLater(this::showAllZonesOnMap);
+                    } catch (InterruptedException e) {
+                        System.err.println("Erreur dans l'attente : " + e.getMessage());
+                    }
+                }).start();
+            } else if (newState == Worker.State.FAILED) {
+                System.err.println("Échec du chargement de la carte au démarrage");
+            }
+        });
     }
 
     private void loadData() {
         zones.setAll(serviceZone.getAll());
         cardContainer.getChildren().clear();
         zones.forEach(zone -> cardContainer.getChildren().add(createZoneCard(zone)));
+        System.out.println("Données chargées : " + zones.size() + " zones trouvées");
+    }
+
+    private void initializeMap() {
+        WebEngine webEngine = mapView.getEngine();
+        try {
+            URL htmlUrl = getClass().getResource("/map.html");
+            if (htmlUrl != null) {
+                webEngine.load(htmlUrl.toString());
+                System.out.println("Chargement de map.html initié");
+            } else {
+                System.err.println("Fichier map.html introuvable");
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur de chargement de la carte : " + e.getMessage());
+        }
     }
 
     private VBox createZoneCard(Zone zone) {
         VBox card = new VBox(15);
         card.getStyleClass().add("card");
 
-        // En-tête avec icône
         HBox header = new HBox(10);
         FontIcon icon = new FontIcon(FontAwesomeSolid.MAP_MARKER);
         icon.setIconSize(24);
         icon.setIconColor(Color.web("#1a73e8"));
 
-        Label title = new Label("Zone #" + zone.getIdZone());
+        // Modification ici : supprimer l'ID du titre et utiliser le nom de la zone
+        Label title = new Label("Zone " + zone.getNom());
         title.setStyle("-fx-font-size: 18; -fx-text-fill: #202124;");
 
         header.getChildren().addAll(icon, title);
 
-        // Contenu
         VBox content = new VBox(8);
         content.getChildren().addAll(
                 createInfoRow(FontAwesomeSolid.SIGNATURE, "Nom : " + zone.getNom()),
@@ -81,7 +122,6 @@ public class GestionZoneController implements Initializable {
                 createInfoRow(FontAwesomeSolid.USERS, "Citoyens : " + zone.getNombreCitoyens())
         );
 
-        // Boutons d'action
         HBox buttons = new HBox(10);
         Button btnModifier = createIconButton("Modifier", FontAwesomeSolid.PENCIL_ALT, "#4361ee");
         Button btnSupprimer = createIconButton("Supprimer", FontAwesomeSolid.TRASH, "#ef476f");
@@ -92,10 +132,30 @@ public class GestionZoneController implements Initializable {
         buttons.getChildren().addAll(btnModifier, btnSupprimer);
         card.getChildren().addAll(header, new Separator(), content, buttons);
 
-        // Style
         card.setStyle("-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16;");
         card.setEffect(new DropShadow(10, Color.gray(0.3)));
         return card;
+    }
+
+    private void showZoneOnMap(Zone zone) {
+        if (!isMapLoaded) {
+            System.err.println("La carte n'est pas encore chargée, impossible d'ajouter la zone : " + zone.getNom());
+            return;
+        }
+        WebEngine webEngine = mapView.getEngine();
+        String script = String.format(Locale.US,
+                "if (typeof addZone === 'function') { addZone(%.6f, %.6f, %.2f, '%s'); } else { console.log('Erreur : addZone non défini'); }",
+                zone.getLatitude(),
+                zone.getLongitude(),
+                zone.getSurface(),
+                zone.getNom().replace("'", "\\'")
+        );
+        try {
+            webEngine.executeScript(script);
+            System.out.println("Marqueur ajouté pour la zone : " + zone.getNom() + " (lat: " + zone.getLatitude() + ", lng: " + zone.getLongitude() + ")");
+        } catch (Exception e) {
+            System.err.println("Erreur lors de l'ajout de la zone sur la carte : " + e.getMessage());
+        }
     }
 
     private HBox createInfoRow(FontAwesomeSolid iconType, String text) {
@@ -125,10 +185,39 @@ public class GestionZoneController implements Initializable {
             try {
                 serviceZone.delete(zone);
                 loadData();
+                showAllZonesOnMap();
                 showSuccessFeedback();
             } catch (Exception e) {
                 showAlert("Erreur", "Échec de la suppression : " + e.getMessage());
             }
+        }
+    }
+
+    private void showAllZonesOnMap() {
+        if (!isMapLoaded) {
+            System.err.println("La carte n'est pas encore chargée, impossible d'afficher toutes les zones");
+            return;
+        }
+        WebEngine webEngine = mapView.getEngine();
+        StringBuilder script = new StringBuilder("loadZonesFromDB([");
+        zones.forEach(zone -> {
+            script.append(String.format(Locale.US,
+                    "{ lat: %.6f, lng: %.6f, surface: %.2f, nom: '%s' },",
+                    zone.getLatitude(), zone.getLongitude(), zone.getSurface(), zone.getNom().replace("'", "\\'")
+            ));
+        });
+        if (!zones.isEmpty()) {
+            script.setLength(script.length() - 1); // Supprimer la dernière virgule
+        }
+        script.append("]);");
+        try {
+            webEngine.executeScript(script.toString());
+            System.out.println("Toutes les zones ont été affichées sur la carte (" + zones.size() + " zones)");
+            // Forcer un re-rendu du WebView
+            mapView.setVisible(false);
+            mapView.setVisible(true);
+        } catch (Exception e) {
+            System.err.println("Erreur lors de l'exécution du script JS pour toutes les zones : " + e.getMessage());
         }
     }
 
@@ -139,11 +228,18 @@ public class GestionZoneController implements Initializable {
             Zone zone = new Zone();
             updateZoneFromForm(zone);
             serviceZone.add(zone);
+
+            if (zone.getLatitude() == 0.0 && zone.getLongitude() == 0.0) {
+                showAlert("Avertissement", "Géocodage échoué pour '" + zone.getNom() + "'. Aucun marqueur n'a été ajouté à la carte.");
+            } else {
+                showZoneOnMap(zone);
+            }
+
             loadData();
             clearForm();
             showSuccessFeedback();
         } catch (Exception e) {
-            showAlert("Erreur d'ajout", e.getMessage());
+            showAlert("Erreur", e.getMessage());
         }
     }
 
@@ -158,6 +254,7 @@ public class GestionZoneController implements Initializable {
             updateZoneFromForm(selectedZone);
             serviceZone.update(selectedZone);
             loadData();
+            showAllZonesOnMap();
             clearForm();
             showSuccessFeedback();
         } catch (Exception e) {
@@ -194,6 +291,7 @@ public class GestionZoneController implements Initializable {
         tfSurface.setText(String.valueOf(zone.getSurface()));
         tfNombreLampadaires.setText(String.valueOf(zone.getNombreLampadaires()));
         tfNombreCitoyens.setText(String.valueOf(zone.getNombreCitoyens()));
+        showZoneOnMap(zone);
     }
 
     private void clearForm() {
@@ -220,7 +318,6 @@ public class GestionZoneController implements Initializable {
         }
     }
 
-    // Méthodes de feedback communes (identique à GestionLampadaireController)
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.initStyle(StageStyle.TRANSPARENT);
@@ -259,13 +356,25 @@ public class GestionZoneController implements Initializable {
         animation.play();
     }
 
-    // Navigation (gardé inchangé)
+
     @FXML
-    private void handleBack(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("/MainMenu.fxml"));
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        stage.setScene(new Scene(root));
-        stage.show();
+    private void handleNavigateToZones(ActionEvent event) {
+        navigateTo(event, "/GestionZone.fxml", "gestion des zones");
+    }
+    private void navigateTo(ActionEvent event, String fxmlPath, String destination) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger la " + destination);
+        }
+    }
+    @FXML
+    private void handleNavigateToZoneCitoyen(ActionEvent event) {
+        navigateTo(event, "/ZoneCitoyenView.fxml", "vue citoyen");
     }
     @FXML
     private void handleNavigateToLampadaire(ActionEvent event) {
@@ -276,92 +385,23 @@ public class GestionZoneController implements Initializable {
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert("Erreur", "Impossible de charger la gestion des zones");
+            showAlert("Erreur", "Impossible de charger la gestion des lampadaires");
         }
     }
     @FXML
-    private void handleNavigateToLampadaires(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("/GestionLampadaire.fxml"));
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        stage.setScene(new Scene(root));
-        stage.show();
+    private void handleBack(ActionEvent event) {
+        navigateTo(event, "/MainMenu.fxml", "menu principal");
     }
     @FXML
-    private void handleGestionCapteur(ActionEvent event) {
-        switchScene(event, "/GestionCapteur.fxml");
+    private void handleNavigateToCameras(ActionEvent event) {
+        navigateTo(event, "/GestionCamera.fxml", "gestion des caméras");
     }
-
     @FXML
-    private void handleGestionCitoyen(ActionEvent event) {
-        switchScene(event, "/GestionCitoyen.fxml");
+    private void handleNavigateToLampadaireMap(ActionEvent event) {
+        navigateTo(event, "/LampadaireMapView.fxml", "carte des lampadaires");
     }
-
     @FXML
-    private void handleGestionDonnee(ActionEvent event) {
-        switchScene(event, "/GestionDonnee.fxml");
-    }
-
-    @FXML
-    private void handleGestionIntervention(ActionEvent event) {
-        switchScene(event, "/GestionIntervention.fxml");
-    }
-
-    @FXML
-    private void handleGestionLampadaire(ActionEvent event) {
-        switchScene(event, "/GestionLampadaire.fxml");
-    }
-
-    @FXML
-    private void handleGestionReclamation(ActionEvent event) {
-        switchScene(event, "/GestionReclamation.fxml");
-    }
-
-    @FXML
-    private void handleGestionResponsable(ActionEvent event) {
-        switchScene(event, "/GestionResponsable.fxml");
-    }
-
-    @FXML
-    private void handleGestionTechnicien(ActionEvent event) {
-        switchScene(event, "/GestionTechnicien.fxml");
-    }
-
-    @FXML
-    private void handleGestionUtilisateur(ActionEvent event) {
-        switchScene(event, "/GestionUtilisateur.fxml");
-    }
-
-    @FXML
-    private void handleGestionZone(ActionEvent event) {
-        switchScene(event, "/GestionZone.fxml");
-    }
-
-    @FXML
-    private void handleProfileInterface(ActionEvent event) {
-        switchScene(event, "/ProfileInterface.fxml");
-    }
-
-    @FXML
-    private void handleSourceInterface(ActionEvent event) {
-        switchScene(event, "/SourceInterface.fxml");
-    }
-
-    @FXML
-    private void handleBack() {
-        // Logique pour revenir à la page précédente
-        System.out.println("Retour à la page précédente");
-    }
-
-    private void switchScene(ActionEvent event, String fxmlPath) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = loader.load();
-
-            // Récupère la scène actuelle et met à jour son contenu
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.getScene().setRoot(root);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private void handleNavigateToLampadaires(ActionEvent event) {
+        navigateTo(event, "/GestionLampadaire.fxml", "gestion des lampadaires");
     }
 }

@@ -55,6 +55,12 @@ public class ForgotPasswordNewPasswordController {
             return;
         }
 
+        // Validation du mot de passe (au moins 8 caractères, un chiffre, une majuscule)
+        if (newPassword.length() < 8 || !newPassword.matches(".*\\d.*") || !newPassword.matches(".*[A-Z].*")) {
+            showAlert("Erreur", "Le mot de passe doit comporter au moins 8 caractères, un chiffre et une lettre majuscule.");
+            return;
+        }
+
         // Vérification de la correspondance des mots de passe
         if (!newPassword.equals(confirmPassword)) {
             showAlert("Erreur", "Les mots de passe ne correspondent pas.");
@@ -67,9 +73,6 @@ public class ForgotPasswordNewPasswordController {
 
             // Essayer de se reconnecter immédiatement avec le nouveau mot de passe
             utilisateur user = serviceUtilisateur.getByEmailAndPassword(email, newPassword);
-
-
-
 
             // Charger et afficher la page de connexion
             loadLoginPage();
