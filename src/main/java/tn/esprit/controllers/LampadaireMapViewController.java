@@ -1,4 +1,5 @@
 package tn.esprit.controllers;
+
 import com.sun.net.httpserver.HttpServer;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,6 +21,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
@@ -32,7 +34,6 @@ import tn.esprit.models.Zone;
 import tn.esprit.services.ServiceLampadaire;
 import tn.esprit.services.ServiceZone;
 import tn.esprit.utils.TrafficUpdateServer;
-
 import java.io.IOException;
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
@@ -54,7 +55,7 @@ public class LampadaireMapViewController implements Initializable {
     private final ObservableList<Lampadaire> lampadaires = FXCollections.observableArrayList();
     private boolean globalMapInitialized = false;
     private Lampadaire selectedLampadaire;
-    private HttpServer trafficServer; // Pour gérer l'arrêt du serveur
+    private HttpServer trafficServer;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -65,7 +66,6 @@ public class LampadaireMapViewController implements Initializable {
         );
 
         try {
-            // Démarrer le serveur avec un port configurable (8089 par défaut)
             TrafficUpdateServer.startServer(trafficStatusLabel, null, 8085);
         } catch (Exception e) {
             e.printStackTrace();
@@ -91,26 +91,31 @@ public class LampadaireMapViewController implements Initializable {
         }
         System.out.println("Lampadaires chargés: " + lampadaires.size());
     }
+
     @FXML
     private void handleNavigateToLampadaires(ActionEvent event) {
         navigateTo(event, "/GestionLampadaire.fxml", "gestion des lampadaires");
         shutdown();
     }
+
     @FXML
     private void handleNavigateToLampadaireMap(ActionEvent event) {
         navigateTo(event, "/LampadaireMapView.fxml", "carte des lampadaires");
         shutdown();
     }
+
     @FXML
     private void handleNavigateToCameras(ActionEvent event) {
         navigateTo(event, "/GestionCamera.fxml", "gestion des caméras");
         shutdown();
     }
+
     @FXML
     private void handleBack(ActionEvent event) {
         navigateTo(event, "/MainMenu.fxml", "menu principal");
         shutdown();
     }
+
     private void navigateTo(ActionEvent event, String fxmlPath, String destination) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
@@ -122,15 +127,17 @@ public class LampadaireMapViewController implements Initializable {
             showAlert("Erreur", "Impossible de charger la " + destination);
         }
     }
+
     @FXML
     private void handleNavigateToZoneCitoyen(ActionEvent event) {
         navigateTo(event, "/ZoneCitoyenView.fxml", "vue citoyen");
-        shutdown(); // Stop the TrafficUpdateServer
+        shutdown();
     }
+
     @FXML
     private void handleNavigateToZones(ActionEvent event) {
         navigateTo(event, "/GestionZone.fxml", "gestion des zones");
-        shutdown(); // Arrêter le serveur
+        shutdown();
     }
 
     @FXML
@@ -383,8 +390,28 @@ public class LampadaireMapViewController implements Initializable {
             Button signalerButton = new Button("Signaler");
             signalerButton.setStyle("-fx-background-color: #ea4335; -fx-text-fill: white; -fx-font-weight: 700; -fx-padding: 8 16; -fx-background-radius: 8;");
             signalerButton.setGraphic(new FontIcon(FontAwesomeSolid.EXCLAMATION_TRIANGLE));
-            // Supprimer ou commenter l'action pour désactiver le bouton
-            // signalerButton.setOnAction(e -> { ... });
+            signalerButton.setOnAction(e -> {
+                try {
+                    // Charger la nouvelle interface de signalement
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/SignalerReclamation.fxml"));
+                    Parent root = loader.load();
+
+                    // Passer l'ID du lampadaire au contrôleur
+                    SignalerReclamationController controller = loader.getController();
+                    controller.setLampadaireId(selectedLampadaire.getIdLamp());
+
+                    // Ouvrir dans une nouvelle fenêtre modale
+                    Stage stage = new Stage();
+                    stage.initModality(Modality.APPLICATION_MODAL);
+                    stage.setScene(new Scene(root));
+                    stage.setTitle("Signaler une Réclamation");
+                    stage.showAndWait();
+
+                    dialog.close(); // Fermer la boîte de dialogue après signalement
+                } catch (IOException ex) {
+                    showAlert("Erreur", "Impossible de charger l'interface de signalement : " + ex.getMessage());
+                }
+            });
 
             Button closeButton = new Button("Fermer");
             closeButton.setStyle("-fx-background-color: #5f6368; -fx-text-fill: white; -fx-font-weight: 700; -fx-padding: 8 16; -fx-background-radius: 8;");
@@ -406,6 +433,6 @@ public class LampadaireMapViewController implements Initializable {
     }
 
     public void shutdown() {
-        TrafficUpdateServer.stopServer(); // Arrêter le serveur proprement
+        TrafficUpdateServer.stopServer();
     }
 }

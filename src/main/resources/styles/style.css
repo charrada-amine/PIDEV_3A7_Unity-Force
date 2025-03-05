@@ -291,3 +291,17 @@
 .capteur-card:hover {
     -fx-background-color: #f0f0f0;
 }
+.action-button.btstl {
+    -fx-font-family: 'Segoe UI';
+    -fx-background-color: linear-gradient(to right, #007BFF, #0056b3);
+    -fx-text-fill: white; -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 2);
+    -fx-cursor: hand;
+}
+.action-button.btstl-delete {
+    -fx-font-family: 'Segoe UI';
+    -fx-background-color: linear-gradient(to right, #ff0000, #b30000);
+    -fx-text-fill: white; -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 2);
+    -fx-cursor: hand;
+}

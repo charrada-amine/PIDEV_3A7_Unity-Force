@@ -79,6 +79,7 @@ public class Lampadaire {
                 '}';
     }
 
+
     public enum EtatLampadaire {
         ACTIF("actif", "allume"),
         EN_PANNE("en panne", "eteint"),

@@ -22,6 +22,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.Font;
 import javafx.stage.StageStyle;
+import javafx.stage.Modality;
 import javafx.util.Duration;
 import tn.esprit.models.Reclamation;
 import tn.esprit.services.ServiceReclamation;
@@ -29,9 +30,21 @@ import java.net.URL;
 import java.sql.Date;
 import java.sql.Time;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.URI;
+import org.json.JSONObject;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
+import java.io.File;
 
 public class GestionReclamationController implements Initializable {
 
@@ -43,6 +56,8 @@ public class GestionReclamationController implements Initializable {
     @FXML private TextField tfCitoyenId;
     @FXML private FlowPane cardContainer;
     @FXML private ScrollPane scrollPane;
+    @FXML private ComboBox<String> cbSort;
+    @FXML private ComboBox<String> cbFilterStatut;
 
     private final ServiceReclamation serviceReclamation = new ServiceReclamation();
     private final ObservableList<Reclamation> reclamations = FXCollections.observableArrayList();
@@ -51,6 +66,71 @@ public class GestionReclamationController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         cbStatut.setItems(FXCollections.observableArrayList("Ouvert", "En cours", "Résolu", "Fermé"));
+
+        // Initialize sorting ComboBox with tooltips
+        cbSort.setItems(FXCollections.observableArrayList("Aucun tri", "Date croissante", "Date décroissante"));
+        cbSort.setValue("Aucun tri");
+        cbSort.setOnAction(e -> refreshDisplay());
+        cbSort.setCellFactory(lv -> new ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setTooltip(null);
+                } else {
+                    setText(item);
+                    switch (item) {
+                        case "Aucun tri":
+                            setTooltip(new Tooltip("Affiche les réclamations dans leur ordre d'origine"));
+                            break;
+                        case "Date croissante":
+                            setTooltip(new Tooltip("Trie les réclamations par date, de la plus ancienne à la plus récente"));
+                            break;
+                        case "Date décroissante":
+                            setTooltip(new Tooltip("Trie les réclamations par date, de la plus récente à la plus ancienne"));
+                            break;
+                    }
+                }
+            }
+        });
+        cbSort.setButtonCell(cbSort.getCellFactory().call(null)); // Apply tooltip to the button too
+
+        // Initialize filter ComboBox with tooltips
+        cbFilterStatut.setItems(FXCollections.observableArrayList("Tous", "Ouvert", "En cours", "Résolu", "Fermé"));
+        cbFilterStatut.setValue("Tous");
+        cbFilterStatut.setOnAction(e -> refreshDisplay());
+        cbFilterStatut.setCellFactory(lv -> new ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setTooltip(null);
+                } else {
+                    setText(item);
+                    switch (item) {
+                        case "Tous":
+                            setTooltip(new Tooltip("Affiche toutes les réclamations, quel que soit leur statut"));
+                            break;
+                        case "Ouvert":
+                            setTooltip(new Tooltip("Affiche uniquement les réclamations avec le statut 'Ouvert'"));
+                            break;
+                        case "En cours":
+                            setTooltip(new Tooltip("Affiche uniquement les réclamations avec le statut 'En cours'"));
+                            break;
+                        case "Résolu":
+                            setTooltip(new Tooltip("Affiche uniquement les réclamations avec le statut 'Résolu'"));
+                            break;
+                        case "Fermé":
+                            setTooltip(new Tooltip("Affiche uniquement les réclamations avec le statut 'Fermé'"));
+                            break;
+                    }
+                }
+            }
+        });
+        cbFilterStatut.setButtonCell(cbFilterStatut.getCellFactory().call(null)); // Apply tooltip to the button too
+
         scrollPane.setFitToWidth(true);
         cardContainer.setHgap(20);
         cardContainer.setVgap(20);
@@ -61,8 +141,33 @@ public class GestionReclamationController implements Initializable {
 
     private void loadData() {
         reclamations.setAll(serviceReclamation.getAll());
+        refreshDisplay();
+    }
+
+    private void refreshDisplay() {
+        String filterStatut = cbFilterStatut.getValue();
+        ObservableList<Reclamation> filteredReclamations = FXCollections.observableArrayList(
+                reclamations.stream()
+                        .filter(r -> "Tous".equals(filterStatut) || r.getStatut().equals(filterStatut))
+                        .collect(Collectors.toList())
+        );
+
+        String sortOption = cbSort.getValue();
+        if (sortOption != null) {
+            switch (sortOption) {
+                case "Date croissante":
+                    filteredReclamations.sort(Comparator.comparing(Reclamation::getDateReclamation));
+                    break;
+                case "Date décroissante":
+                    filteredReclamations.sort(Comparator.comparing(Reclamation::getDateReclamation).reversed());
+                    break;
+                default:
+                    break;
+            }
+        }
+
         cardContainer.getChildren().clear();
-        reclamations.forEach(reclamation -> cardContainer.getChildren().add(createReclamationCard(reclamation)));
+        filteredReclamations.forEach(reclamation -> cardContainer.getChildren().add(createReclamationCard(reclamation)));
     }
 
     private void handleDeleteReclamation(Reclamation reclamation) {
@@ -97,12 +202,92 @@ public class GestionReclamationController implements Initializable {
         selectedReclamation = null;
     }
 
+    private boolean checkBadWords(String text) {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://bad-words-filter-api.p.rapidapi.com/badwords"))
+                    .header("x-rapidapi-key", "6abc316058msh50ae9be18c5e6d8p1ca615jsn3bf705815064")
+                    .header("x-rapidapi-host", "bad-words-filter-api.p.rapidapi.com")
+                    .header("Content-Type", "application/json")
+                    .method("POST", HttpRequest.BodyPublishers.ofString("{\"text\":\"" + text + "\"}"))
+                    .build();
+
+            HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+            String responseBody = response.body();
+            System.out.println("Réponse de l'API pour '" + text + "' : " + responseBody);
+
+            JSONObject jsonResponse = new JSONObject(responseBody);
+
+            if (jsonResponse.has("contains_bad_words")) {
+                return jsonResponse.getBoolean("contains_bad_words");
+            } else if (jsonResponse.has("bad_words") && jsonResponse.getJSONArray("bad_words").length() > 0) {
+                return true;
+            } else if (jsonResponse.has("is_profane")) {
+                return jsonResponse.getBoolean("is_profane");
+            }
+
+            String[] badWords = {"fuck", "shit", "damn", "ass", "bitch"};
+            for (String badWord : badWords) {
+                if (text.toLowerCase().contains(badWord)) {
+                    System.out.println("Mot inapproprié détecté localement : " + badWord);
+                    return true;
+                }
+            }
+
+            return false;
+        } catch (Exception e) {
+            showAlert("Erreur API", "Erreur lors de la vérification des mots inappropriés : " + e.getMessage());
+            System.err.println("Erreur API : " + e.getMessage());
+            String[] badWords = {"fuck", "shit", "damn", "ass", "bitch"};
+            for (String badWord : badWords) {
+                if (text.toLowerCase().contains(badWord)) {
+                    System.out.println("Mot inapproprié détecté localement (API en échec) : " + badWord);
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    private void generatePdf(Reclamation reclamation) {
+        try {
+            String fileName = "PDFs/Reclamation_" + reclamation.getID_reclamation() + ".pdf";
+            new File("PDFs").mkdirs();
+            PdfWriter writer = new PdfWriter(new File(fileName));
+            PdfDocument pdf = new PdfDocument(writer);
+            Document document = new Document(pdf);
+
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+            document.add(new Paragraph("Détails de la Réclamation #" + reclamation.getID_reclamation())
+                    .setBold().setFontSize(16));
+            document.add(new Paragraph("Description : " + reclamation.getDescription()));
+            document.add(new Paragraph("Date : " + reclamation.getDateReclamation().toLocalDate().format(dateFormatter)));
+            document.add(new Paragraph("Heure : " + reclamation.getHeureReclamation()));
+            document.add(new Paragraph("Statut : " + reclamation.getStatut()));
+            document.add(new Paragraph("Lampadaire ID : " + reclamation.getLampadaireId()));
+            document.add(new Paragraph("Citoyen ID : " + reclamation.getCitoyenId()));
+
+            document.close();
+            showSuccessFeedback("PDF généré avec succès : " + fileName);
+        } catch (Exception e) {
+            showAlert("Erreur PDF", "Erreur lors de la génération du PDF : " + e.getMessage());
+        }
+    }
+
     @FXML
     private void handleAdd() {
         try {
             validateInputs();
+            String description = tfDescription.getText();
+
+            if (checkBadWords(description)) {
+                showAlert("Contenu inapproprié", "La description contient des mots inappropriés. Veuillez la modifier.");
+                return;
+            }
+
             Reclamation reclamation = new Reclamation(
-                    tfDescription.getText(),
+                    description,
                     Date.valueOf(dpDate.getValue()),
                     Time.valueOf(tfHeure.getText()),
                     cbStatut.getValue(),
@@ -126,7 +311,14 @@ public class GestionReclamationController implements Initializable {
         }
         try {
             validateInputs();
-            selectedReclamation.setDescription(tfDescription.getText());
+            String description = tfDescription.getText();
+
+            if (checkBadWords(description)) {
+                showAlert("Contenu inapproprié", "La description contient des mots inappropriés. Veuillez la modifier.");
+                return;
+            }
+
+            selectedReclamation.setDescription(description);
             selectedReclamation.setDateReclamation(Date.valueOf(dpDate.getValue()));
             selectedReclamation.setHeureReclamation(Time.valueOf(tfHeure.getText()));
             selectedReclamation.setStatut(cbStatut.getValue());
@@ -189,7 +381,6 @@ public class GestionReclamationController implements Initializable {
         }
     }
 
-    // Common UI Components
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.initStyle(StageStyle.TRANSPARENT);
@@ -226,8 +417,12 @@ public class GestionReclamationController implements Initializable {
     }
 
     private void showSuccessFeedback() {
+        showSuccessFeedback("Opération réussie !");
+    }
+
+    private void showSuccessFeedback(String message) {
         Pane root = (Pane) cardContainer.getParent();
-        Label feedback = new Label("✓ Opération réussie !");
+        Label feedback = new Label("✓ " + message);
         feedback.setStyle(
                 "-fx-background-color: linear-gradient(to right, #34a853, #2d8a4a);" +
                         "-fx-text-fill: white;" +
@@ -285,7 +480,13 @@ public class GestionReclamationController implements Initializable {
         Button btnSupprimer = createIconButton("Supprimer", FontAwesomeSolid.TRASH, "#ff6b6b");
         btnSupprimer.setOnAction(e -> handleDeleteReclamation(reclamation));
 
-        buttons.getChildren().addAll(btnModifier, btnSupprimer);
+        Button btnGeneratePdf = createIconButton("Générer PDF", FontAwesomeSolid.FILE_PDF, "#28a745");
+        btnGeneratePdf.setOnAction(e -> generatePdf(reclamation));
+
+        Button btnIntervenir = createIconButton("Intervenir", FontAwesomeSolid.TOOLS, "#ff9800");
+        btnIntervenir.setOnAction(e -> handleIntervenir(reclamation));
+
+        buttons.getChildren().addAll(btnModifier, btnSupprimer, btnGeneratePdf, btnIntervenir);
 
         card.getChildren().addAll(header, new Separator(), content, buttons);
         card.setStyle("-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16;");
@@ -322,7 +523,30 @@ public class GestionReclamationController implements Initializable {
         return button;
     }
 
-    // Navigation Methods
+    private void handleIntervenir(Reclamation reclamation) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AddIntervention.fxml"));
+            Parent root = loader.load();
+
+            AddInterventionController addInterventionController = loader.getController();
+            addInterventionController.setReclamationAndLampadaireId(reclamation.getID_reclamation(), reclamation.getLampadaireId());
+
+            Stage dialogStage = new Stage();
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(cardContainer.getScene().getWindow());
+            dialogStage.initStyle(StageStyle.UTILITY);
+            dialogStage.setTitle("Ajouter une Intervention");
+            dialogStage.setScene(new Scene(root));
+            dialogStage.setResizable(false);
+
+            dialogStage.setOnHidden(e -> loadData());
+
+            dialogStage.showAndWait();
+        } catch (IOException e) {
+            showAlert("Erreur de navigation", "Impossible de charger l'interface d'ajout d'intervention : " + e.getMessage());
+        }
+    }
+
     @FXML
     private void handleNavigateToInterventions(ActionEvent event) {
         loadView("GestionIntervention.fxml", event);
@@ -336,7 +560,7 @@ public class GestionReclamationController implements Initializable {
 
     @FXML
     private void handleBack(ActionEvent event) {
-        loadView("MainMenu.fxml", event);
+        loadView("Menu.fxml", event);
     }
 
     private void loadView(String fxmlFile, ActionEvent event) {
@@ -347,84 +571,6 @@ public class GestionReclamationController implements Initializable {
             stage.show();
         } catch (IOException e) {
             showAlert("Erreur de navigation", "Impossible de charger la vue : " + fxmlFile);
-        }
-    }
-    @FXML
-    private void handleGestionCapteur(ActionEvent event) {
-        switchScene(event, "/GestionCapteur.fxml");
-    }
-
-    @FXML
-    private void handleGestionCitoyen(ActionEvent event) {
-        switchScene(event, "/GestionCitoyen.fxml");
-    }
-
-    @FXML
-    private void handleGestionDonnee(ActionEvent event) {
-        switchScene(event, "/GestionDonnee.fxml");
-    }
-
-    @FXML
-    private void handleGestionIntervention(ActionEvent event) {
-        switchScene(event, "/GestionIntervention.fxml");
-    }
-
-    @FXML
-    private void handleGestionLampadaire(ActionEvent event) {
-        switchScene(event, "/GestionLampadaire.fxml");
-    }
-
-    @FXML
-    private void handleGestionReclamation(ActionEvent event) {
-        switchScene(event, "/GestionReclamation.fxml");
-    }
-
-    @FXML
-    private void handleGestionResponsable(ActionEvent event) {
-        switchScene(event, "/GestionResponsable.fxml");
-    }
-
-    @FXML
-    private void handleGestionTechnicien(ActionEvent event) {
-        switchScene(event, "/GestionTechnicien.fxml");
-    }
-
-    @FXML
-    private void handleGestionUtilisateur(ActionEvent event) {
-        switchScene(event, "/GestionUtilisateur.fxml");
-    }
-
-    @FXML
-    private void handleGestionZone(ActionEvent event) {
-        switchScene(event, "/GestionZone.fxml");
-    }
-
-    @FXML
-    private void handleProfileInterface(ActionEvent event) {
-        switchScene(event, "/ProfileInterface.fxml");
-    }
-
-    @FXML
-    private void handleSourceInterface(ActionEvent event) {
-        switchScene(event, "/SourceInterface.fxml");
-    }
-
-    @FXML
-    private void handleBack() {
-        // Logique pour revenir à la page précédente
-        System.out.println("Retour à la page précédente");
-    }
-
-    private void switchScene(ActionEvent event, String fxmlPath) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = loader.load();
-
-            // Récupère la scène actuelle et met à jour son contenu
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.getScene().setRoot(root);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }

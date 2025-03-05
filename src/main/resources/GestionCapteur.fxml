@@ -127,22 +127,22 @@
 
                 <!-- Boutons CRUD -->
                 <HBox spacing="15" styleClass="button-container">
-                    <Button text="Ajouter" onAction="#handleAddCapteur" styleClass="action-button,add">
+                    <Button text="Ajouter" onAction="#handleAddCapteur" styleClass="action-button,btstl">
                         <graphic>
                             <FontIcon iconLiteral="fas-plus-circle" iconSize="16" iconColor="white"/>
                         </graphic>
                     </Button>
-                    <Button text="Modifier" onAction="#handleUpdateCapteur" styleClass="action-button,edit">
+                    <Button text="Modifier" onAction="#handleUpdateCapteur" styleClass="action-button,btstl">
                         <graphic>
                             <FontIcon iconLiteral="fas-edit" iconSize="16" iconColor="white"/>
                         </graphic>
                     </Button>
-                    <Button text="Supprimer" onAction="#handleDeleteCapteur" styleClass="action-button,delete">
+                    <Button text="Supprimer" onAction="#handleDeleteCapteur" styleClass="action-button,btstl-delete">
                         <graphic>
                             <FontIcon iconLiteral="fas-trash-alt" iconSize="16" iconColor="white"/>
                         </graphic>
                     </Button>
-                    <Button text="Réinitialiser" onAction="#handleRefresh" styleClass="action-button,reset">
+                    <Button text="Réinitialiser" onAction="#handleRefresh" styleClass="action-button,btstl">
                         <graphic>
                             <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
                         </graphic>
@@ -150,12 +150,12 @@
 
                 </HBox>
                 <HBox spacing="15" styleClass="button-container">
-                    <Button text="Exporter" onAction="#handleExportCapteurs" styleClass="action-button,export">
+                    <Button text="Exporter" onAction="#handleExportCapteurs" styleClass="action-button,btstl">
                         <graphic>
                             <FontIcon iconLiteral="fas-file-export" iconSize="16" iconColor="white"/>
                         </graphic>
                     </Button>
-                    <Button text="Trier par date" onAction="#handleSortByDate" styleClass="action-button,sort">
+                    <Button text="Trier par date" onAction="#handleSortByDate" styleClass="action-button,btstl">
                         <graphic>
                             <FontIcon iconLiteral="fas-sort-amount-down" iconSize="16" iconColor="white"/>
                         </graphic>

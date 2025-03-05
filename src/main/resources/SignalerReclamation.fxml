@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.esprit.controllers.SignalerReclamationController"
+            stylesheets="@styles/style.css">
+
+    <center>
+        <VBox spacing="20" styleClass="form-card" prefWidth="380" alignment="CENTER" style="-fx-padding: 25;">
+            <Label text="Signaler une Réclamation" styleClass="form-title"/>
+
+            <VBox spacing="15">
+                <TextField fx:id="tfDescription" promptText="Description" styleClass="modern-input"/>
+                <DatePicker fx:id="dpDate" promptText="Date de réclamation" styleClass="modern-input"/>
+                <TextField fx:id="tfHeure" promptText="Heure (HH:MM:SS)" styleClass="modern-input"/>
+                <ComboBox fx:id="cbStatut" promptText="Statut actuel" styleClass="modern-input"/>
+                <TextField fx:id="tfCitoyenId" promptText="ID du Citoyen" styleClass="modern-input"/>
+
+                <HBox spacing="15" styleClass="action-buttons" alignment="CENTER">
+                    <Button text="Ajouter" onAction="#handleAdd" styleClass="action-button add">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-plus-circle" iconSize="16"/>
+                        </graphic>
+                    </Button>
+                    <Button text="Réinitialiser" onAction="#handleClear" styleClass="action-button reset">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-undo" iconSize="16"/>
+                        </graphic>
+                    </Button>
+                </HBox>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

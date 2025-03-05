@@ -29,6 +29,7 @@ import tn.esprit.services.ServiceIntervention;
 import java.net.URL;
 import java.sql.Date;
 import java.sql.Time;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
@@ -38,7 +39,7 @@ public class GestionInterventionController implements Initializable {
 
     @FXML private ComboBox<TypeIntervention> cbType;
     @FXML private TextField tfDescription;
-    @FXML private TextField tfEtat;
+    @FXML private ComboBox<String> cbEtat;
     @FXML private DatePicker dpDate;
     @FXML private TextField tfHeure;
     @FXML private TextField tfLampadaireId;
@@ -50,6 +51,8 @@ public class GestionInterventionController implements Initializable {
     private final ServiceIntervention serviceIntervention = new ServiceIntervention();
     private final ObservableList<Intervention> interventions = FXCollections.observableArrayList();
     private Intervention selectedIntervention;
+    private Integer preFilledReclamationId;
+    private Integer preFilledLampadaireId;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -59,7 +62,18 @@ public class GestionInterventionController implements Initializable {
         cardContainer.setVgap(20);
         cardContainer.setPadding(new Insets(20));
         Font.loadFont(getClass().getResourceAsStream("/fonts/Roboto-Regular.ttf"), 14);
+        tfReclamationId.setDisable(false); // Enabled by default
+        tfLampadaireId.setDisable(false); // Enabled by default
         loadData();
+    }
+
+    public void setReclamationAndLampadaireId(int reclamationId, int lampadaireId) {
+        this.preFilledReclamationId = reclamationId;
+        this.preFilledLampadaireId = lampadaireId;
+        tfReclamationId.setText(String.valueOf(reclamationId));
+        tfReclamationId.setDisable(true); // Disable when pre-filled
+        tfLampadaireId.setText(String.valueOf(lampadaireId));
+        tfLampadaireId.setDisable(true); // Disable when pre-filled
     }
 
     private void loadData() {
@@ -84,24 +98,38 @@ public class GestionInterventionController implements Initializable {
         selectedIntervention = intervention;
         cbType.setValue(intervention.getTypeIntervention());
         tfDescription.setText(intervention.getDescription());
-        tfEtat.setText(intervention.getEtat());
+        cbEtat.setValue(intervention.getEtat());
         dpDate.setValue(intervention.getDateIntervention().toLocalDate());
         tfHeure.setText(intervention.getHeureIntervention().toString());
         tfLampadaireId.setText(String.valueOf(intervention.getLampadaireId()));
+        tfLampadaireId.setDisable(false); // Enable when editing existing intervention
         tfTechnicienId.setText(String.valueOf(intervention.getTechnicienId()));
         tfReclamationId.setText(intervention.getID_reclamation() != null ?
                 String.valueOf(intervention.getID_reclamation()) : "");
+        tfReclamationId.setDisable(false); // Enable when editing existing intervention
     }
 
     private void clearForm() {
         cbType.getSelectionModel().clearSelection();
         tfDescription.clear();
-        tfEtat.clear();
+        cbEtat.getSelectionModel().clearSelection();
         dpDate.setValue(null);
         tfHeure.clear();
-        tfLampadaireId.clear();
         tfTechnicienId.clear();
-        tfReclamationId.clear();
+        if (preFilledReclamationId == null) {
+            tfReclamationId.clear();
+            tfReclamationId.setDisable(false);
+        } else {
+            tfReclamationId.setText(String.valueOf(preFilledReclamationId));
+            tfReclamationId.setDisable(true);
+        }
+        if (preFilledLampadaireId == null) {
+            tfLampadaireId.clear();
+            tfLampadaireId.setDisable(false);
+        } else {
+            tfLampadaireId.setText(String.valueOf(preFilledLampadaireId));
+            tfLampadaireId.setDisable(true);
+        }
         selectedIntervention = null;
     }
 
@@ -112,12 +140,13 @@ public class GestionInterventionController implements Initializable {
             Intervention intervention = new Intervention(
                     cbType.getValue(),
                     tfDescription.getText(),
-                    tfEtat.getText(),
+                    cbEtat.getValue(),
                     Date.valueOf(dpDate.getValue()),
                     Time.valueOf(tfHeure.getText()),
-                    Integer.parseInt(tfLampadaireId.getText()),
+                    preFilledLampadaireId != null ? preFilledLampadaireId : Integer.parseInt(tfLampadaireId.getText()),
                     Integer.parseInt(tfTechnicienId.getText()),
-                    tfReclamationId.getText().isEmpty() ? null : Integer.parseInt(tfReclamationId.getText())
+                    preFilledReclamationId != null ? preFilledReclamationId :
+                            (tfReclamationId.getText().isEmpty() ? null : Integer.parseInt(tfReclamationId.getText()))
             );
             serviceIntervention.add(intervention);
             loadData();
@@ -138,7 +167,7 @@ public class GestionInterventionController implements Initializable {
             validateInputs();
             selectedIntervention.setTypeIntervention(cbType.getValue());
             selectedIntervention.setDescription(tfDescription.getText());
-            selectedIntervention.setEtat(tfEtat.getText());
+            selectedIntervention.setEtat(cbEtat.getValue());
             selectedIntervention.setDateIntervention(Date.valueOf(dpDate.getValue()));
             selectedIntervention.setHeureIntervention(Time.valueOf(tfHeure.getText()));
             selectedIntervention.setLampadaireId(Integer.parseInt(tfLampadaireId.getText()));
@@ -181,7 +210,7 @@ public class GestionInterventionController implements Initializable {
     private void validateInputs() throws Exception {
         if (cbType.getValue() == null ||
                 tfDescription.getText().isEmpty() ||
-                tfEtat.getText().isEmpty() ||
+                cbEtat.getValue() == null ||
                 dpDate.getValue() == null ||
                 tfHeure.getText().isEmpty() ||
                 tfLampadaireId.getText().isEmpty() ||
@@ -189,24 +218,35 @@ public class GestionInterventionController implements Initializable {
             throw new Exception("Tous les champs obligatoires doivent être remplis");
         }
 
-        try {
-            Time.valueOf(tfHeure.getText());
-        } catch (Exception e) {
+        LocalDate selectedDate = dpDate.getValue();
+        if (selectedDate.isBefore(LocalDate.now())) {
+            throw new Exception("La date d'intervention ne peut pas être antérieure à aujourd'hui");
+        }
+
+        if (!tfHeure.getText().matches("^([0-1]?\\d|2[0-3]):([0-5]\\d):([0-5]\\d)$")) {
             throw new Exception("Format d'heure invalide (HH:MM:SS)");
         }
 
-        try {
-            Integer.parseInt(tfLampadaireId.getText());
-            Integer.parseInt(tfTechnicienId.getText());
-            if (!tfReclamationId.getText().isEmpty()) {
-                Integer.parseInt(tfReclamationId.getText());
-            }
-        } catch (NumberFormatException e) {
-            throw new Exception("Les IDs doivent être des nombres valides");
+        validatePositiveId(tfTechnicienId, "Technicien");
+        if (preFilledLampadaireId == null) {
+            validatePositiveId(tfLampadaireId, "Lampadaire");
+        }
+        if (preFilledReclamationId == null && !tfReclamationId.getText().isEmpty()) {
+            validatePositiveId(tfReclamationId, "Réclamation");
         }
     }
 
-    // Alert and Feedback Methods (Keep these identical across controllers)
+    private void validatePositiveId(TextField field, String fieldName) throws Exception {
+        try {
+            int id = Integer.parseInt(field.getText());
+            if (id <= 0) {
+                throw new Exception("L'ID " + fieldName + " doit être un nombre positif");
+            }
+        } catch (NumberFormatException e) {
+            throw new Exception("L'ID " + fieldName + " doit être un nombre valide");
+        }
+    }
+
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.initStyle(StageStyle.TRANSPARENT);
@@ -268,7 +308,6 @@ public class GestionInterventionController implements Initializable {
         animation.play();
     }
 
-    // UI Components
     private VBox createInterventionCard(Intervention intervention) {
         VBox card = new VBox(15);
         card.getStyleClass().add("card");
@@ -343,7 +382,6 @@ public class GestionInterventionController implements Initializable {
         return button;
     }
 
-    // Navigation Methods
     @FXML
     private void handleNavigateToReclamations(ActionEvent event) {
         loadView("GestionReclamation.fxml", event);
@@ -368,84 +406,6 @@ public class GestionInterventionController implements Initializable {
             stage.show();
         } catch (IOException e) {
             showAlert("Erreur de navigation", "Impossible de charger la vue : " + fxmlFile);
-        }
-    }
-    @FXML
-    private void handleGestionCapteur(ActionEvent event) {
-        switchScene(event, "/GestionCapteur.fxml");
-    }
-
-    @FXML
-    private void handleGestionCitoyen(ActionEvent event) {
-        switchScene(event, "/GestionCitoyen.fxml");
-    }
-
-    @FXML
-    private void handleGestionDonnee(ActionEvent event) {
-        switchScene(event, "/GestionDonnee.fxml");
-    }
-
-    @FXML
-    private void handleGestionIntervention(ActionEvent event) {
-        switchScene(event, "/GestionIntervention.fxml");
-    }
-
-    @FXML
-    private void handleGestionLampadaire(ActionEvent event) {
-        switchScene(event, "/GestionLampadaire.fxml");
-    }
-
-    @FXML
-    private void handleGestionReclamation(ActionEvent event) {
-        switchScene(event, "/GestionReclamation.fxml");
-    }
-
-    @FXML
-    private void handleGestionResponsable(ActionEvent event) {
-        switchScene(event, "/GestionResponsable.fxml");
-    }
-
-    @FXML
-    private void handleGestionTechnicien(ActionEvent event) {
-        switchScene(event, "/GestionTechnicien.fxml");
-    }
-
-    @FXML
-    private void handleGestionUtilisateur(ActionEvent event) {
-        switchScene(event, "/GestionUtilisateur.fxml");
-    }
-
-    @FXML
-    private void handleGestionZone(ActionEvent event) {
-        switchScene(event, "/GestionZone.fxml");
-    }
-
-    @FXML
-    private void handleProfileInterface(ActionEvent event) {
-        switchScene(event, "/ProfileInterface.fxml");
-    }
-
-    @FXML
-    private void handleSourceInterface(ActionEvent event) {
-        switchScene(event, "/SourceInterface.fxml");
-    }
-
-    @FXML
-    private void handleBack() {
-        // Logique pour revenir à la page précédente
-        System.out.println("Retour à la page précédente");
-    }
-
-    private void switchScene(ActionEvent event, String fxmlPath) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = loader.load();
-
-            // Récupère la scène actuelle et met à jour son contenu
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.getScene().setRoot(root);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }

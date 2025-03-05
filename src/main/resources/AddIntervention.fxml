@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.esprit.controllers.AddInterventionController"
+      spacing="15" alignment="CENTER" prefWidth="300" prefHeight="400"
+      style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10;"
+      stylesheets="@styles/style.css">
+
+    <Label text="Ajouter une Intervention" styleClass="form-title" alignment="CENTER"/>
+
+    <ComboBox fx:id="cbType" promptText="Type d'intervention" styleClass="modern-input" prefWidth="250"/>
+    <TextField fx:id="tfDescription" promptText="Description" styleClass="modern-input" prefWidth="250"/>
+    <ComboBox fx:id="cbEtat" promptText="État actuel" styleClass="modern-input" prefWidth="250">
+        <items>
+            <FXCollections fx:factory="observableArrayList">
+                <String fx:value="En attente"/>
+                <String fx:value="En cours"/>
+                <String fx:value="Terminée"/>
+                <String fx:value="Annulée"/>
+            </FXCollections>
+        </items>
+    </ComboBox>
+    <DatePicker fx:id="dpDate" promptText="Date prévue" styleClass="modern-input" prefWidth="250"/>
+    <TextField fx:id="tfHeure" promptText="Heure (HH:MM:SS)" styleClass="modern-input" prefWidth="250"/>
+    <TextField fx:id="tfTechnicienId" promptText="ID du Technicien" styleClass="modern-input" prefWidth="250"/>
+
+    <HBox spacing="10" alignment="CENTER" styleClass="action-buttons">
+        <Button text="Ajouter" onAction="#handleAdd" styleClass="action-button add">
+            <graphic>
+                <FontIcon iconLiteral="fas-plus-circle" iconSize="16"/>
+            </graphic>
+        </Button>
+        <Button text="Annuler" onAction="#handleCancel" styleClass="action-button reset">
+            <graphic>
+                <FontIcon iconLiteral="fas-times" iconSize="16"/>
+            </graphic>
+        </Button>
+    </HBox>
+</VBox>

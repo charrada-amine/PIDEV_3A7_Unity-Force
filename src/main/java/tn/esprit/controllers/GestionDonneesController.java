@@ -702,11 +702,13 @@ public class GestionDonneesController implements Initializable {
 
             // Diviser la ligne en type et valeur
             String[] parts = lastLine.split(",");
-            if (parts.length == 4) { // Maintenant, il y a 4 parties : temperature, valeur, motion, valeur
+            if (parts.length == 6) { // Maintenant, il y a 6 parties : temperature, valeur, motion, valeur, energy, valeur
                 String type1 = parts[0].trim().toUpperCase(); // "TEMPERATURE"
                 String valeur1 = parts[1].trim(); // Valeur de la température
                 String type2 = parts[2].trim().toUpperCase(); // "MOTION"
                 String valeur2 = parts[3].trim(); // Valeur du mouvement (true/false)
+                String type3 = parts[4].trim().toUpperCase(); // "ENERGY"
+                String valeur3 = parts[5].trim(); // Valeur de l'énergie (tension)
 
                 // Afficher les données de mouvement
                 if (type2.equals("MOTION")) {
@@ -742,11 +744,13 @@ public class GestionDonneesController implements Initializable {
 
             // Diviser la ligne en type et valeur
             String[] parts = lastLine.split(",");
-            if (parts.length == 4) { // Maintenant, il y a 4 parties : temperature, valeur, motion, valeur
+            if (parts.length == 6) { // Maintenant, il y a 6 parties : temperature, valeur, motion, valeur, energy, valeur
                 String type1 = parts[0].trim().toUpperCase(); // "TEMPERATURE"
                 String valeur1 = parts[1].trim(); // Valeur de la température
                 String type2 = parts[2].trim().toUpperCase(); // "MOTION"
                 String valeur2 = parts[3].trim(); // Valeur du mouvement (true/false)
+                String type3 = parts[4].trim().toUpperCase(); // "ENERGY"
+                String valeur3 = parts[5].trim(); // Valeur de l'énergie (tension)
 
                 // Afficher les données de température
                 if (type1.equals("TEMPERATURE")) {
@@ -758,6 +762,48 @@ public class GestionDonneesController implements Initializable {
                     showSuccessAlert("Données de température récupérées avec succès : " + valeur1);
                 } else {
                     showAlert("Erreur", "Type de capteur non reconnu : " + type1);
+                }
+            } else {
+                showAlert("Erreur", "Format de données incorrect : " + lastLine);
+            }
+        } else {
+            showAlert("Erreur", "Aucune donnée valide reçue : " + receivedData);
+        }
+    }
+    @FXML
+    private void handleRecupererDonneeEnergie() {
+        DataReceiver dataReceiver = new DataReceiver();
+        String receivedData = dataReceiver.fetchDataFromServer();
+
+        // Afficher la réponse brute pour débogage
+        System.out.println("Données reçues : " + receivedData);
+
+        // Vérifier si les données contiennent une ligne valide
+        if (receivedData != null && receivedData.contains(",")) {
+            // Extraire la dernière ligne reçue
+            String[] lines = receivedData.split("\n");
+            String lastLine = lines[lines.length - 1].trim(); // Prendre la dernière ligne
+
+            // Diviser la ligne en type et valeur
+            String[] parts = lastLine.split(",");
+            if (parts.length == 6) { // Maintenant, il y a 6 parties : temperature, valeur, motion, valeur, energy, valeur
+                String type1 = parts[0].trim().toUpperCase(); // "TEMPERATURE"
+                String valeur1 = parts[1].trim(); // Valeur de la température
+                String type2 = parts[2].trim().toUpperCase(); // "MOTION"
+                String valeur2 = parts[3].trim(); // Valeur du mouvement (true/false)
+                String type3 = parts[4].trim().toUpperCase(); // "ENERGY"
+                String valeur3 = parts[5].trim(); // Valeur de l'énergie (tension)
+
+                // Afficher les données d'énergie
+                if (type3.equals("ENERGY")) {
+                    typeCapteurComboBox.setValue("CONSOMMATION_ENERGIE"); // Sélectionner le type "ENERGIE" dans le ComboBox
+                    valeurField.setText(valeur3); // Remplir le champ de valeur avec la tension
+                    dateCollectePicker.setValue(LocalDate.now()); // Remplir la date actuelle
+                    heureCollecteField.setText(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))); // Formater l'heure
+
+                    showSuccessAlert("Données d'énergie récupérées avec succès : " + valeur3);
+                } else {
+                    showAlert("Erreur", "Type de capteur non reconnu : " + type3);
                 }
             } else {
                 showAlert("Erreur", "Format de données incorrect : " + lastLine);

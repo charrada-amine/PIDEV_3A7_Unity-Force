@@ -5,89 +5,26 @@
 <?import javafx.geometry.Insets?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
 <BorderPane xmlns="http://javafx.com/javafx/17"
-            xmlns:fx="http://javafx/fxml/1"
+            xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="tn.esprit.controllers.GestionInterventionController"
             stylesheets="@styles/style.css">
 
-    <!-- Barre de navigation latérale -->
     <left>
         <VBox prefWidth="240" styleClass="nav-bar">
             <Label text="Gestion Urbaine" styleClass="nav-title"/>
-
-            <!-- Boutons de navigation -->
-            <Button text="Capteurs" styleClass="nav-button" onAction="#handleGestionCapteur">
-                <graphic>
-                    <FontIcon iconLiteral="fas-microchip" iconSize="16" iconColor="#ffffff"/>
-                </graphic>
-            </Button>
-
-            <Button text="Citoyens" styleClass="nav-button" onAction="#handleGestionCitoyen">
-                <graphic>
-                    <FontIcon iconLiteral="fas-users" iconSize="16" iconColor="#ffffff"/>
-                </graphic>
-            </Button>
-
-            <Button text="Données" styleClass="nav-button" onAction="#handleGestionDonnee">
-                <graphic>
-                    <FontIcon iconLiteral="fas-database" iconSize="16" iconColor="#ffffff"/>
-                </graphic>
-            </Button>
-
-            <Button text="Interventions" styleClass="nav-button" onAction="#handleGestionIntervention">
+            <Button text="Interventions" styleClass="nav-button" onAction="#handleShowInterventions">
                 <graphic>
                     <FontIcon iconLiteral="fas-tools" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-
-            <Button text="Lampadaires" styleClass="nav-button" onAction="#handleGestionLampadaire">
-                <graphic>
-                    <FontIcon iconLiteral="fas-lightbulb" iconSize="16" iconColor="#ffffff"/>
-                </graphic>
-            </Button>
-
-            <Button text="Réclamations" styleClass="nav-button" onAction="#handleGestionReclamation">
+            <Button text="Réclamations" styleClass="nav-button" onAction="#handleNavigateToReclamations">
                 <graphic>
                     <FontIcon iconLiteral="fas-exclamation-circle" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-
-            <Button text="Responsables" styleClass="nav-button" onAction="#handleGestionResponsable">
-                <graphic>
-                    <FontIcon iconLiteral="fas-user-tie" iconSize="16" iconColor="#ffffff"/>
-                </graphic>
-            </Button>
-
-            <Button text="Techniciens" styleClass="nav-button" onAction="#handleGestionTechnicien">
-                <graphic>
-                    <FontIcon iconLiteral="fas-user-cog" iconSize="16" iconColor="#ffffff"/>
-                </graphic>
-            </Button>
-
-            <Button text="Utilisateurs" styleClass="nav-button" onAction="#handleGestionUtilisateur">
-                <graphic>
-                    <FontIcon iconLiteral="fas-user" iconSize="16" iconColor="#ffffff"/>
-                </graphic>
-            </Button>
-
-            <Button text="Zones" styleClass="nav-button" onAction="#handleGestionZone">
-                <graphic>
-                    <FontIcon iconLiteral="fas-map-marked-alt" iconSize="16" iconColor="#ffffff"/>
-                </graphic>
-            </Button>
-
-            <Button text="Profil" styleClass="nav-button" onAction="#handleProfileInterface">
-                <graphic>
-                    <FontIcon iconLiteral="fas-user-circle" iconSize="16" iconColor="#ffffff"/>
-                </graphic>
-            </Button>
-
-            <Button text="Sources" styleClass="nav-button" onAction="#handleSourceInterface">
-                <graphic>
-                    <FontIcon iconLiteral="fas-code-branch" iconSize="16" iconColor="#ffffff"/>
-                </graphic>
-            </Button>
-
             <Button text="Retour" styleClass="nav-button" onAction="#handleBack">
                 <graphic>
                     <FontIcon iconLiteral="fas-arrow-left" iconSize="16" iconColor="#ffffff"/>
@@ -104,7 +41,16 @@
                 <VBox spacing="15">
                     <ComboBox fx:id="cbType" promptText="Type d'intervention" styleClass="modern-input"/>
                     <TextField fx:id="tfDescription" promptText="Description" styleClass="modern-input"/>
-                    <TextField fx:id="tfEtat" promptText="État actuel" styleClass="modern-input"/>
+                    <ComboBox fx:id="cbEtat" promptText="État actuel" styleClass="modern-input">
+                        <items>
+                            <FXCollections fx:factory="observableArrayList">
+                                <String fx:value="En attente"/>
+                                <String fx:value="En cours"/>
+                                <String fx:value="Terminée"/>
+                                <String fx:value="Annulée"/>
+                            </FXCollections>
+                        </items>
+                    </ComboBox>
                     <DatePicker fx:id="dpDate" promptText="Date prévue" styleClass="modern-input"/>
                     <TextField fx:id="tfHeure" promptText="Heure (HH:MM:SS)" styleClass="modern-input"/>
                     <TextField fx:id="tfLampadaireId" promptText="ID du Lampadaire" styleClass="modern-input"/>

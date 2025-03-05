@@ -15,12 +15,16 @@
       <list>
         <option value="Enum" />
         <option value="CSS File" />
+        <option value="FxmlFile" />
         <option value="Class" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 5
@@ -47,7 +51,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/karim/OneDrive/Bureau/document/PIwebjava/PIDEV_3A7_integration4M&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/karim/OneDrive/Bureau/document/PIwebjava/NOORCITY_VF&quot;,
     &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
@@ -159,6 +163,14 @@
       <workItem from="1741088385232" duration="889000" />
       <workItem from="1741089300834" duration="245000" />
       <workItem from="1741089562384" duration="4942000" />
+      <workItem from="1741135965968" duration="1037000" />
+      <workItem from="1741137017925" duration="1088000" />
+      <workItem from="1741138151446" duration="5361000" />
+      <workItem from="1741143733129" duration="27000" />
+      <workItem from="1741143770946" duration="2799000" />
+      <workItem from="1741163082445" duration="360000" />
+      <workItem from="1741163761337" duration="207000" />
+      <workItem from="1741163992206" duration="949000" />
     </task>
     <servers />
   </component>
