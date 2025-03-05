@@ -29,9 +29,20 @@ import java.net.URL;
 import java.sql.Date;
 import java.sql.Time;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.ResourceBundle;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.URI;
+import org.json.JSONObject;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
+import java.io.File;
 
 public class GestionReclamationController implements Initializable {
 
@@ -43,6 +54,7 @@ public class GestionReclamationController implements Initializable {
     @FXML private TextField tfCitoyenId;
     @FXML private FlowPane cardContainer;
     @FXML private ScrollPane scrollPane;
+    @FXML private ComboBox<String> cbSort;
 
     private final ServiceReclamation serviceReclamation = new ServiceReclamation();
     private final ObservableList<Reclamation> reclamations = FXCollections.observableArrayList();
@@ -51,6 +63,9 @@ public class GestionReclamationController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         cbStatut.setItems(FXCollections.observableArrayList("Ouvert", "En cours", "Résolu", "Fermé"));
+        cbSort.setItems(FXCollections.observableArrayList("Aucun tri", "Date croissante", "Date décroissante"));
+        cbSort.setValue("Aucun tri");
+        cbSort.setOnAction(e -> sortReclamations());
         scrollPane.setFitToWidth(true);
         cardContainer.setHgap(20);
         cardContainer.setVgap(20);
@@ -61,6 +76,28 @@ public class GestionReclamationController implements Initializable {
 
     private void loadData() {
         reclamations.setAll(serviceReclamation.getAll());
+        sortReclamations();
+    }
+
+    private void sortReclamations() {
+        String sortOption = cbSort.getValue();
+        if (sortOption != null) {
+            switch (sortOption) {
+                case "Date croissante":
+                    reclamations.sort(Comparator.comparing(Reclamation::getDateReclamation));
+                    break;
+                case "Date décroissante":
+                    reclamations.sort(Comparator.comparing(Reclamation::getDateReclamation).reversed());
+                    break;
+                default:
+                    reclamations.setAll(serviceReclamation.getAll());
+                    break;
+            }
+            refreshCards();
+        }
+    }
+
+    private void refreshCards() {
         cardContainer.getChildren().clear();
         reclamations.forEach(reclamation -> cardContainer.getChildren().add(createReclamationCard(reclamation)));
     }
@@ -97,12 +134,79 @@ public class GestionReclamationController implements Initializable {
         selectedReclamation = null;
     }
 
+    // Méthode pour vérifier les mots inappropriés
+    private boolean checkBadWords(String text) {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://bad-words-filter-api.p.rapidapi.com/badwords"))
+                    .header("x-rapidapi-key", "6abc316058msh50ae9be18c5e6d8p1ca615jsn3bf705815064")
+                    .header("x-rapidapi-host", "bad-words-filter-api.p.rapidapi.com")
+                    .header("Content-Type", "application/json")
+                    .method("POST", HttpRequest.BodyPublishers.ofString("{\"text\":\"" + text + "\"}"))
+                    .build();
+
+            HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+            String responseBody = response.body();
+            System.out.println("Réponse de l'API pour '" + text + "' : " + responseBody);
+
+            JSONObject jsonResponse = new JSONObject(responseBody);
+
+            if (jsonResponse.has("contains_bad_words")) {
+                return jsonResponse.getBoolean("contains_bad_words");
+            } else if (jsonResponse.has("bad_words") && jsonResponse.getJSONArray("bad_words").length() > 0) {
+                return true;
+            } else if (jsonResponse.has("is_profane")) {
+                return jsonResponse.getBoolean("is_profane");
+            }
+
+            return false;
+        } catch (Exception e) {
+            showAlert("Erreur API", "Erreur lors de la vérification des mots inappropriés : " + e.getMessage());
+            System.err.println("Erreur API : " + e.getMessage());
+            return true; // Refuser si l'API échoue
+        }
+    }
+
+    // Méthode pour générer un PDF
+    private void generatePdf(Reclamation reclamation) {
+        try {
+            String fileName = "PDFs/Reclamation_" + reclamation.getID_reclamation() + ".pdf";
+            new File("PDFs").mkdirs(); // Crée le dossier s'il n'existe pas
+            PdfWriter writer = new PdfWriter(new File(fileName));
+            PdfDocument pdf = new PdfDocument(writer);
+            Document document = new Document(pdf);
+
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+            document.add(new Paragraph("Détails de la Réclamation #" + reclamation.getID_reclamation())
+                    .setBold().setFontSize(16));
+            document.add(new Paragraph("Description : " + reclamation.getDescription()));
+            document.add(new Paragraph("Date : " + reclamation.getDateReclamation().toLocalDate().format(dateFormatter)));
+            document.add(new Paragraph("Heure : " + reclamation.getHeureReclamation()));
+            document.add(new Paragraph("Statut : " + reclamation.getStatut()));
+            document.add(new Paragraph("Lampadaire ID : " + reclamation.getLampadaireId()));
+            document.add(new Paragraph("Citoyen ID : " + reclamation.getCitoyenId()));
+
+            document.close();
+            showSuccessFeedback("PDF généré avec succès : " + fileName);
+        } catch (Exception e) {
+            showAlert("Erreur PDF", "Erreur lors de la génération du PDF : " + e.getMessage());
+        }
+    }
+
     @FXML
     private void handleAdd() {
         try {
             validateInputs();
+            String description = tfDescription.getText();
+
+            if (checkBadWords(description)) {
+                showAlert("Contenu inapproprié", "La description contient des mots inappropriés. Veuillez la modifier.");
+                return;
+            }
+
             Reclamation reclamation = new Reclamation(
-                    tfDescription.getText(),
+                    description,
                     Date.valueOf(dpDate.getValue()),
                     Time.valueOf(tfHeure.getText()),
                     cbStatut.getValue(),
@@ -126,7 +230,14 @@ public class GestionReclamationController implements Initializable {
         }
         try {
             validateInputs();
-            selectedReclamation.setDescription(tfDescription.getText());
+            String description = tfDescription.getText();
+
+            if (checkBadWords(description)) {
+                showAlert("Contenu inapproprié", "La description contient des mots inappropriés. Veuillez la modifier.");
+                return;
+            }
+
+            selectedReclamation.setDescription(description);
             selectedReclamation.setDateReclamation(Date.valueOf(dpDate.getValue()));
             selectedReclamation.setHeureReclamation(Time.valueOf(tfHeure.getText()));
             selectedReclamation.setStatut(cbStatut.getValue());
@@ -189,7 +300,6 @@ public class GestionReclamationController implements Initializable {
         }
     }
 
-    // Common UI Components
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.initStyle(StageStyle.TRANSPARENT);
@@ -226,8 +336,12 @@ public class GestionReclamationController implements Initializable {
     }
 
     private void showSuccessFeedback() {
+        showSuccessFeedback("Opération réussie !");
+    }
+
+    private void showSuccessFeedback(String message) {
         Pane root = (Pane) cardContainer.getParent();
-        Label feedback = new Label("✓ Opération réussie !");
+        Label feedback = new Label("✓ " + message);
         feedback.setStyle(
                 "-fx-background-color: linear-gradient(to right, #34a853, #2d8a4a);" +
                         "-fx-text-fill: white;" +
@@ -285,7 +399,10 @@ public class GestionReclamationController implements Initializable {
         Button btnSupprimer = createIconButton("Supprimer", FontAwesomeSolid.TRASH, "#ff6b6b");
         btnSupprimer.setOnAction(e -> handleDeleteReclamation(reclamation));
 
-        buttons.getChildren().addAll(btnModifier, btnSupprimer);
+        Button btnGeneratePdf = createIconButton("Générer PDF", FontAwesomeSolid.FILE_PDF, "#28a745");
+        btnGeneratePdf.setOnAction(e -> generatePdf(reclamation));
+
+        buttons.getChildren().addAll(btnModifier, btnSupprimer, btnGeneratePdf);
 
         card.getChildren().addAll(header, new Separator(), content, buttons);
         card.setStyle("-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16;");
@@ -322,7 +439,6 @@ public class GestionReclamationController implements Initializable {
         return button;
     }
 
-    // Navigation Methods
     @FXML
     private void handleNavigateToInterventions(ActionEvent event) {
         loadView("GestionIntervention.fxml", event);
