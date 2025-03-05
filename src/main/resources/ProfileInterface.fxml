@@ -17,6 +17,11 @@
             <Label text="Gestion Urbaine" styleClass="nav-title"/>
 
             <!-- Boutons de navigation -->
+            <Button text="Accueil" styleClass="nav-button" onAction="#handleAccueil">
+                <graphic>
+                    <FontIcon iconLiteral="fas-home" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
             <Button text="Capteurs" styleClass="nav-button" onAction="#handleGestionCapteur">
                 <graphic>
                     <FontIcon iconLiteral="fas-microchip" iconSize="16" iconColor="#ffffff"/>
@@ -118,13 +123,16 @@
                     <TextField fx:id="txtDureeActivite" promptText="Durée Activité (h)" styleClass="modern-input"/>
 
                     <!-- Lampadaire ID -->
-                    <TextField fx:id="txtLampadaireId" promptText="Lampadaire ID" styleClass="modern-input"/>
+                    <TextField fx:id="txtLampadaireId" promptText="Lampadaire " styleClass="modern-input"/>
 
-                    <!-- Source ID -->
-                    <ComboBox fx:id="comboBoxSourceId" promptText="Source ID" styleClass="modern-input"/>
+                    <!-- Source (nom) -->
+                    <ComboBox fx:id="comboBoxSourceName" promptText="Sélectionnez une source" styleClass="modern-input"/>
 
                     <!-- Boutons modernisés -->
+
+
                     <HBox spacing="15" styleClass="button-container">
+                        <!-- Boutons Ajouter, Modifier, Réinitialiser -->
                         <Button text="Ajouter" onAction="#handleAdd" styleClass="action-button,add">
                             <graphic>
                                 <FontIcon iconLiteral="fas-plus-circle" iconSize="16" iconColor="white"/>
@@ -135,10 +143,24 @@
                                 <FontIcon iconLiteral="fas-edit" iconSize="16" iconColor="white"/>
                             </graphic>
                         </Button>
-
                         <Button text="Réinitialiser" onAction="#handleClear" styleClass="action-button,reset">
                             <graphic>
                                 <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
+                            </graphic>
+                        </Button>
+                    </HBox>
+                    <HBox spacing="15" styleClass="button-container">
+                        <!-- Bouton Exporter -->
+                        <Button text="Exporter" onAction="#handleExport" styleClass="action-button,export">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-file-export" iconSize="16" iconColor="white"/>
+                            </graphic>
+                        </Button>
+
+                        <!-- Bouton Trier -->
+                        <Button text="Trier par Consommation Jour" onAction="#handleSortByConsommationJour" styleClass="action-button,sort">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-sort" iconSize="16" iconColor="white"/>
                             </graphic>
                         </Button>
                     </HBox>

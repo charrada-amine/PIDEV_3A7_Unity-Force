@@ -33,19 +33,16 @@ public class ServiceLampadaire implements IService<Lampadaire> {
             return;
         }
 
-        String qry = "INSERT INTO lampadaire(typeLampadaire, puissance, etat, dateInstallation, id_zone) VALUES (?,?,?,?,?)";
+        String qry = "INSERT INTO lampadaire(typeLampadaire, puissance, etat, dateInstallation, id_zone, latitude, longitude, id_camera) VALUES (?,?,?,?,?,?,?,?)";
         try (PreparedStatement pstm = cnx.prepareStatement(qry, Statement.RETURN_GENERATED_KEYS)) {
             pstm.setString(1, lampadaire.getTypeLampadaire());
             pstm.setFloat(2, lampadaire.getPuissance());
-            pstm.setString(3, lampadaire.getEtat().name()); // Conversion enum -> String
-
-            if (lampadaire.getDateInstallation() != null) {
-                pstm.setDate(4, Date.valueOf(lampadaire.getDateInstallation()));
-            } else {
-                pstm.setNull(4, Types.DATE);
-            }
-
+            pstm.setString(3, lampadaire.getEtat().name());
+            pstm.setDate(4, lampadaire.getDateInstallation() != null ? Date.valueOf(lampadaire.getDateInstallation()) : null);
             pstm.setInt(5, lampadaire.getIdZone());
+            pstm.setDouble(6, lampadaire.getLatitude());
+            pstm.setDouble(7, lampadaire.getLongitude());
+            pstm.setObject(8, lampadaire.getIdCamera() > 0 ? lampadaire.getIdCamera() : null, Types.INTEGER);
             pstm.executeUpdate();
 
             try (ResultSet generatedKeys = pstm.getGeneratedKeys()) {
@@ -54,7 +51,6 @@ public class ServiceLampadaire implements IService<Lampadaire> {
                 }
             }
             System.out.println("Lampadaire ajouté : " + lampadaire);
-
         } catch (SQLException e) {
             System.err.println("Erreur ajout : " + e.getMessage());
         }
@@ -67,21 +63,19 @@ public class ServiceLampadaire implements IService<Lampadaire> {
 
         try (Statement stm = cnx.createStatement();
              ResultSet rs = stm.executeQuery(qry)) {
-
             while (rs.next()) {
                 Lampadaire l = new Lampadaire();
                 l.setIdLamp(rs.getInt("id_lamp"));
                 l.setTypeLampadaire(rs.getString("typeLampadaire"));
                 l.setPuissance(rs.getFloat("puissance"));
-
-                // Conversion String -> Enum
-                String etatStr = rs.getString("etat");
-                l.setEtat(EtatLampadaire.valueOf(etatStr));
-
+                l.setEtat(EtatLampadaire.valueOf(rs.getString("etat")));
                 Date sqlDate = rs.getDate("dateInstallation");
                 l.setDateInstallation(sqlDate != null ? sqlDate.toLocalDate() : null);
-
                 l.setIdZone(rs.getInt("id_zone"));
+                l.setLatitude(rs.getDouble("latitude"));
+                l.setLongitude(rs.getDouble("longitude"));
+                l.setIdCamera(rs.getInt("id_camera")); // Ajout
+                if (rs.wasNull()) l.setIdCamera(0); // Si NULL, mettre 0
                 lampadaires.add(l);
             }
         } catch (SQLException e) {
@@ -92,25 +86,19 @@ public class ServiceLampadaire implements IService<Lampadaire> {
 
     @Override
     public void update(Lampadaire lampadaire) {
-        String qry = "UPDATE lampadaire SET typeLampadaire=?, puissance=?, etat=?, dateInstallation=?, id_zone=? WHERE id_lamp=?";
-
+        String qry = "UPDATE lampadaire SET typeLampadaire=?, puissance=?, etat=?, dateInstallation=?, id_zone=?, latitude=?, longitude=?, id_camera=? WHERE id_lamp=?";
         try (PreparedStatement pstm = cnx.prepareStatement(qry)) {
             pstm.setString(1, lampadaire.getTypeLampadaire());
             pstm.setFloat(2, lampadaire.getPuissance());
-            pstm.setString(3, lampadaire.getEtat().name()); // Conversion enum -> String
-
-            if (lampadaire.getDateInstallation() != null) {
-                pstm.setDate(4, Date.valueOf(lampadaire.getDateInstallation()));
-            } else {
-                pstm.setNull(4, Types.DATE);
-            }
-
+            pstm.setString(3, lampadaire.getEtat().name());
+            pstm.setDate(4, lampadaire.getDateInstallation() != null ? Date.valueOf(lampadaire.getDateInstallation()) : null);
             pstm.setInt(5, lampadaire.getIdZone());
-            pstm.setInt(6, lampadaire.getIdLamp());
-
+            pstm.setDouble(6, lampadaire.getLatitude());
+            pstm.setDouble(7, lampadaire.getLongitude());
+            pstm.setObject(8, lampadaire.getIdCamera() > 0 ? lampadaire.getIdCamera() : null, Types.INTEGER);
+            pstm.setInt(9, lampadaire.getIdLamp());
             int rowsUpdated = pstm.executeUpdate();
             System.out.println(rowsUpdated + " ligne(s) mise(s) à jour");
-
         } catch (SQLException e) {
             System.err.println("Erreur mise à jour : " + e.getMessage());
         }
@@ -138,15 +126,14 @@ public class ServiceLampadaire implements IService<Lampadaire> {
                 l.setIdLamp(rs.getInt("id_lamp"));
                 l.setTypeLampadaire(rs.getString("typeLampadaire"));
                 l.setPuissance(rs.getFloat("puissance"));
-
-                // Conversion String -> Enum
-                String etatStr = rs.getString("etat");
-                l.setEtat(EtatLampadaire.valueOf(etatStr));
-
+                l.setEtat(EtatLampadaire.valueOf(rs.getString("etat")));
                 Date sqlDate = rs.getDate("dateInstallation");
                 l.setDateInstallation(sqlDate != null ? sqlDate.toLocalDate() : null);
-
                 l.setIdZone(rs.getInt("id_zone"));
+                l.setLatitude(rs.getDouble("latitude"));
+                l.setLongitude(rs.getDouble("longitude"));
+                l.setIdCamera(rs.getInt("id_camera")); // Ajout
+                if (rs.wasNull()) l.setIdCamera(0); // Si NULL, mettre 0
                 return l;
             }
         } catch (SQLException e) {

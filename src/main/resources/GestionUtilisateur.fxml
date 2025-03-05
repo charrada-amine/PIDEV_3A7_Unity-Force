@@ -173,29 +173,36 @@
                                 <FontIcon iconLiteral="fas-plus-circle" iconSize="16" iconColor="#ffffff"/>
                             </graphic>
                         </Button>
-                        <Button text="Modifier" onAction="#handleUpdateUser" styleClass="action-button,edit">
-                            <graphic>
-                                <FontIcon iconLiteral="fas-edit" iconSize="16" iconColor="#ffffff"/>
-                            </graphic>
-                        </Button>
-                        <Button text="Supprimer" onAction="#handleDeleteUser" styleClass="action-button,delete">
-                            <graphic>
-                                <FontIcon iconLiteral="fas-trash-alt" iconSize="16" iconColor="#ffffff"/>
-                            </graphic>
-                        </Button>
+
                         <Button text="Réinitialiser" onAction="#handleClear" styleClass="action-button,reset">
                             <graphic>
                                 <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
                             </graphic>
                         </Button>
+                        <HBox spacing="10">
+                            <Button text="Trier par rôle" onAction="#handleShowRoleFilter" styleClass="action-button,sort"/>
+                            <ComboBox fx:id="roleFilterComboBox" visible="false" onAction="#handleFilterByRole">
+                                <items>
+                                    <FXCollections fx:factory="observableArrayList">
+                                        <String fx:value="Tous" />
+                                        <String fx:value="Citoyen" />
+                                        <String fx:value="Responsable" />
+                                        <String fx:value="Technicien" />
+                                    </FXCollections>
+                                </items>
+                            </ComboBox>
+                        </HBox>
+
+
                     </HBox>
                 </VBox>
             </VBox>
 
             <!-- Colonne droite : liste des utilisateurs -->
-            <ScrollPane fx:id="scrollPane" fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="scroll-pane"
-                        style="-fx-background: transparent; -fx-padding: 10;">
-                <FlowPane fx:id="userFlowPane" orientation="VERTICAL" hgap="20" vgap="20" style="-fx-padding: 10;"/>
+            <ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER"
+                        style="-fx-background: transparent; -fx-border-width: 0;"
+                        prefWidth="1000">
+                <FlowPane fx:id="userFlowPane"  hgap="25" vgap="25" style="-fx-padding: 10;"/>
             </ScrollPane>
         </HBox>
     </center>

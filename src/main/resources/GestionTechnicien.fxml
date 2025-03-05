@@ -11,9 +11,7 @@
 
     <!-- Barre d'actions supérieure -->
     <top>
-        <HBox spacing="10" style="-fx-background-color: #f5f5f5; -fx-padding: 10;">
-            <!-- Barre supérieure vide ou pour un autre contenu -->
-        </HBox>
+        <Label fx:id="welcomeLabel" text="Bienvenue, utilisateur" style="-fx-font-size: 20px; -fx-font-weight: bold;" />
     </top>
 
     <!-- Barre de navigation latérale -->
@@ -109,11 +107,20 @@
                 <Label text="Gestion des Techniciens" style="-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #202124;"/>
 
                 <VBox spacing="10" style="-fx-padding: 20;"> <!-- Marges internes -->
-                    <TextField fx:id="idField" promptText="ID" styleClass="modern-input"/>
                     <TextField fx:id="nameField" promptText="Nom" styleClass="modern-input"/>
                     <TextField fx:id="prenomField" promptText="Prénom" styleClass="modern-input"/>
                     <TextField fx:id="emailField" promptText="Email" styleClass="modern-input"/>
-                    <PasswordField fx:id="passwordField" promptText="Mot de passe" styleClass="modern-input"/>
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <StackPane>
+                            <PasswordField fx:id="passwordField" promptText="Mot de passe" styleClass="modern-input" prefWidth="200" />
+                            <TextField fx:id="visiblePasswordField" promptText="Mot de passe" styleClass="modern-input" prefWidth="200" visible="false" />
+                        </StackPane>
+                        <ToggleButton fx:id="togglePasswordButton" styleClass="icon-button">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-eye-slash" iconSize="20" />
+                            </graphic>
+                        </ToggleButton>
+                    </HBox>
                     <HBox spacing="10">
                         <!-- Label pour la spécialité -->
                         <Label text="Spécialité :" />
@@ -132,31 +139,42 @@
                     </HBox>
 
 
-                    <!-- Boutons d'action -->
-                    <HBox spacing="10" alignment="CENTER" style="-fx-padding: 10;">
-                        <Button text="Modifier" onAction="#handleUpdateTechnicien" styleClass="action-button,edit">
-                            <graphic>
-                                <FontIcon iconLiteral="fas-edit" iconSize="16" iconColor="#ffffff"/>
-                            </graphic>
-                        </Button>
-                        <Button text="Supprimer" onAction="#handleDeleteTechnicien" styleClass="action-button,delete">
-                            <graphic>
-                                <FontIcon iconLiteral="fas-trash-alt" iconSize="16" iconColor="#ffffff"/>
-                            </graphic>
-                        </Button>
-                        <Button text="Réinitialiser" onAction="#handleClear" styleClass="action-button,reset">
-                            <graphic>
-                                <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
-                            </graphic>
-                        </Button>
-                    </HBox>
+            <HBox spacing="10" alignment="CENTER" style="-fx-padding: 10;">
+                <Button text="Modifier" onAction="#handleUpdateTechnicien" styleClass="action-button,edit">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-edit" iconSize="16" iconColor="#ffffff"/>
+                    </graphic>
+                </Button>
+                <Button text="Supprimer" onAction="#handleDeleteTechnicien" styleClass="action-button,delete">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-trash-alt" iconSize="16" iconColor="#ffffff"/>
+                    </graphic>
+                </Button>
+            </HBox>
+
+            <!-- Nouveau HBox pour Réinitialiser et Log Out -->
+            <HBox spacing="10" alignment="CENTER" style="-fx-padding: 10;">
+                <Button text="Réinitialiser" onAction="#handleClear" styleClass="action-button,reset">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
+                    </graphic>
+                </Button>
+                <Button text="Log Out" onAction="#handleLogOut">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-sign-out-alt" iconSize="25" iconColor="#2d3436"/>
+                    </graphic>
+                </Button>
+            </HBox>
+
+
                 </VBox>
             </VBox>
 
             <!-- Liste des techniciens -->
-            <ScrollPane fx:id="scrollPane" fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="scroll-pane"
-                        style="-fx-background: transparent; -fx-padding: 10;">
-                <FlowPane fx:id="technicienFlowPane" orientation="VERTICAL" hgap="20" vgap="20" style="-fx-padding: 10;"/>
+            <ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER"
+                        style="-fx-background: transparent; -fx-border-width: 0;"
+                        prefWidth="800">
+                <FlowPane fx:id="technicienFlowPane"  hgap="20" vgap="20" style="-fx-padding: 10;"/>
             </ScrollPane>
         </HBox>
     </center>

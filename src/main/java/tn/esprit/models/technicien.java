@@ -1,10 +1,7 @@
 package tn.esprit.models;
 
-import tn.esprit.Enumerations.Role;
-import tn.esprit.Enumerations.Specialite;
-
 import java.util.Date;
-
+import tn.esprit.Enumerations.Role;
 public class technicien extends utilisateur {
     private int id_technicien; // Correspond à id_utilisateur
 

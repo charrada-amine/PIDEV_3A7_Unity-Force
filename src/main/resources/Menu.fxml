@@ -28,58 +28,71 @@
                     <FontIcon iconLiteral="fas-microchip" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-
             <Button text="Citoyens" styleClass="nav-button" onAction="#handleGestionCitoyen">
                 <graphic>
                     <FontIcon iconLiteral="fas-users" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-
             <Button text="Données" styleClass="nav-button" onAction="#handleGestionDonnee">
                 <graphic>
                     <FontIcon iconLiteral="fas-database" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-
             <Button text="Interventions" styleClass="nav-button" onAction="#handleGestionIntervention">
                 <graphic>
                     <FontIcon iconLiteral="fas-tools" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-
             <Button text="Lampadaires" styleClass="nav-button" onAction="#handleGestionLampadaire">
                 <graphic>
                     <FontIcon iconLiteral="fas-lightbulb" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-
             <Button text="Réclamations" styleClass="nav-button" onAction="#handleGestionReclamation">
                 <graphic>
                     <FontIcon iconLiteral="fas-exclamation-circle" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-
             <Button text="Responsables" styleClass="nav-button" onAction="#handleGestionResponsable">
                 <graphic>
                     <FontIcon iconLiteral="fas-user-tie" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-
             <Button text="Techniciens" styleClass="nav-button" onAction="#handleGestionTechnicien">
                 <graphic>
                     <FontIcon iconLiteral="fas-user-cog" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-
             <Button text="Utilisateurs" styleClass="nav-button" onAction="#handleGestionUtilisateur">
                 <graphic>
                     <FontIcon iconLiteral="fas-user" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-
             <Button text="Zones" styleClass="nav-button" onAction="#handleGestionZone">
                 <graphic>
                     <FontIcon iconLiteral="fas-map-marked-alt" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <!-- Ajout des nouvelles interfaces -->
+            <Button text="Vue Citoyen" styleClass="nav-button" onAction="#handleNavigateToZoneCitoyen">
+                <graphic>
+                    <FontIcon iconLiteral="fas-users" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Lampadaires" styleClass="nav-button" onAction="#handleNavigateToLampadaires">
+                <graphic>
+                    <FontIcon iconLiteral="fas-lightbulb" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Carte Lampadaires" styleClass="nav-button" onAction="#handleNavigateToLampadaireMap">
+                <graphic>
+                    <FontIcon iconLiteral="fas-map" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Caméras" styleClass="nav-button" onAction="#handleNavigateToCameras">
+                <graphic>
+                    <FontIcon iconLiteral="fas-camera" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
 
@@ -88,13 +101,11 @@
                     <FontIcon iconLiteral="fas-user-circle" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-
             <Button text="Sources" styleClass="nav-button" onAction="#handleSourceInterface">
                 <graphic>
                     <FontIcon iconLiteral="fas-code-branch" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-
             <Button text="Retour" styleClass="nav-button" onAction="#handleBack">
                 <graphic>
                     <FontIcon iconLiteral="fas-arrow-left" iconSize="16" iconColor="#ffffff"/>

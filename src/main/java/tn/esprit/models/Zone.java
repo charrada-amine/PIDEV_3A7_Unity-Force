@@ -6,7 +6,8 @@ public class Zone {private int id_zone;
     private float surface;
     private int nombreLampadaires;
     private int nombreCitoyens;
-
+    private double latitude;
+    private double longitude;
     // Constructeur par défaut
     public Zone() {
     }
@@ -33,6 +34,10 @@ public class Zone {private int id_zone;
     public String getNom() {
         return nom;
     }
+    public double getLatitude() { return latitude; }
+    public void setLatitude(double latitude) { this.latitude = latitude; }
+    public double getLongitude() { return longitude; }
+    public void setLongitude(double longitude) { this.longitude = longitude; }
 
     public void setNom(String nom) {
         this.nom = nom;

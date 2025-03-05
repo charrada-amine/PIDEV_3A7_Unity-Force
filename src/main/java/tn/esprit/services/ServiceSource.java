@@ -17,19 +17,19 @@ public class ServiceSource {
     }
 
     public void add(Source source) {
-        String query = "INSERT INTO source (type, capacite, rendement, etat, dateInstallation) VALUES (?, ?, ?, ?, ?)";
+        String query = "INSERT INTO source (type, capacite, rendement, etat, dateInstallation, nom) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-            statement.setString(1, source.getType().name()); // Utilisation de Enum.name()
+            statement.setString(1, source.getType().name());
             statement.setFloat(2, source.getCapacite());
             statement.setFloat(3, source.getRendement());
             statement.setString(4, source.getEtat().name());
             statement.setDate(5, Date.valueOf(source.getDateInstallation()));
+            statement.setString(6, source.getNom()); // Ajout du nom
 
             int rowsInserted = statement.executeUpdate();
 
             if (rowsInserted > 0) {
-                // Récupérer l'ID généré automatiquement
                 try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
                         source.setIdSource(generatedKeys.getInt(1));
@@ -59,7 +59,8 @@ public class ServiceSource {
                         resultSet.getFloat("capacite"),
                         resultSet.getFloat("rendement"),
                         etat,
-                        resultSet.getDate("dateInstallation").toLocalDate()
+                        resultSet.getDate("dateInstallation").toLocalDate(),
+                        resultSet.getString("nom") // Récupération du nom
                 );
                 sources.add(source);
             }
@@ -87,7 +88,7 @@ public class ServiceSource {
     }
 
     public void update(Source source) {
-        String query = "UPDATE source SET type = ?, capacite = ?, rendement = ?, etat = ?, dateInstallation = ? WHERE idSource = ?";
+        String query = "UPDATE source SET type = ?, capacite = ?, rendement = ?, etat = ?, dateInstallation = ?, nom = ? WHERE idSource = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, source.getType().name());
@@ -95,7 +96,8 @@ public class ServiceSource {
             statement.setFloat(3, source.getRendement());
             statement.setString(4, source.getEtat().name());
             statement.setDate(5, Date.valueOf(source.getDateInstallation()));
-            statement.setInt(6, source.getIdSource());
+            statement.setString(6, source.getNom()); // Ajout du nom
+            statement.setInt(7, source.getIdSource());
 
             int rowsUpdated = statement.executeUpdate();
             if (rowsUpdated > 0) {
@@ -106,18 +108,17 @@ public class ServiceSource {
         } catch (SQLException e) {
             System.out.println("❌ Erreur lors de la mise à jour de la source : " + e.getMessage());
         }
-
     }
 
     public List<Integer> getAllSourceIds() {
         List<Integer> sourceIds = new ArrayList<>();
-        String query = "SELECT idSource FROM source"; // Requête pour récupérer les idsSource
+        String query = "SELECT idSource FROM source";
 
         try (Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(query)) {
 
             while (resultSet.next()) {
-                sourceIds.add(resultSet.getInt("idSource")); // Ajouter les ids dans la liste
+                sourceIds.add(resultSet.getInt("idSource"));
             }
             System.out.println("✅ Récupération des idsSource réussie !");
         } catch (SQLException e) {
@@ -126,6 +127,39 @@ public class ServiceSource {
         return sourceIds;
     }
 
+    public String getSourceNameById(int sourceId) {
+        String query = "SELECT nom FROM source WHERE idSource = ?";
+        String sourceName = "";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, sourceId);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                sourceName = resultSet.getString("nom");
+            }
+        } catch (SQLException e) {
+            System.out.println("❌ Erreur lors de la récupération du nom de la source : " + e.getMessage());
+        }
+
+        return sourceName;
+    }
+
+
+    public List<String> getAllSourceNames() {
+        List<String> sourceNames = new ArrayList<>();
+        String query = "SELECT nom FROM source";
+
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+
+            while (resultSet.next()) {
+                sourceNames.add(resultSet.getString("nom"));
+            }
+        } catch (SQLException e) {
+            System.out.println("❌ Erreur lors de la récupération des noms des sources : " + e.getMessage());
+        }
+
+        return sourceNames;
+    }
 }
-
-

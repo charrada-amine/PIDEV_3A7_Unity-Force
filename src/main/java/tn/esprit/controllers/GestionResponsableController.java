@@ -12,6 +12,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import org.kordamp.ikonli.javafx.FontIcon;
+import tn.esprit.models.Role;
+import tn.esprit.models.Session;
 import tn.esprit.models.responsable;
 import tn.esprit.models.utilisateur;
 import tn.esprit.services.ServiceCitoyen;
@@ -28,9 +31,15 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class GestionResponsableController {
-
+    @FXML
+    private Label welcomeLabel;
+    @FXML
+    private Button logOutButton;  // Le bouton Log Out
+    @FXML
+    private FlowPane userFlowPane;
     @FXML
     private FlowPane responsableFlowPane;
     private final ServiceResponsable serviceResponsable = new ServiceResponsable();
@@ -38,27 +47,156 @@ public class GestionResponsableController {
     @FXML
     private TextField idField, nameField, prenomField, emailField, passwordField, modulesField ;
     @FXML
+    private TextField visiblePasswordField;
+    @FXML
+    private ComboBox<String> roleFilterComboBox;
+
+    private String roleSelectionne = "Tous"; // Valeur par défaut
+    @FXML
+    private ToggleButton togglePasswordButton;
+    @FXML
     private void initialize() {
-        if (responsableFlowPane == null) {
-            System.err.println("Erreur : 'responsableFlowPane' est nul. Vérifiez le fichier FXML.");
+        if (userFlowPane == null) {
+            System.err.println("Erreur : 'userflowpane' est nul. Vérifiez le fichier FXML.");
         } else {
-            System.out.println("FlowPane 'responsableFlowPane' initialisé correctement.");
+            System.out.println("FlowPane 'userflowpane' initialisé correctement.");
             loadUsers();
         }
+// Récupérer l'utilisateur de la session
+        utilisateur user = Session.getCurrentUser();
+
+        // Vérifier si un utilisateur est connecté
+        if (user != null) {
+            // Afficher le nom et le prénom de l'utilisateur
+            welcomeLabel.setText("Bienvenue, " + user.getNom() + " " + user.getPrenom());
+        } else {
+            // Si aucun utilisateur n'est connecté, afficher un message générique
+            welcomeLabel.setText("Bienvenue, invité");
+        }
+        // Ajouter un écouteur pour basculer la visibilité du mot de passe
+        togglePasswordButton.selectedProperty().addListener((obs, wasSelected, isNowSelected) -> {
+            if (isNowSelected) {
+                // Afficher le mot de passe en clair
+                visiblePasswordField.setText(passwordField.getText());
+                visiblePasswordField.setVisible(true);
+                passwordField.setVisible(false);
+                ((FontIcon) togglePasswordButton.getGraphic()).setIconLiteral("fas-eye");
+            } else {
+                // Masquer le mot de passe
+                passwordField.setText(visiblePasswordField.getText());
+                passwordField.setVisible(true);
+                visiblePasswordField.setVisible(false);
+                ((FontIcon) togglePasswordButton.getGraphic()).setIconLiteral("fas-eye-slash");
+            }
+        });
+    }
+    @FXML
+    private void handleLogOut(ActionEvent event) {
+        // Met fin à la session
+        Session.logOut();
+
+        // Afficher un message de déconnexion
+        showAlert("Déconnexion", "Vous avez été déconnecté avec succès.");
+
+        // Fermer la fenêtre actuelle (l'écran principal)
+        Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        currentStage.close();
+
+        // Ouvrir la fenêtre de connexion
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Login.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Connexion");
+            stage.setScene(new Scene(root));
+            stage.show();
+            stage.setMaximized(true);
+
+        } catch (IOException e) {
+            showAlert("Erreur", "Une erreur est survenue lors de la déconnexion.");
+            e.printStackTrace();
+        }
+    }
+    private VBox createUserCard(utilisateur user) {
+        VBox card = new VBox(10);
+        card.setStyle("-fx-border-color: #ddd; -fx-border-width: 1; -fx-padding: 10; -fx-background-color: #f9f9f9; -fx-alignment: center;");
+
+        // Champ ID (non modifiable)
+        /*Label idLabel = new Label("ID:");
+        idLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: black;");
+        TextField idField = new TextField(String.valueOf(user.getId_utilisateur()));
+        idField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
+        idField.setEditable(false); // Non modifiable
+        HBox idBox = new HBox(10, idLabel, idField);
+        idBox.setAlignment(Pos.CENTER_LEFT);*/
+
+        // Champ Nom
+        Label nameLabel = new Label("Nom:");
+        nameLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
+        TextField nameField = new TextField(user.getNom());
+        nameField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
+        nameField.setEditable(false);
+        HBox nameBox = new HBox(10, nameLabel, nameField);
+        nameBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Champ Prénom
+        Label prenomLabel = new Label("Prénom:");
+        prenomLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
+        TextField prenomField = new TextField(user.getPrenom());
+        prenomField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
+        prenomField.setEditable(false);
+        HBox prenomBox = new HBox(10, prenomLabel, prenomField);
+        prenomBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Champ Email
+        Label emailLabel = new Label("Email:");
+        emailLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
+        TextField emailField = new TextField(user.getEmail());
+        emailField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
+        emailField.setEditable(false);
+        HBox emailBox = new HBox(10, emailLabel, emailField);
+        emailBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Champ Mot de passe
+        /*Label passwordLabel = new Label("Mot de passe:");
+        passwordLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
+        TextField mdpfield = new TextField(user.getMotdepasse());
+        mdpfield.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
+        mdpfield.setEditable(false);
+        HBox mdpBox = new HBox(10, passwordLabel, mdpfield);
+        mdpBox.setAlignment(Pos.CENTER_LEFT);*/
+
+        // Champ Rôle
+        Label roleLabel = new Label("Rôle:");
+        roleLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
+        TextField roleField = new TextField(user.getRole().name());
+        roleField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
+        roleField.setEditable(false);
+        HBox roleBox = new HBox(10, roleLabel, roleField);
+        roleBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Champ Date d'inscription
+        Label dateInscriptionLabel = new Label("Date d'inscription");
+        dateInscriptionLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: black;");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        String dateInscriptionString = sdf.format(user.getDateinscription());
+        TextField dateinscription = new TextField(dateInscriptionString);
+        dateinscription.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
+        dateinscription.setEditable(false);
+        HBox dateInscriptionBox = new HBox(10, dateInscriptionLabel, dateinscription);
+        dateInscriptionBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Ajouter les HBoxes à la carte
+        card.getChildren().addAll(nameBox, prenomBox, emailBox,  roleBox, dateInscriptionBox);
+
+        return card;
     }
 
     private VBox createResponsableCard(responsable responsable) {
         VBox card = new VBox(10);
         card.setStyle("-fx-border-color: #ddd; -fx-border-width: 1; -fx-padding: 10; -fx-background-color: #f9f9f9; -fx-alignment: center;");
 
-        // Champ ID (non modifiable)
-        Label idLabel = new Label("ID:");
-        idLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: black;");
-        TextField idField = new TextField(String.valueOf(responsable.getId_utilisateur()));
-        idField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
-        idField.setEditable(false);
-        HBox idBox = new HBox(10, idLabel, idField); // Aligner le label et le champ ID
-        idBox.setAlignment(Pos.CENTER_LEFT); // Aligner à gauche
 
         // Champ Nom (non modifiable)
         Label nameLabel = new Label("Nom:");
@@ -88,13 +226,13 @@ public class GestionResponsableController {
         emailBox.setAlignment(Pos.CENTER_LEFT);
 
         // Champ Mot de passe (non modifiable)
-        Label passwordLabel = new Label("Mot de passe:");
+      /*  Label passwordLabel = new Label("Mot de passe:");
         passwordLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
         TextField passwordField = new TextField(responsable.getMotdepasse());
         passwordField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         passwordField.setEditable(false);
         HBox passwordBox = new HBox(10, passwordLabel, passwordField); // Aligner le label et le champ Mot de passe
-        passwordBox.setAlignment(Pos.CENTER_LEFT);
+        passwordBox.setAlignment(Pos.CENTER_LEFT);*/
 
         // Champ Date d'inscription (non modifiable)
         Label dateInscriptionLabel = new Label("Date d'inscription:");
@@ -117,11 +255,9 @@ public class GestionResponsableController {
 
         // Ajouter les HBoxes à la carte
         card.getChildren().addAll(
-                idBox,
                 nameBox,
                 prenomBox,
                 emailBox,
-                passwordBox,
                 dateInscriptionBox,
                 modulesBox
         );
@@ -130,37 +266,21 @@ public class GestionResponsableController {
     }
     @FXML
     private void loadUsers() {
-        if (responsableFlowPane == null) {
-            System.err.println("Erreur : 'responsableFlowPane' est nul lors de l'appel de 'loadResponsables'.");
-            return;
+        List<utilisateur> users = serviceUtilisateur.getAllUtilisateurs();
+
+        // Filtrer les utilisateurs par rôle sélectionné
+        if (!"Tous".equals(roleSelectionne)) {
+            users.removeIf(user -> !user.getRole().toString().equalsIgnoreCase(roleSelectionne));
         }
 
-        ServiceResponsable serviceResponsable = new ServiceResponsable();
-        List<responsable> responsables;
+        // Effacer les anciennes cartes
+        userFlowPane.getChildren().clear();
 
-        try {
-            responsables = serviceResponsable.getAllResponsables();
-        } catch (Exception e) {
-            System.err.println("Erreur lors de la récupération des responsables : " + e.getMessage());
-            e.printStackTrace();
-            return;
+        // Afficher les utilisateurs sous forme de cartes
+        for (utilisateur user : users) {
+            VBox card = createUserCard(user);
+            userFlowPane.getChildren().add(card);
         }
-
-        if (responsables == null || responsables.isEmpty()) {
-            System.out.println("Aucun responsable trouvé.");
-            responsableFlowPane.getChildren().clear();
-            return;
-        }
-
-        ObservableList<VBox> responsableCards = FXCollections.observableArrayList();
-
-        for (responsable r : responsables) {
-            VBox responsableCard = createResponsableCard(r);  // Utilisation de la méthode createResponsableCard
-            responsableCards.add(responsableCard);
-        }
-
-        responsableFlowPane.getChildren().clear();
-        responsableFlowPane.getChildren().addAll(responsableCards);
     }
 
 
@@ -289,64 +409,42 @@ public class GestionResponsableController {
     @FXML
     private void handleUpdateResponsable() {
         try {
-            // Récupérer l'ID du responsable
-            String userIdText = idField.getText();
-            if (userIdText.isEmpty()) {
-                showAlert("Erreur", "L'ID de l'utilisateur/responsable ne peut pas être vide.");
+            // Récupérer et valider l'email
+            String email = emailField.getText().trim();
+            if (email.isEmpty() || !email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                showAlert("Erreur", "L'email doit être valide.");
                 return;
             }
 
-            int userId;
-            try {
-                userId = Integer.parseInt(userIdText);
-                if (userId <= 0) {
-                    showAlert("Erreur", "L'ID doit être un nombre entier positif.");
-                    return;
-                }
-            } catch (NumberFormatException e) {
-                showAlert("Erreur", "L'ID doit être un nombre entier.");
+            // Récupérer et valider le mot de passe
+            String password = togglePasswordButton.isSelected() ? visiblePasswordField.getText().trim() : passwordField.getText().trim();
+            if (password.isEmpty()) {
+                showAlert("Erreur", "Le mot de passe ne peut pas être vide.");
                 return;
             }
 
-            // Vérifier si l'utilisateur existe
-            utilisateur existingUser = serviceUtilisateur.getUtilisateurById(userId);
-            if (existingUser == null) {
-                showAlert("Erreur", "Aucun utilisateur trouvé avec cet ID.");
+            // Vérifier si le responsable existe avec cet email et mot de passe
+            utilisateur responsable = serviceUtilisateur.getByEmailAndPassword(email, password);
+            if (responsable == null) {
+                showAlert("Erreur", "Email ou mot de passe incorrect.");
                 return;
             }
 
-            // Récupérer et valider les champs
+            // Récupérer et valider le nouveau nom
             String newName = nameField.getText().trim();
             if (newName.isEmpty() || !newName.matches("[A-Za-zÀ-ÖØ-öø-ÿ\\s-]+")) {
                 showAlert("Erreur", "Le nom doit contenir uniquement des lettres et ne peut pas être vide.");
                 return;
             }
 
+            // Récupérer et valider le nouveau prénom
             String newPrenom = prenomField.getText().trim();
             if (newPrenom.isEmpty() || !newPrenom.matches("[A-Za-zÀ-ÖØ-öø-ÿ\\s-]+")) {
                 showAlert("Erreur", "Le prénom doit contenir uniquement des lettres et ne peut pas être vide.");
                 return;
             }
 
-            String newEmail = emailField.getText().trim();
-            if (newEmail.isEmpty() || !newEmail.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-                showAlert("Erreur", "L'email doit être valide.");
-                return;
-            }
-            if (!newEmail.equals(existingUser.getEmail()) && emailExists(newEmail)) {
-                showAlert("Erreur", "L'email est déjà utilisé.");
-                return;
-            }
-
-            String newPassword = passwordField.getText().trim();
-            if (newPassword.isEmpty() || newPassword.length() < 8
-                    || !newPassword.matches(".*\\d.*")
-                    || !newPassword.matches(".*[A-Z].*")) {
-                showAlert("Erreur", "Le mot de passe doit comporter au moins 8 caractères, un chiffre et une lettre majuscule.");
-                return;
-            }
-
-            // Validation des modules
+            // Récupérer et valider les modules
             String modulesText = modulesField.getText().trim();
             if (modulesText.isEmpty()) {
                 showAlert("Erreur", "Les modules ne peuvent pas être vides.");
@@ -362,85 +460,85 @@ public class GestionResponsableController {
             }
             String formattedModules = String.join(",", modulesArray);
 
-            // Mise à jour des champs dans le service
-            serviceUtilisateur.updateFieldResponsable(userId, "nom", newName);
-            serviceUtilisateur.updateFieldResponsable(userId, "prenom", newPrenom);
-            serviceUtilisateur.updateFieldResponsable(userId, "email", newEmail);
-            serviceUtilisateur.updateFieldResponsable(userId, "motdepasse", newPassword);
-            serviceUtilisateur.updateFieldResponsable(userId, "modules", formattedModules);
+            // Mettre à jour les champs autorisés (nom, prénom, modules)
+            serviceUtilisateur.updateFieldResponsable(responsable.getId_utilisateur(), "nom", newName);
+            serviceUtilisateur.updateFieldResponsable(responsable.getId_utilisateur(), "prenom", newPrenom);
+            serviceUtilisateur.updateFieldResponsable(responsable.getId_utilisateur(), "modules", formattedModules);
 
-            // Recharger les utilisateurs pour refléter la modification
+            // Recharger la liste des responsables
             loadUsers();
 
             // Réinitialiser les champs
             clearFields();
 
-            // Confirmation de la modification
+            // Afficher confirmation
             showAlert("Succès", "Responsable modifié avec succès.");
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Erreur", "Une erreur est survenue lors de la modification.");
         }
     }
+    @FXML
+    private void handleShowRoleFilter() {
+        // Afficher le ComboBox quand on clique sur le bouton
+        roleFilterComboBox.setVisible(true);
+    }
+
+    @FXML
+    private void handleFilterByRole() {
+        String selectedRole = roleFilterComboBox.getValue();
+        if (selectedRole == null || userFlowPane == null) return;
+
+        // Récupérer tous les utilisateurs
+        List<utilisateur> utilisateurs = serviceUtilisateur.getAllUtilisateurs();
+
+        // Filtrer par rôle (sauf si "Tous" est sélectionné)
+        if (!"Tous".equals(selectedRole)) {
+            utilisateurs = utilisateurs.stream()
+                    .filter(u -> u.getRole().name().equalsIgnoreCase(selectedRole))
+                    .collect(Collectors.toList());
+        }
+
+        // Mettre à jour l'affichage
+        userFlowPane.getChildren().clear();
+        for (utilisateur user : utilisateurs) {
+            VBox card = createUserCard(user);
+            userFlowPane.getChildren().add(card);
+        }
+    }
+
+
+
     private void clearFields() {
-        idField.clear();
         nameField.clear();
         prenomField.clear();
         emailField.clear();
         passwordField.clear();
         modulesField.clear(); // Réinitialiser le champ des modules
+        togglePasswordButton.setSelected(false); // Désactiver le basculement
+
     }
 
 
 
     @FXML
     private void handleDeleteResponsable() {
-        // Créer un formulaire pour entrer l'ID du responsable
-        Dialog<Void> dialog = new Dialog<>();
-        dialog.setTitle("Supprimer Responsable");
-        dialog.setHeaderText("Supprimer un responsable par son ID");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Delete.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("Suppression de Responsable");
+            stage.setScene(new Scene(root));
+            stage.setMaximized(true);
 
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-
-        TextField responsableIdField = new TextField();
-        grid.addRow(0, new Label("ID Responsable :"), responsableIdField);
-
-        dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-        dialog.setResultConverter(button -> {
-            if (button == ButtonType.OK) {
-                try {
-                    int id = Integer.parseInt(responsableIdField.getText());
-                    utilisateur responsable = serviceResponsable.getResponsableById(id);
-
-                    if (responsable != null) {
-                        // Demande de confirmation
-                        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-                        confirmation.setTitle("Confirmation");
-                        confirmation.setHeaderText("Voulez-vous vraiment supprimer le responsable : " +
-                                responsable.getNom() + " " + responsable.getPrenom() + "?");
-
-                        Optional<ButtonType> result = confirmation.showAndWait();
-                        if (result.isPresent() && result.get() == ButtonType.OK) {
-                            serviceResponsable.deleteById(id);
-                            showAlert("Succès", "Responsable supprimé avec succès !");
-                            loadUsers(); // Recharger la liste après suppression
-                        }
-                    } else {
-                        showAlert("Erreur", "Responsable avec l'ID " + id + " introuvable.");
-                    }
-                } catch (NumberFormatException e) {
-                    showAlert("Erreur", "Veuillez entrer un ID valide.");
-                }
-            }
-            return null;
-        });
-
-        dialog.showAndWait();
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger la fenêtre de suppression.");
+        }
     }
+
+
 
     private void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -513,6 +611,12 @@ public class GestionResponsableController {
     private void handleBack() {
         // Logique pour revenir à la page précédente
         System.out.println("Retour à la page précédente");
+    }
+
+    // Nouveau handler pour le bouton Accueil
+    @FXML
+    private void handleAccueil(ActionEvent event) {
+        switchScene(event, "/Menu.fxml");
     }
 
     private void switchScene(ActionEvent event, String fxmlPath) {

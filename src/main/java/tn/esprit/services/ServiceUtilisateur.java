@@ -4,14 +4,18 @@ import tn.esprit.utils.MyDatabase;
 import tn.esprit.models.utilisateur;
 
 import tn.esprit.Enumerations.Role;
-import tn.esprit.Enumerations.Specialite;
-import java.util.Scanner;
+import tn.esprit.models.Specialite;
 
+import java.util.*;
+
+import org.mindrot.jbcrypt.BCrypt;
+
+import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import java.util.List;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 
 public class ServiceUtilisateur {
@@ -19,6 +23,25 @@ public class ServiceUtilisateur {
 
     public ServiceUtilisateur() {
         cnx = MyDatabase.getInstance().getCnx();
+    }
+
+
+    public class PasswordEncryptor {
+
+        public static String encryptPassword(String password) {
+            try {
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                byte[] hash = digest.digest(password.getBytes());
+                StringBuilder hexString = new StringBuilder();
+                for (byte b : hash) {
+                    hexString.append(String.format("%02x", b));
+                }
+                return hexString.toString();  // Retourner le mot de passe crypté
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
     }
     public void add(utilisateur utilisateur, Specialite specialite, List<String> modules, int zoneId) {
         // Vérifier que tous les champs obligatoires sont non vides
@@ -47,6 +70,10 @@ public class ServiceUtilisateur {
             return;
         }
 
+        // 🔹 Hashage du mot de passe avant de l'insérer dans la base de données
+        String encryptedPassword = PasswordEncryptor.encryptPassword(utilisateur.getMotdepasse()); // Utiliser votre méthode de hashage ici
+        utilisateur.setMotdepasse(encryptedPassword);
+
         // Préparer la requête pour insérer l'utilisateur dans la base de données
         String qry = "INSERT INTO utilisateur (nom, prenom, email, motdepasse, role, dateinscription) VALUES (?, ?, ?, ?, ?, ?)";
 
@@ -55,7 +82,7 @@ public class ServiceUtilisateur {
             pstm.setString(1, utilisateur.getNom());
             pstm.setString(2, utilisateur.getPrenom());
             pstm.setString(3, utilisateur.getEmail());
-            pstm.setString(4, utilisateur.getMotdepasse());
+            pstm.setString(4, encryptedPassword); // Utiliser le mot de passe hashé
             pstm.setString(5, utilisateur.getRole().toString()); // Convertir l'énumération en chaîne de caractères
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             String dateSansHeure = sdf.format(utilisateur.getDateinscription());
@@ -135,8 +162,6 @@ public class ServiceUtilisateur {
             System.out.println("❌ Erreur SQL : " + e.getMessage());
         }
     }
-
-
 
 
     public void deleteById(int id) {
@@ -382,33 +407,33 @@ public class ServiceUtilisateur {
 
 
     // Méthode pour récupérer un utilisateur par son ID
-        public utilisateur getUtilisateurById(int userId) {
-            utilisateur user = null;
+    public utilisateur getUtilisateurById(int userId) {
+        utilisateur user = null;
 
-            String query = "SELECT * FROM utilisateur WHERE id_utilisateur = ?";
+        String query = "SELECT * FROM utilisateur WHERE id_utilisateur = ?";
 
-            try (Connection connection = MyDatabase.getConnection();
-                 PreparedStatement stmt = connection.prepareStatement(query)) {
+        try (Connection connection = MyDatabase.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
 
-                stmt.setInt(1, userId); // Set l'ID dans la requête
+            stmt.setInt(1, userId); // Set l'ID dans la requête
 
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        // Si un utilisateur est trouvé
-                        user = new utilisateur();
-                        user.setId_utilisateur(rs.getInt("id_utilisateur"));
-                        user.setNom(rs.getString("nom"));
-                        user.setEmail(rs.getString("email"));
-                        // Ajouter d'autres champs si nécessaire
-                    }
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    // Si un utilisateur est trouvé
+                    user = new utilisateur();
+                    user.setId_utilisateur(rs.getInt("id_utilisateur"));
+                    user.setNom(rs.getString("nom"));
+                    user.setEmail(rs.getString("email"));
+                    // Ajouter d'autres champs si nécessaire
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-                // Gérer les exceptions ici (par exemple, afficher un message d'erreur)
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Gérer les exceptions ici (par exemple, afficher un message d'erreur)
+        }
 
-            return user; // Retourner l'utilisateur trouvé ou null s'il n'existe pas
-        }/*
+        return user; // Retourner l'utilisateur trouvé ou null s'il n'existe pas
+    }/*
     public boolean isEmailExists(String email) {
         // Connexion à la base de données
         try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/pi3a7")) {
@@ -432,10 +457,102 @@ public class ServiceUtilisateur {
 
         return false; // Si une erreur se produit, supposez que l'email n'existe pas
     }*/
+    // Générer un code de vérification
+    public int generateVerificationCode() {
+        return 1000 + (int) (Math.random() * 9000);
+    }
+    // Mettre à jour le mot de passe
+    public boolean updatePassword(String email, String newPassword) {
+        String encryptedPassword = PasswordEncryptor.encryptPassword(newPassword);
 
-    public void updateSpecialite(int idUtilisateur, Specialite selectedSpecialite) {
+        String query = "UPDATE utilisateur SET motdepasse = ? WHERE email = ?";
+        try (Connection cnx = MyDatabase.getInstance().getCnx();
+             PreparedStatement pstm = cnx.prepareStatement(query)) {
+            pstm.setString(1, encryptedPassword);
+            pstm.setString(2, email);
+
+            int rowsUpdated = pstm.executeUpdate();
+            return rowsUpdated > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    // Méthode pour envoyer un email
+    public void sendEmail(String toEmail, String subject, String body) throws MessagingException {
+        // Configuration des propriétés SMTP
+        Properties props = new Properties();
+        props.put("mail.smtp.host", "smtp.gmail.com"); // Serveur SMTP de Gmail
+        props.put("mail.smtp.port", "587"); // Port pour TLS
+        props.put("mail.smtp.auth", "true"); // Authentification requise
+        props.put("mail.smtp.starttls.enable", "true"); // Activation de TLS
+
+        // Authentification
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication("mellouli.youssef11@gmail.com\n", "cnvv wklj lydi psnl");
+            }
+        });
+
+        // Création du message
+        Message message = new MimeMessage(session);
+        message.setFrom(new InternetAddress("mellouli.youssef11@gmail.com\n")); // Expéditeur
+        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail)); // Destinataire
+        message.setSubject(subject); // Sujet
+        message.setText(body); // Corps du message
+
+        // Envoi du message
+        Transport.send(message);
     }
 
+    // Valider l'email
+    public boolean isValidEmail(String email) {
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        return email.matches(emailRegex);
+    }
+    public utilisateur getByEmailAndPassword(String email, String password) {
+        String qry = "SELECT * FROM utilisateur WHERE email = ?";
+        try {
+            PreparedStatement pstm = cnx.prepareStatement(qry);
+            pstm.setString(1, email);
+            ResultSet rs = pstm.executeQuery();
+
+            if (rs.next()) {
+                String hashedPassword = rs.getString("motdepasse");  // Récupérer le mot de passe haché
+                String encryptedPassword = PasswordEncryptor.encryptPassword(password);  // Hachage du mot de passe fourni
+
+                // 🔹 Afficher les mots de passe pour le débogage (ne laissez pas dans le code final)
+                System.out.println("Mot de passe saisi haché : " + encryptedPassword);
+                System.out.println("Mot de passe en base de données : " + hashedPassword);
+
+                // Comparer le mot de passe haché
+                if (hashedPassword.equals(encryptedPassword)) {
+                    System.out.println("✅ Connexion réussie !");
+                    return new utilisateur(
+                            rs.getInt("id_utilisateur"),
+                            rs.getString("nom"),
+                            rs.getString("prenom"),
+                            rs.getString("email"),
+                            hashedPassword,
+                            Role.valueOf(rs.getString("role")),
+                            rs.getDate("dateinscription")
+                    );
+                } else {
+                    System.out.println("❌ Mot de passe incorrect !");
+                }
+            } else {
+                System.out.println("❌ Aucun utilisateur trouvé avec cet email.");
+            }
+        } catch (SQLException e) {
+            System.out.println("❌ Erreur SQL : " + e.getMessage());
+        }
+        return null;
+    }
+
+
 }
+
+
 
 

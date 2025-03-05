@@ -11,6 +11,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import org.kordamp.ikonli.javafx.FontIcon;
+import tn.esprit.models.Session;
 import tn.esprit.models.citoyen;
 import tn.esprit.models.utilisateur;
 import javafx.geometry.Pos;
@@ -32,11 +34,20 @@ import java.util.List;
 
 public class GestionCitoyenController {
     @FXML
+    private Label welcomeLabel;
+    @FXML
     private TextField idField, nameField, prenomField, emailField, passwordField, zoneIdField;
     @FXML
     private FlowPane citoyenFlowPane; // Correspond à 'fx:id="citoyenFlowPane"' dans le FXML
     private final ServiceUtilisateur serviceUtilisateur = new ServiceUtilisateur();
     private final ServiceCitoyen serviceCitoyen = new ServiceCitoyen();
+    @FXML
+    private TextField visiblePasswordField;
+    @FXML
+    private Button logOutButton;  // Le bouton Log Out
+
+    @FXML
+    private ToggleButton togglePasswordButton;
     @FXML
     private void initialize() {
         if (citoyenFlowPane == null) {
@@ -45,7 +56,66 @@ public class GestionCitoyenController {
             System.out.println("FlowPane 'citoyenFlowPane' initialisé correctement.");
             loadUsers(); // Charger les citoyens
         }
+        // Récupérer l'utilisateur de la session
+        utilisateur user = Session.getCurrentUser();
+
+        // Vérifier si un utilisateur est connecté
+        if (user != null) {
+            // Afficher le nom et le prénom de l'utilisateur
+            welcomeLabel.setText("Bienvenue, " + user.getNom() + " " + user.getPrenom());
+        } else {
+            // Si aucun utilisateur n'est connecté, afficher un message générique
+            welcomeLabel.setText("Bienvenue, invité");
+        }
+
+        // Ajouter un écouteur pour basculer la visibilité du mot de passe
+        togglePasswordButton.selectedProperty().addListener((obs, wasSelected, isNowSelected) -> {
+            if (isNowSelected) {
+                // Afficher le mot de passe en clair
+                visiblePasswordField.setText(passwordField.getText());
+                visiblePasswordField.setVisible(true);
+                passwordField.setVisible(false);
+                ((FontIcon) togglePasswordButton.getGraphic()).setIconLiteral("fas-eye");
+            } else {
+                // Masquer le mot de passe
+                passwordField.setText(visiblePasswordField.getText());
+                passwordField.setVisible(true);
+                visiblePasswordField.setVisible(false);
+                ((FontIcon) togglePasswordButton.getGraphic()).setIconLiteral("fas-eye-slash");
+
+            }
+        });
     }
+    @FXML
+    private void handleLogOut(ActionEvent event) {
+        // Met fin à la session
+        Session.logOut();
+
+        // Afficher un message de déconnexion
+        showAlert("Déconnexion", "Vous avez été déconnecté avec succès.");
+
+        // Fermer la fenêtre actuelle (l'écran principal)
+        Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        currentStage.close();
+
+        // Ouvrir la fenêtre de connexion
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Login.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Connexion");
+            stage.setScene(new Scene(root));
+            stage.show();
+            stage.setMaximized(true);
+
+        } catch (IOException e) {
+            showAlert("Erreur", "Une erreur est survenue lors de la déconnexion.");
+            e.printStackTrace();
+        }
+    }
+
+
     public boolean emailExists(String email) {
         String query = "SELECT COUNT(*) FROM utilisateur WHERE email = ?";
         PreparedStatement preparedStatement = null;
@@ -79,13 +149,13 @@ public class GestionCitoyenController {
         card.setStyle("-fx-border-color: #ddd; -fx-border-width: 1; -fx-padding: 10; -fx-background-color: #f9f9f9; -fx-alignment: center;");
 
         // Champ ID (non modifiable)
-        Label idLabel = new Label("ID:");
+       /*Label idLabel = new Label("ID:");
         idLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: black;");
         TextField idField = new TextField(String.valueOf(citoyen.getId_utilisateur()));
         idField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         idField.setEditable(false); // Non modifiable
         HBox idBox = new HBox(10, idLabel, idField); // Aligner le label et le champ ID
-        idBox.setAlignment(Pos.CENTER_LEFT); // Aligner à gauche
+        idBox.setAlignment(Pos.CENTER_LEFT); // Aligner à gauche*/
 
         // Champ Nom (non modifiable)
         Label nameLabel = new Label("Nom:");
@@ -115,13 +185,13 @@ public class GestionCitoyenController {
         emailBox.setAlignment(Pos.CENTER_LEFT); // Aligner à gauche
 
         // Champ Mot de passe (non modifiable)
-        Label passwordLabel = new Label("Mot de passe:");
+       /* Label passwordLabel = new Label("Mot de passe:");
         passwordLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: black;");
         TextField passwordField = new TextField(citoyen.getMotdepasse());
         passwordField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-padding: 5;");
         passwordField.setEditable(false); // Non modifiable
         HBox passwordBox = new HBox(10, passwordLabel, passwordField); // Aligner le label et le champ Mot de passe
-        passwordBox.setAlignment(Pos.CENTER_LEFT); // Aligner à gauche
+        passwordBox.setAlignment(Pos.CENTER_LEFT); // Aligner à gauche*/
 
         // Champ Date d'inscription (non modifiable)
         Label dateInscriptionLabel = new Label("Date d'inscription:");
@@ -144,11 +214,9 @@ public class GestionCitoyenController {
 
         // Ajouter les HBoxes à la carte
         card.getChildren().addAll(
-                idBox,
                 nameBox,
                 prenomBox,
                 emailBox,
-                passwordBox,
                 dateInscriptionBox,
                 zoneIdBox
         );
@@ -223,57 +291,50 @@ public class GestionCitoyenController {
     @FXML
     private void handleUpdateCitoyen() {
         try {
-            // Récupérer l'ID du citoyen
-            String userIdText = idField.getText();
-            if (userIdText.isEmpty()) {
-                showAlert("Erreur", "L'ID de l'utilisateur/citoyen ne peut pas être vide.");
-                return;
-            }
-
-            int userId;
-            try {
-                userId = Integer.parseInt(userIdText);
-            } catch (NumberFormatException e) {
-                showAlert("Erreur", "L'ID doit être un nombre entier.");
-                return;
-            }
-
-            // Vérifier si l'utilisateur existe
-            utilisateur existingUser = serviceUtilisateur.getUtilisateurById(userId);
-            if (existingUser == null) {
-                showAlert("Erreur", "Aucun citoyen trouvé avec cet ID.");
-                return;
-            }
-
-            // Récupérer et valider les champs
-            String newName = nameField.getText();
-            String newPrenom = prenomField.getText();
-            String newEmail = emailField.getText();
-            String newPassword = passwordField.getText();
-            String newZoneIdText = zoneIdField.getText();
-
-            if (newName.isEmpty() || newPrenom.isEmpty() || newEmail.isEmpty() || newPassword.isEmpty() || newZoneIdText.isEmpty()) {
-                showAlert("Erreur", "Tous les champs doivent être remplis.");
-                return;
-            }
-
-            // Validation de l'email
-            if (!newEmail.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+            // Récupérer et valider l'email
+            String email = emailField.getText().trim();
+            if (email.isEmpty() || !email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
                 showAlert("Erreur", "L'email doit être valide.");
                 return;
             }
-            if (!newEmail.equals(existingUser.getEmail()) && emailExists(newEmail)) {
-                showAlert("Erreur", "L'email est déjà utilisé.");
+
+            // Récupérer et valider le mot de passe
+            String password = togglePasswordButton.isSelected() ? visiblePasswordField.getText().trim() : passwordField.getText().trim();
+            if (password.isEmpty()) {
+                showAlert("Erreur", "Le mot de passe ne peut pas être vide.");
                 return;
             }
 
-            // Validation du mot de passe
-            if (newPassword.length() < 8 || !newPassword.matches(".*\\d.*") || !newPassword.matches(".*[A-Z].*")) {
-                showAlert("Erreur", "Le mot de passe doit comporter au moins 8 caractères, un chiffre et une lettre majuscule.");
+
+            // Vérifier si le citoyen existe avec cet email et mot de passe
+            utilisateur citoyen = serviceUtilisateur.getByEmailAndPassword(email, password);
+            if (citoyen == null) {
+                showAlert("Erreur", "Email ou mot de passe incorrect.");
                 return;
             }
 
-            // Validation du Zone ID
+
+            // Récupérer et valider le nouveau nom
+            String newName = nameField.getText().trim();
+            if (newName.isEmpty() || !newName.matches("[A-Za-zÀ-ÖØ-öø-ÿ\\s-]+")) {
+                showAlert("Erreur", "Le nom doit contenir uniquement des lettres et ne peut pas être vide.");
+                return;
+            }
+
+            // Récupérer et valider le nouveau prénom
+            String newPrenom = prenomField.getText().trim();
+            if (newPrenom.isEmpty() || !newPrenom.matches("[A-Za-zÀ-ÖØ-öø-ÿ\\s-]+")) {
+                showAlert("Erreur", "Le prénom doit contenir uniquement des lettres et ne peut pas être vide.");
+                return;
+            }
+
+            // Récupérer et valider le nouveau Zone ID
+            String newZoneIdText = zoneIdField.getText().trim();
+            if (newZoneIdText.isEmpty()) {
+                showAlert("Erreur", "Le Zone ID ne peut pas être vide.");
+                return;
+            }
+
             int newZoneId;
             try {
                 newZoneId = Integer.parseInt(newZoneIdText);
@@ -282,34 +343,36 @@ public class GestionCitoyenController {
                 return;
             }
 
-            // Mise à jour des champs dans le service
-            serviceUtilisateur.updateField(userId, "nom", newName);
-            serviceUtilisateur.updateField(userId, "prenom", newPrenom);
-            serviceUtilisateur.updateField(userId, "email", newEmail);
-            serviceUtilisateur.updateField(userId, "motdepasse", newPassword);
-            serviceUtilisateur.updateField(userId, "zoneId", String.valueOf(newZoneId));
 
-            // Recharger les utilisateurs pour refléter la modification
+            // Mise à jour des champs autorisés (nom, prénom, zoneId)
+            serviceUtilisateur.updateField(citoyen.getId_utilisateur(), "nom", newName);
+            serviceUtilisateur.updateField(citoyen.getId_utilisateur(), "prenom", newPrenom);
+            serviceUtilisateur.updateField(citoyen.getId_utilisateur(), "zoneId", String.valueOf(newZoneId));
+
+            // Rafraîchir la liste des citoyens
             loadUsers();
 
             // Réinitialiser les champs
             clearFields();
 
-            // Confirmation de la modification
+            // Afficher confirmation
             showAlert("Succès", "Citoyen modifié avec succès.");
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Erreur", "Une erreur est survenue lors de la modification.");
         }
     }
+
+
     // Fonction pour réinitialiser les champs du formulaire
     private void clearFields() {
-        idField.clear();
         nameField.clear();
         prenomField.clear();
         emailField.clear();
         passwordField.clear();
         zoneIdField.clear();
+        togglePasswordButton.setSelected(false); // Désactiver le basculement
+
 
     }
     @FXML
@@ -419,52 +482,21 @@ public class GestionCitoyenController {
     }
     @FXML
     private void handleDeleteCitoyen() {
-        // Créer un formulaire pour entrer l'ID du citoyen
-        Dialog<Void> dialog = new Dialog<>();
-        dialog.setTitle("Supprimer Citoyen");
-        dialog.setHeaderText("Supprimer un citoyen par son ID");
+           try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Delete.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("Suppression de Citoyen");
+            stage.setScene(new Scene(root));
+               stage.setMaximized(true);
 
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-
-        TextField citoyenIdField = new TextField();
-        grid.addRow(0, new Label("ID Citoyen :"), citoyenIdField);
-
-        dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-        dialog.setResultConverter(button -> {
-            if (button == ButtonType.OK) {
-                try {
-                    int id = Integer.parseInt(citoyenIdField.getText());
-                    citoyen citizen = serviceCitoyen.getCitoyenById(id);
-
-                    if (citizen != null) {
-                        // Demande de confirmation
-                        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-                        confirmation.setTitle("Confirmation");
-                        confirmation.setHeaderText("Voulez-vous vraiment supprimer le citoyen : " +
-                                citizen.getNom() + " " + citizen.getPrenom() + "?");
-
-                        Optional<ButtonType> result = confirmation.showAndWait();
-                        if (result.isPresent() && result.get() == ButtonType.OK) {
-                            serviceCitoyen.deleteById(id);
-                            showAlert("Succès", "Citoyen supprimé avec succès !");
-                            loadUsers(); // Recharger la liste après suppression
-                        }
-                    } else {
-                        showAlert("Erreur", "Citoyen avec l'ID " + id + " introuvable.");
-                    }
-                } catch (NumberFormatException e) {
-                    showAlert("Erreur", "Veuillez entrer un ID valide.");
-                }
-            }
-            return null;
-        });
-
-        dialog.showAndWait();
+               stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger la fenêtre de suppression.");
+        }
     }
+
     @FXML
     private void handleGestionCapteur(ActionEvent event) {
         switchScene(event, "/GestionCapteur.fxml");
@@ -531,6 +563,12 @@ public class GestionCitoyenController {
         System.out.println("Retour à la page précédente");
     }
 
+    // Nouveau handler pour le bouton Accueil
+    @FXML
+    private void handleAccueil(ActionEvent event) {
+        switchScene(event, "/Menu.fxml");
+    }
+
     private void switchScene(ActionEvent event, String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
@@ -543,6 +581,5 @@ public class GestionCitoyenController {
             e.printStackTrace();
         }
     }
-
 
 }

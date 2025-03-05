@@ -5,7 +5,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
+import java.io.File;
 import java.io.IOException;
 import javafx.animation.Timeline;
 import javafx.animation.KeyFrame;
@@ -26,39 +29,58 @@ import javafx.util.Duration;
 import tn.esprit.models.Source;
 import tn.esprit.Enumerations.EnumEtat;
 import tn.esprit.Enumerations.EnumType;
+import tn.esprit.models.profile;
 import tn.esprit.services.ServiceSource;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ResourceBundle;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
+import tn.esprit.models.profile;
+import tn.esprit.utils.QrcodeGenerator;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class SourceController implements Initializable {
 
 
     @FXML private Button btnBack;
     @FXML private Button btnprofile;
-
+    @FXML
+    private TextField tfSearch; // Ajoutez ce champ pour la recherche
     @FXML private ComboBox<EnumType> cbType; // Utilisation d'un ComboBox pour le type
     @FXML private TextField tfCapacite;
     @FXML private TextField tfRendement;
+    @FXML private TextField  tfNom;
     @FXML private ComboBox<EnumEtat> cbEtat;
     @FXML private FlowPane cardContainer;
     @FXML private ScrollPane scrollPane;
     private final ServiceSource serviceSource = new ServiceSource();
     private final ObservableList<Source> sources = FXCollections.observableArrayList();
+    private final Map<Integer, List<String>> sourceModifications = new HashMap<>();
     private Source selectedSource;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         cbType.setItems(FXCollections.observableArrayList(EnumType.values())); // Initialisation du ComboBox pour le type
         cbEtat.setItems(FXCollections.observableArrayList(EnumEtat.values()));
+
         scrollPane.setFitToWidth(true);
         cardContainer.setHgap(20);
         cardContainer.setVgap(20);
         cardContainer.setPadding(new Insets(20));
         Font.loadFont(getClass().getResourceAsStream("/fonts/Roboto-Regular.ttf"), 14);
+
+        // Initialiser le champ de recherche
+        tfSearch.setPromptText("Rechercher par nom...");
 
         loadData();
     }
@@ -99,9 +121,8 @@ public class SourceController implements Initializable {
         tfCapacite.setText(String.valueOf(source.getCapacite()));
         tfRendement.setText(String.valueOf(source.getRendement()));
         cbEtat.setValue(source.getEtat());
-
+        tfNom.setText(source.getNom()); // Remplir le champ nom
     }
-
 
 
     private void clearForm() {
@@ -109,8 +130,7 @@ public class SourceController implements Initializable {
         tfCapacite.clear();
         tfRendement.clear();
         cbEtat.getSelectionModel().clearSelection();
-        //dpDateInstallation.setValue(null);
-        //dpDateInstallation.setDisable(false); // Re-enable the DatePicker for new entry
+        tfNom.clear(); // Effacer le champ nom
         selectedSource = null;
     }
 
@@ -127,6 +147,7 @@ public class SourceController implements Initializable {
             source.setRendement(Float.parseFloat(tfRendement.getText()));
             source.setEtat(cbEtat.getValue());
             source.setDateInstallation(LocalDate.now()); // Automatically set to current date
+            source.setNom(tfNom.getText()); // Récupérer le nom depuis le champ
             serviceSource.add(source);
             loadData();
             clearForm();
@@ -138,33 +159,117 @@ public class SourceController implements Initializable {
 
 
 
-
-
     @FXML
     private void handleUpdate() {
         if (selectedSource == null) {
             showAlert("Erreur", "Veuillez sélectionner une source à modifier");
             return;
         }
+
         try {
+            // Valider les entrées
             validateInputs();
+
+            // Enregistrer les différences entre l'ancienne et la nouvelle version
+            StringBuilder modificationBuilder = new StringBuilder();
+            modificationBuilder.append("Source mise à jour le ").append(new java.util.Date()).append("\n");
+
+            // Comparer chaque champ et enregistrer les différences
+            if (!selectedSource.getType().equals(cbType.getValue())) {
+                modificationBuilder.append("- Type: ")
+                        .append(selectedSource.getType())
+                        .append(" -> ")
+                        .append(cbType.getValue())
+                        .append("\n");
+            }
+            if (selectedSource.getCapacite() != Float.parseFloat(tfCapacite.getText())) {
+                modificationBuilder.append("- Capacité: ")
+                        .append(selectedSource.getCapacite())
+                        .append(" -> ")
+                        .append(tfCapacite.getText())
+                        .append("\n");
+            }
+            if (selectedSource.getRendement() != Float.parseFloat(tfRendement.getText())) {
+                modificationBuilder.append("- Rendement: ")
+                        .append(selectedSource.getRendement())
+                        .append(" -> ")
+                        .append(tfRendement.getText())
+                        .append("\n");
+            }
+            if (!selectedSource.getEtat().equals(cbEtat.getValue())) {
+                modificationBuilder.append("- État: ")
+                        .append(selectedSource.getEtat())
+                        .append(" -> ")
+                        .append(cbEtat.getValue())
+                        .append("\n");
+            }
+            if (!selectedSource.getNom().equals(tfNom.getText())) {
+                modificationBuilder.append("- Nom: ")
+                        .append(selectedSource.getNom())
+                        .append(" -> ")
+                        .append(tfNom.getText())
+                        .append("\n");
+            }
+
+            // Ajouter la modification à la liste des modifications de la source
+            String modification = modificationBuilder.toString();
+            sourceModifications.computeIfAbsent(selectedSource.getIdSource(), k -> new ArrayList<>()).add(modification);
+
+            // Mettre à jour la source sélectionnée
             selectedSource.setType(cbType.getValue());
             selectedSource.setCapacite(Float.parseFloat(tfCapacite.getText()));
             selectedSource.setRendement(Float.parseFloat(tfRendement.getText()));
             selectedSource.setEtat(cbEtat.getValue());
+            selectedSource.setNom(tfNom.getText());
 
-            // Ne pas modifier la date d'installation
-            // selectedSource.setDateInstallation reste inchangé
-
+            // Mettre à jour la source dans la base de données
             serviceSource.update(selectedSource);
+
+            // Recharger les données et réinitialiser le formulaire
             loadData();
             clearForm();
+
+            // Afficher un message de succès
             showSuccessFeedback();
         } catch (Exception e) {
+            // Gérer les erreurs
             showAlert("Erreur de modification", e.getMessage());
         }
     }
 
+    private void handleGenerateQrCode(Source source) {
+        // Récupérer les modifications de la source
+        List<String> modifications = sourceModifications.getOrDefault(source.getIdSource(), new ArrayList<>());
+
+        // Créer une chaîne de caractères contenant les modifications
+        StringBuilder modificationsBuilder = new StringBuilder();
+        modificationsBuilder.append("Dernières modifications pour la source ID: ").append(source.getIdSource()).append("\n\n");
+
+        // Ajouter chaque modification
+        for (String modification : modifications) {
+            modificationsBuilder.append(modification).append("\n");
+        }
+
+        // Convertir les modifications en une chaîne
+        String modificationsText = modificationsBuilder.toString();
+
+        // Ouvrir un FileChooser pour choisir l'emplacement du fichier
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Enregistrer le QR Code");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Fichiers PNG", "*.png"));
+        fileChooser.setInitialFileName("qr_code_source_" + source.getIdSource() + ".png");
+
+        File file = fileChooser.showSaveDialog(null);
+        if (file == null) {
+            return; // L'utilisateur a annulé
+        }
+
+        // Générer le QR code avec les modifications
+        QrcodeGenerator.generateProfileQrCode(modificationsText, file.getAbsolutePath(), 300, 300);
+
+        // Afficher un message de succès
+        showSuccessAlert("Succès", "Le QR code a été généré avec succès : " + file.getAbsolutePath());
+    }
 
 
 
@@ -187,9 +292,10 @@ public class SourceController implements Initializable {
     }
 
     private void validateInputs() throws Exception {
-        if (cbType.getValue() == null || tfCapacite.getText().isEmpty() || tfRendement.getText().isEmpty() || cbEtat.getValue() == null) {
-            throw new Exception("Veuillez remplir tous les champs.");
+        if (cbType.getValue() == null || tfCapacite.getText().isEmpty() || tfRendement.getText().isEmpty() || cbEtat.getValue() == null || tfNom.getText().isEmpty()) {
+            throw new Exception("Tous les champs doivent être remplis.");
         }
+        // Vous pouvez ajouter d'autres validations ici
     }
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -241,7 +347,7 @@ public class SourceController implements Initializable {
         icon.setIconSize(24);
         icon.setIconColor(Color.web("#1a73e8"));
 
-        Label title = new Label("Source #" + source.getIdSource());
+        Label title = new Label("SOURCE #" + source.getNom());
         title.setStyle("-fx-font-size: 18; -fx-text-fill: #202124;");
 
         header.getChildren().addAll(icon, title);
@@ -252,25 +358,50 @@ public class SourceController implements Initializable {
                 createInfoRow(FontAwesomeSolid.TAG, "Type : " + source.getType().toString()),
                 createInfoRow(FontAwesomeSolid.BOLT, "Capacité : " + source.getCapacite() + " W"),
                 createInfoRow(FontAwesomeSolid.BOLT, "Rendement : " + source.getRendement() + " %"),
-
                 createInfoRow(FontAwesomeSolid.POWER_OFF, "État : " + source.getEtat().toString()),
                 createInfoRow(FontAwesomeSolid.CALENDAR, "Installation : " + source.getDateInstallation())
         );
 
-        // Boutons d'action
-        HBox buttons = new HBox(10);
+        // Boutons d'action (ligne 1 : Modifier et Supprimer)
+        HBox buttonsRow1 = new HBox(10);
 
         // Bouton Modifier
         Button btnModifier = createIconButton("Modifier", FontAwesomeSolid.PENCIL_ALT, "-secondary");
         btnModifier.setOnAction(e -> fillForm(source));
+        btnModifier.setPrefSize(100, 40);  // Fixer la taille du bouton Modifier
+        btnModifier.setMinSize(100, 40);
+        btnModifier.setMaxSize(100, 40);
 
         // Bouton Supprimer
         Button btnSupprimer = createIconButton("Supprimer", FontAwesomeSolid.TRASH, "#ea4335");
         btnSupprimer.setOnAction(e -> handleDeleteSource(source));
+        btnSupprimer.setPrefSize(100, 40);  // Fixer la taille du bouton Supprimer
+        btnSupprimer.setMinSize(100, 40);
+        btnSupprimer.setMaxSize(100, 40);
 
-        buttons.getChildren().addAll(btnModifier, btnSupprimer);
+        buttonsRow1.getChildren().addAll(btnModifier, btnSupprimer);
 
-        card.getChildren().addAll(header, new Separator(), content, buttons);
+        // Boutons d'action (ligne 2 : Générer PDF)
+        HBox buttonsRow2 = new HBox(10);
+
+        // Bouton PDF
+        Button btnPdf = createIconButton("PDF", FontAwesomeSolid.FILE_PDF, "#34a853");
+        btnPdf.setOnAction(e -> handleGeneratePdf(source));
+        btnPdf.setPrefSize(100, 40);  // Fixer la taille du bouton PDF
+        btnPdf.setMinSize(100, 40);
+        btnPdf.setMaxSize(100, 40);
+
+        Button btnGenererQrCode = createIconButton("QR Code", FontAwesomeSolid.FILE_PDF, "#34a853");
+// Couleur bleue
+        btnGenererQrCode.setOnAction(e -> handleGenerateQrCode(source));
+        btnGenererQrCode.setPrefSize(100, 40); // Fixer la taille du bouton Générer QR Code
+        btnGenererQrCode.setMinSize(100, 40);
+        btnGenererQrCode.setMaxSize(100, 40);
+
+        buttonsRow2.getChildren().addAll(btnPdf,btnGenererQrCode);
+
+        // Ajouter les éléments à la carte
+        card.getChildren().addAll(header, new Separator(), content, buttonsRow1, buttonsRow2);
         card.setStyle("-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16;");
         card.setEffect(new DropShadow(10, Color.gray(0.3)));
 
@@ -345,6 +476,69 @@ public class SourceController implements Initializable {
         }
     }
     @FXML
+    private void handleSearch() {
+        String searchText = tfSearch.getText().trim().toLowerCase(); // Récupérer le texte de recherche et le mettre en minuscules
+
+        if (searchText.isEmpty()) {
+            // Si le champ de recherche est vide, afficher toutes les sources
+            loadData();
+        } else {
+            // Filtrer les sources par nom
+            List<Source> filteredSources = serviceSource.getAll().stream()
+                    .filter(source -> source.getNom().toLowerCase().contains(searchText))
+                    .collect(Collectors.toList());
+
+            // Mettre à jour l'affichage avec les sources filtrées
+            sources.setAll(filteredSources);
+            cardContainer.getChildren().clear();
+            sources.forEach(source -> cardContainer.getChildren().add(createSourceCard(source)));
+        }
+    }
+    private void handleGeneratePdf(Source source){
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Enregistrer le document de la source");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Fichiers PDF", "*.pdf"));
+        fileChooser.setInitialFileName("source_" + source.getIdSource() + ".pdf");
+
+        File file = fileChooser.showSaveDialog(null);
+        if (file == null) {
+            return; // L'utilisateur a annulé
+        }
+
+        // Créer un document PDF
+        Document document = new Document();
+
+        try {
+            // Créer un écrivain pour écrire dans le fichier PDF
+            PdfWriter.getInstance(document, new FileOutputStream(file));
+
+            // Ouvrir le document pour pouvoir y ajouter des éléments
+            document.open();
+
+            // Ajouter des informations sur la source dans le PDF
+            document.add(new Paragraph("Informations sur la Source Énergétique"));
+            document.add(new Paragraph("ID: " + source.getIdSource()));
+            document.add(new Paragraph("Type: " + source.getType()));
+            document.add(new Paragraph("Capacité: " + source.getCapacite() + " kWh"));
+            document.add(new Paragraph("Rendement: " + source.getRendement() + "%"));
+            document.add(new Paragraph("État: " + source.getEtat()));
+            document.add(new Paragraph("Date d'Installation: " + source.getDateInstallation()));
+
+        } catch (DocumentException | IOException e) {
+            System.err.println("❌ Erreur lors de la création du PDF : " + e.getMessage());
+        } finally {
+            // Fermer le document
+            document.close();
+        }
+
+        // Afficher un message de succès
+        showSuccessAlert("Succès", "Le fichier PDF de la source a été généré avec succès : " + file.getAbsolutePath());
+    }
+
+    private static void showSuccessAlert(String title, String message) {
+        System.out.println("✅ " + title + " : " + message);
+    }
+    @FXML
     private void handleGestionCapteur(ActionEvent event) {
         switchScene(event, "/GestionCapteur.fxml");
     }
@@ -410,6 +604,12 @@ public class SourceController implements Initializable {
         System.out.println("Retour à la page précédente");
     }
 
+    // Nouveau handler pour le bouton Accueil
+    @FXML
+    private void handleAccueil(ActionEvent event) {
+        switchScene(event, "/Menu.fxml");
+    }
+
     private void switchScene(ActionEvent event, String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
@@ -422,5 +622,5 @@ public class SourceController implements Initializable {
             e.printStackTrace();
         }
     }
+    }
 
-}

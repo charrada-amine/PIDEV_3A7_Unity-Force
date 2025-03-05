@@ -14,6 +14,51 @@ import java.io.IOException;
 public class MenuController {
 
     @FXML
+    private Button btnNavigateToCameras; // Bouton pour l'interface Caméras
+
+    @FXML
+    private Button btnNavigateToLampadaireMap; // Bouton pour l'interface Carte Lampadaires
+
+    @FXML
+    private Button btnNavigateToLampadaires; // Bouton pour l'interface Lampadaires (alternative)
+
+    @FXML
+    private Button btnNavigateToZoneCitoyen; // Bouton pour l'interface Vue Citoyen
+
+    @FXML
+    private Button btnNavigateToZones; // Bouton pour l'interface Zones (alternative)
+
+
+    // Handler pour le bouton de navigation vers l'interface Caméras
+    @FXML
+    private void handleNavigateToCameras(ActionEvent event) {
+        switchScene(event, "/GestionCamera.fxml");
+    }
+
+    // Handler pour le bouton de navigation vers l'interface Carte Lampadaires
+    @FXML
+    private void handleNavigateToLampadaireMap(ActionEvent event) {
+        switchScene(event, "/LampadaireMapView.fxml");
+    }
+
+    // Handler pour le bouton de navigation vers l'interface Lampadaires (alternative)
+    @FXML
+    private void handleNavigateToLampadaires(ActionEvent event) {
+        switchScene(event, "/GestionLampadaire.fxml"); // Note : doublon potentiel avec handleGestionLampadaire
+    }
+
+    // Handler pour le bouton de navigation vers l'interface Vue Citoyen
+    @FXML
+    private void handleNavigateToZoneCitoyen(ActionEvent event) {
+        switchScene(event, "/ZoneCitoyenView.fxml");
+    }
+
+    // Handler pour le bouton de navigation vers l'interface Zones (alternative)
+    @FXML
+    private void handleNavigateToZones(ActionEvent event) {
+        switchScene(event, "/GestionZone.fxml"); // Note : doublon potentiel avec handleGestionZone
+    }
+    @FXML
     private Button btnGestionCapteur;
 
     @FXML
