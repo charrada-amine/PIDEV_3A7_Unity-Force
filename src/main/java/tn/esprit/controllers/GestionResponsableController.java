@@ -11,6 +11,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 import tn.esprit.models.Role;
@@ -21,6 +22,7 @@ import tn.esprit.services.ServiceCitoyen;
 import tn.esprit.services.ServiceResponsable;
 import tn.esprit.services.ServiceUtilisateur;
 import tn.esprit.utils.MyDatabase;
+import tn.esprit.utils.PdfGeneratorUser;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -33,9 +35,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import java.io.File;
+
 public class GestionResponsableController {
     @FXML
     private Label welcomeLabel;
+    @FXML
+    private ComboBox<String> modulesComboBox;
     @FXML
     private Button logOutButton;  // Le bouton Log Out
     @FXML
@@ -444,26 +450,17 @@ public class GestionResponsableController {
                 return;
             }
 
-            // Récupérer et valider les modules
-            String modulesText = modulesField.getText().trim();
-            if (modulesText.isEmpty()) {
-                showAlert("Erreur", "Les modules ne peuvent pas être vides.");
+            // Récupérer le module sélectionné dans la ComboBox
+            String selectedModule = modulesComboBox.getValue();
+            if (selectedModule == null) {
+                showAlert("Erreur", "Veuillez sélectionner un module.");
                 return;
             }
-
-            String[] modulesArray = modulesText.split(",");
-            for (String module : modulesArray) {
-                if (module.trim().isEmpty()) {
-                    showAlert("Erreur", "Chaque module doit être un texte non vide.");
-                    return;
-                }
-            }
-            String formattedModules = String.join(",", modulesArray);
 
             // Mettre à jour les champs autorisés (nom, prénom, modules)
             serviceUtilisateur.updateFieldResponsable(responsable.getId_utilisateur(), "nom", newName);
             serviceUtilisateur.updateFieldResponsable(responsable.getId_utilisateur(), "prenom", newPrenom);
-            serviceUtilisateur.updateFieldResponsable(responsable.getId_utilisateur(), "modules", formattedModules);
+            serviceUtilisateur.updateFieldResponsable(responsable.getId_utilisateur(), "modules", selectedModule);
 
             // Recharger la liste des responsables
             loadUsers();
@@ -478,6 +475,7 @@ public class GestionResponsableController {
             showAlert("Erreur", "Une erreur est survenue lors de la modification.");
         }
     }
+
     @FXML
     private void handleShowRoleFilter() {
         // Afficher le ComboBox quand on clique sur le bouton
@@ -514,10 +512,11 @@ public class GestionResponsableController {
         prenomField.clear();
         emailField.clear();
         passwordField.clear();
-        modulesField.clear(); // Réinitialiser le champ des modules
+        modulesComboBox.setValue(null); // Réinitialiser le champ des modules
         togglePasswordButton.setSelected(false); // Désactiver le basculement
 
     }
+
 
 
 
@@ -547,6 +546,8 @@ public class GestionResponsableController {
         alert.setContentText(content);
         alert.showAndWait();
     }
+
+
     @FXML
     private void handleGestionCapteur(ActionEvent event) {
         switchScene(event, "/GestionCapteur.fxml");
@@ -582,42 +583,7 @@ public class GestionResponsableController {
         switchScene(event, "/GestionResponsable.fxml");
     }
 
-    @FXML
-    private void handleGestionTechnicien(ActionEvent event) {
-        switchScene(event, "/GestionTechnicien.fxml");
-    }
 
-    @FXML
-    private void handleGestionUtilisateur(ActionEvent event) {
-        switchScene(event, "/GestionUtilisateur.fxml");
-    }
-
-    @FXML
-    private void handleGestionZone(ActionEvent event) {
-        switchScene(event, "/GestionZone.fxml");
-    }
-
-    @FXML
-    private void handleProfileInterface(ActionEvent event) {
-        switchScene(event, "/ProfileInterface.fxml");
-    }
-
-    @FXML
-    private void handleSourceInterface(ActionEvent event) {
-        switchScene(event, "/SourceInterface.fxml");
-    }
-
-    @FXML
-    private void handleBack() {
-        // Logique pour revenir à la page précédente
-        System.out.println("Retour à la page précédente");
-    }
-
-    // Nouveau handler pour le bouton Accueil
-    @FXML
-    private void handleAccueil(ActionEvent event) {
-        switchScene(event, "/Menu.fxml");
-    }
 
     private void switchScene(ActionEvent event, String fxmlPath) {
         try {
@@ -631,4 +597,116 @@ public class GestionResponsableController {
             e.printStackTrace();
         }
     }
+
+    private void handleGeneratePdf(List<utilisateur> utilisateurs) {
+        // Ouvrir un FileChooser pour choisir l'emplacement du fichier
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Enregistrer le PDF des Utilisateurs");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Fichiers PDF", "*.pdf"));
+        fileChooser.setInitialFileName("utilisateurs.pdf");
+
+        File file = fileChooser.showSaveDialog(null);
+        if (file == null) {
+            return; // L'utilisateur a annulé
+        }
+
+        // Générer le PDF des utilisateurs
+        PdfGeneratorUser.generateUsersPdf(utilisateurs, file.getAbsolutePath());
+
+        // Afficher un message de succès
+        showAlert("Succès", "Le fichier PDF a été généré avec succès : " + file.getAbsolutePath());
+    }
+    @FXML
+    private void handleGeneratePdf() {
+        List<utilisateur> utilisateurs = serviceUtilisateur.getAllUtilisateurs(); // Récupérez les utilisateurs depuis votre service
+        handleGeneratePdf(utilisateurs); // Appelez la méthode existante avec la liste
+    }
+
+    @FXML
+    private Button btnNavigateToCameras; // Bouton pour l'interface Caméras
+
+    @FXML
+    private Button btnNavigateToLampadaireMap; // Bouton pour l'interface Carte Lampadaires
+
+    @FXML
+    private Button btnNavigateToLampadaires; // Bouton pour l'interface Lampadaires (alternative)
+
+    @FXML
+    private Button btnNavigateToZoneCitoyen; // Bouton pour l'interface Vue Citoyen
+
+
+
+
+    // Handler pour le bouton de navigation vers l'interface Caméras
+    @FXML
+    private void handleNavigateToCameras(ActionEvent event) {
+        switchScene(event, "/GestionCamera.fxml");
+    }
+
+    // Handler pour le bouton de navigation vers l'interface Carte Lampadaires
+    @FXML
+    private void handleNavigateToLampadaireMap(ActionEvent event) {
+        switchScene(event, "/LampadaireMapView.fxml");
+    }
+
+    // Handler pour le bouton de navigation vers l'interface Lampadaires (alternative)
+    @FXML
+    private void handleNavigateToLampadaires(ActionEvent event) {
+        switchScene(event, "/GestionLampadaire.fxml"); // Note : doublon potentiel avec handleGestionLampadaire
+    }
+
+    // Handler pour le bouton de navigation vers l'interface Vue Citoyen
+    @FXML
+    private void handleNavigateToZoneCitoyen(ActionEvent event) {
+        switchScene(event, "/ZoneCitoyenView.fxml");
+    }
+
+    // Handler pour le bouton de navigation vers l'interface Zones (alternative)
+    @FXML
+    private void handleNavigateToZones(ActionEvent event) {
+        switchScene(event, "/GestionZone.fxml"); // Note : doublon potentiel avec handleGestionZone
+    }
+    // Handler pour le bouton de gestion des techniciens
+    @FXML
+    private void handleGestionTechnicien(ActionEvent event) {
+        switchScene(event, "/GestionTechnicien.fxml");
+    }
+
+    // Handler pour le bouton de gestion des utilisateurs
+    @FXML
+    private void handleGestionUtilisateur(ActionEvent event) {
+        switchScene(event, "/GestionUtilisateur.fxml");
+    }
+
+    // Handler pour le bouton de gestion des zones
+    @FXML
+    private void handleGestionZone(ActionEvent event) {
+        switchScene(event, "/GestionZone.fxml");
+    }
+
+    // Handler pour le bouton de gestion du profil
+    @FXML
+    private void handleProfileInterface(ActionEvent event) {
+        switchScene(event, "/ProfileInterface.fxml");
+    }
+
+    // Handler pour le bouton des sources
+    @FXML
+    private void handleSourceInterface(ActionEvent event) {
+        switchScene(event, "/SourceInterface.fxml");
+    }
+
+    // Handler pour revenir à la page d'accueil (Menu)
+    @FXML
+    private void handleAccueil(ActionEvent event) {
+        switchScene(event, "/Menu.fxml");
+    }
+
+    // Méthode pour revenir à la page précédente (en option, à personnaliser)
+    @FXML
+    private void handleBack() {
+        System.out.println("Retour à la page précédente");
+    }
+
+
 }

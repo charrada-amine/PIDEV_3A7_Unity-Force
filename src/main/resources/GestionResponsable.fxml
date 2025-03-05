@@ -15,86 +15,92 @@
     </top>
 
     <!-- Barre de navigation latérale -->
+    <!-- Barre de navigation latérale -->
     <left>
         <VBox prefWidth="240" styleClass="nav-bar">
-            <Label text="Gestion Urbaine" styleClass="nav-title"/>
 
             <!-- Boutons de navigation -->
+            <Button text="Accueil" styleClass="nav-button" onAction="#handleAccueil">
+                <graphic>
+                    <FontIcon iconLiteral="fas-home" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
             <Button text="Capteurs" styleClass="nav-button" onAction="#handleGestionCapteur">
                 <graphic>
                     <FontIcon iconLiteral="fas-microchip" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-
             <Button text="Citoyens" styleClass="nav-button" onAction="#handleGestionCitoyen">
                 <graphic>
                     <FontIcon iconLiteral="fas-users" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-
             <Button text="Données" styleClass="nav-button" onAction="#handleGestionDonnee">
                 <graphic>
                     <FontIcon iconLiteral="fas-database" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-
             <Button text="Interventions" styleClass="nav-button" onAction="#handleGestionIntervention">
                 <graphic>
                     <FontIcon iconLiteral="fas-tools" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-
             <Button text="Lampadaires" styleClass="nav-button" onAction="#handleGestionLampadaire">
                 <graphic>
                     <FontIcon iconLiteral="fas-lightbulb" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-
             <Button text="Réclamations" styleClass="nav-button" onAction="#handleGestionReclamation">
                 <graphic>
                     <FontIcon iconLiteral="fas-exclamation-circle" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-
             <Button text="Responsables" styleClass="nav-button" onAction="#handleGestionResponsable">
                 <graphic>
                     <FontIcon iconLiteral="fas-user-tie" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-
             <Button text="Techniciens" styleClass="nav-button" onAction="#handleGestionTechnicien">
                 <graphic>
                     <FontIcon iconLiteral="fas-user-cog" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-
-            <Button text="Utilisateurs" styleClass="nav-button" onAction="#handleGestionUtilisateur">
-                <graphic>
-                    <FontIcon iconLiteral="fas-user" iconSize="16" iconColor="#ffffff"/>
-                </graphic>
-            </Button>
-
             <Button text="Zones" styleClass="nav-button" onAction="#handleGestionZone">
                 <graphic>
                     <FontIcon iconLiteral="fas-map-marked-alt" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
 
-            <Button text="Profil" styleClass="nav-button" onAction="#handleProfileInterface">
+            <!-- Ajout des nouvelles interfaces -->
+            <Button text="Vue Citoyen" styleClass="nav-button" onAction="#handleNavigateToZoneCitoyen">
+                <graphic>
+                    <FontIcon iconLiteral="fas-users" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Lampadaires" styleClass="nav-button" onAction="#handleNavigateToLampadaires">
+                <graphic>
+                    <FontIcon iconLiteral="fas-lightbulb" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Carte Lampadaires" styleClass="nav-button" onAction="#handleNavigateToLampadaireMap">
+                <graphic>
+                    <FontIcon iconLiteral="fas-map" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+            <Button text="Caméras" styleClass="nav-button" onAction="#handleNavigateToCameras">
+                <graphic>
+                    <FontIcon iconLiteral="fas-camera" iconSize="16" iconColor="#ffffff"/>
+                </graphic>
+            </Button>
+
+            <Button text="Profil energetique" styleClass="nav-button" onAction="#handleProfileInterface">
                 <graphic>
                     <FontIcon iconLiteral="fas-user-circle" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-
             <Button text="Sources" styleClass="nav-button" onAction="#handleSourceInterface">
                 <graphic>
                     <FontIcon iconLiteral="fas-code-branch" iconSize="16" iconColor="#ffffff"/>
-                </graphic>
-            </Button>
-
-            <Button text="Retour" styleClass="nav-button" onAction="#handleBack">
-                <graphic>
-                    <FontIcon iconLiteral="fas-arrow-left" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
         </VBox>
@@ -122,14 +128,28 @@
                         </ToggleButton>
                     </HBox>
                     <HBox spacing="10">
-                        <!-- Label pour les modules -->
-                        <Label text="Modules :" />
 
-                        <!-- Champ pour les modules -->
-                        <TextField fx:id="modulesField" promptText="Modules" styleClass="modern-input" prefWidth="200" />
+                        <Label text="Module :" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+
+
+                        <ComboBox fx:id="modulesComboBox" promptText="Sélectionnez un module" styleClass="modern-input">
+                            <items>
+                                <FXCollections fx:factory="observableArrayList">
+                                    <String fx:value="Admin" />
+                                    <String fx:value="Infrastructure" />
+                                    <String fx:value="Profil Énergétique" />
+                                    <String fx:value="Intervention" />
+                                    <String fx:value="Donnée" />
+                                </FXCollections>
+                            </items>
+                        </ComboBox>
                     </HBox>
 
+
+
+
                     <!-- Boutons d'action -->
+                    <!-- Première ligne : Modifier et Supprimer -->
                     <HBox spacing="10" alignment="CENTER" style="-fx-padding: 10;">
                         <Button text="Modifier" onAction="#handleUpdateResponsable" styleClass="action-button,edit">
                             <graphic>
@@ -141,32 +161,51 @@
                                 <FontIcon iconLiteral="fas-trash-alt" iconSize="16" iconColor="#ffffff"/>
                             </graphic>
                         </Button>
+                    </HBox>
+
+                    <!-- Deuxième ligne : Réinitialiser et Log Out -->
+                    <HBox spacing="10" alignment="CENTER" style="-fx-padding: 10;">
                         <Button text="Réinitialiser" onAction="#handleClear" styleClass="action-button,reset">
                             <graphic>
                                 <FontIcon iconLiteral="fas-undo" iconSize="16" iconColor="#2d3436"/>
                             </graphic>
                         </Button>
-                    </HBox>
-
-                    <!-- Nouvel HBox pour Log Out et Trier -->
-                    <HBox spacing="10" alignment="CENTER" style="-fx-padding: 10;">
                         <Button text="Log Out" onAction="#handleLogOut">
                             <graphic>
                                 <FontIcon iconLiteral="fas-sign-out-alt" iconSize="25" iconColor="#2d3436"/>
                             </graphic>
                         </Button>
-                        <Button text="Trier par rôle" onAction="#handleShowRoleFilter" styleClass="action-button,sort"/>
-                        <ComboBox fx:id="roleFilterComboBox" visible="false" onAction="#handleFilterByRole">
-                            <items>
-                                <FXCollections fx:factory="observableArrayList">
-                                    <String fx:value="Tous" />
-                                    <String fx:value="Citoyen" />
-                                    <String fx:value="Responsable" />
-                                    <String fx:value="Technicien" />
-                                </FXCollections>
-                            </items>
-                        </ComboBox>
                     </HBox>
+
+                    <!-- Troisième ligne : Trier et Exporter PDF -->
+                    <VBox spacing="10" alignment="CENTER" style="-fx-padding: 10;">
+                        <!-- Trier par rôle sur une ligne -->
+                        <HBox spacing="10" alignment="CENTER">
+                            <Button text="Trier par rôle" onAction="#handleShowRoleFilter"
+                                    style="-fx-background-color: orange; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                            <ComboBox fx:id="roleFilterComboBox" visible="false" onAction="#handleFilterByRole">
+                                <items>
+                                    <FXCollections fx:factory="observableArrayList">
+                                        <String fx:value="Tous"/>
+                                        <String fx:value="Citoyen"/>
+                                        <String fx:value="Responsable"/>
+                                        <String fx:value="Technicien"/>
+                                    </FXCollections>
+                                </items>
+                            </ComboBox>
+                        </HBox>
+
+                        <!-- Exporter PDF en dessous -->
+                        <HBox spacing="10" alignment="CENTER">
+                            <Button text="Exporter PDF" onAction="#handleGeneratePdf"
+                                    style="-fx-background-color: red; -fx-text-fill: white; -fx-font-weight: bold;">
+                                <graphic>
+                                    <FontIcon iconLiteral="fas-file-pdf" iconSize="20" iconColor="white"/>
+                                </graphic>
+                            </Button>
+                        </HBox>
+                    </VBox>
+
 
                 </VBox>
             </VBox>
@@ -179,7 +218,6 @@
             </ScrollPane>
         </HBox>
     </center>
-
     <!-- Pied de page -->
     <bottom>
         <Label text="© 2025 Gestion des responsables - Tous droits réservés" style="-fx-font-size: 12px; -fx-text-fill: #888888; -fx-padding: 10;" alignment="CENTER"/>

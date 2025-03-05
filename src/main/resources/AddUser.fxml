@@ -59,8 +59,10 @@
 
                         <HBox fx:id="modulesBox" spacing="10" visible="false">
                             <Label text="Modules :" style="-fx-text-fill: #007BFF;"/>
-                            <TextField fx:id="modulesField" promptText="Séparez par des virgules" style="-fx-background-color: white; -fx-border-color: #007BFF;"/>
+                            <ComboBox fx:id="modulesComboBox" promptText="Sélectionnez un module"
+                                      style="-fx-background-color: white; -fx-border-color: #007BFF;"/>
                         </HBox>
+
                     </VBox>
 
                     <HBox spacing="15" alignment="CENTER">

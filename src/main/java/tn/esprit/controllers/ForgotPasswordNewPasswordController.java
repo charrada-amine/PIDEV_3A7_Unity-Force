@@ -60,6 +60,12 @@ public class ForgotPasswordNewPasswordController {
             showAlert("Erreur", "Les mots de passe ne correspondent pas.");
             return;
         }
+        // Validation du mot de passe (au moins 8 caractères, un chiffre, une majuscule)
+        if (newPassword.length() < 8 || !newPassword.matches(".*\\d.*") || !newPassword.matches(".*[A-Z].*")) {
+            showAlert("Erreur", "Le mot de passe doit comporter au moins 8 caractères, un chiffre et une lettre majuscule.");
+            return;
+        }
+
 
         // Mise à jour du mot de passe dans la base de données
         if (serviceUtilisateur.updatePassword(email, newPassword)) {
