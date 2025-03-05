@@ -25,6 +25,8 @@ import javafx.stage.StageStyle;
 import javafx.stage.Modality;
 import javafx.util.Duration;
 import tn.esprit.models.Reclamation;
+import tn.esprit.models.Lampadaire;
+import tn.esprit.models.Zone;
 import tn.esprit.services.ServiceReclamation;
 import java.net.URL;
 import java.sql.Date;
@@ -45,6 +47,14 @@ import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
 import java.io.File;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import javafx.scene.image.Image;
+import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 
 public class GestionReclamationController implements Initializable {
 
@@ -60,6 +70,8 @@ public class GestionReclamationController implements Initializable {
     @FXML private ComboBox<String> cbFilterStatut;
 
     private final ServiceReclamation serviceReclamation = new ServiceReclamation();
+    private final tn.esprit.services.ServiceLampadaire serviceLampadaire = new tn.esprit.services.ServiceLampadaire();
+    private final tn.esprit.services.ServiceZone serviceZone = new tn.esprit.services.ServiceZone(); // Assumed service
     private final ObservableList<Reclamation> reclamations = FXCollections.observableArrayList();
     private Reclamation selectedReclamation;
 
@@ -67,7 +79,6 @@ public class GestionReclamationController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         cbStatut.setItems(FXCollections.observableArrayList("Ouvert", "En cours", "Résolu", "Fermé"));
 
-        // Initialize sorting ComboBox with tooltips
         cbSort.setItems(FXCollections.observableArrayList("Aucun tri", "Date croissante", "Date décroissante"));
         cbSort.setValue("Aucun tri");
         cbSort.setOnAction(e -> refreshDisplay());
@@ -81,22 +92,15 @@ public class GestionReclamationController implements Initializable {
                 } else {
                     setText(item);
                     switch (item) {
-                        case "Aucun tri":
-                            setTooltip(new Tooltip("Affiche les réclamations dans leur ordre d'origine"));
-                            break;
-                        case "Date croissante":
-                            setTooltip(new Tooltip("Trie les réclamations par date, de la plus ancienne à la plus récente"));
-                            break;
-                        case "Date décroissante":
-                            setTooltip(new Tooltip("Trie les réclamations par date, de la plus récente à la plus ancienne"));
-                            break;
+                        case "Aucun tri": setTooltip(new Tooltip("Affiche les réclamations dans leur ordre d'origine")); break;
+                        case "Date croissante": setTooltip(new Tooltip("Trie les réclamations par date, de la plus ancienne à la plus récente")); break;
+                        case "Date décroissante": setTooltip(new Tooltip("Trie les réclamations par date, de la plus récente à la plus ancienne")); break;
                     }
                 }
             }
         });
-        cbSort.setButtonCell(cbSort.getCellFactory().call(null)); // Apply tooltip to the button too
+        cbSort.setButtonCell(cbSort.getCellFactory().call(null));
 
-        // Initialize filter ComboBox with tooltips
         cbFilterStatut.setItems(FXCollections.observableArrayList("Tous", "Ouvert", "En cours", "Résolu", "Fermé"));
         cbFilterStatut.setValue("Tous");
         cbFilterStatut.setOnAction(e -> refreshDisplay());
@@ -110,26 +114,16 @@ public class GestionReclamationController implements Initializable {
                 } else {
                     setText(item);
                     switch (item) {
-                        case "Tous":
-                            setTooltip(new Tooltip("Affiche toutes les réclamations, quel que soit leur statut"));
-                            break;
-                        case "Ouvert":
-                            setTooltip(new Tooltip("Affiche uniquement les réclamations avec le statut 'Ouvert'"));
-                            break;
-                        case "En cours":
-                            setTooltip(new Tooltip("Affiche uniquement les réclamations avec le statut 'En cours'"));
-                            break;
-                        case "Résolu":
-                            setTooltip(new Tooltip("Affiche uniquement les réclamations avec le statut 'Résolu'"));
-                            break;
-                        case "Fermé":
-                            setTooltip(new Tooltip("Affiche uniquement les réclamations avec le statut 'Fermé'"));
-                            break;
+                        case "Tous": setTooltip(new Tooltip("Affiche toutes les réclamations, quel que soit leur statut")); break;
+                        case "Ouvert": setTooltip(new Tooltip("Affiche uniquement les réclamations avec le statut 'Ouvert'")); break;
+                        case "En cours": setTooltip(new Tooltip("Affiche uniquement les réclamations avec le statut 'En cours'")); break;
+                        case "Résolu": setTooltip(new Tooltip("Affiche uniquement les réclamations avec le statut 'Résolu'")); break;
+                        case "Fermé": setTooltip(new Tooltip("Affiche uniquement les réclamations avec le statut 'Fermé'")); break;
                     }
                 }
             }
         });
-        cbFilterStatut.setButtonCell(cbFilterStatut.getCellFactory().call(null)); // Apply tooltip to the button too
+        cbFilterStatut.setButtonCell(cbFilterStatut.getCellFactory().call(null));
 
         scrollPane.setFitToWidth(true);
         cardContainer.setHgap(20);
@@ -486,7 +480,10 @@ public class GestionReclamationController implements Initializable {
         Button btnIntervenir = createIconButton("Intervenir", FontAwesomeSolid.TOOLS, "#ff9800");
         btnIntervenir.setOnAction(e -> handleIntervenir(reclamation));
 
-        buttons.getChildren().addAll(btnModifier, btnSupprimer, btnGeneratePdf, btnIntervenir);
+        Button btnGenerateQrCode = createIconButton("Générer QR Code", FontAwesomeSolid.QRCODE, "#9c27b0");
+        btnGenerateQrCode.setOnAction(e -> handleGenerateQrCode(reclamation));
+
+        buttons.getChildren().addAll(btnModifier, btnSupprimer, btnGeneratePdf, btnIntervenir, btnGenerateQrCode);
 
         card.getChildren().addAll(header, new Separator(), content, buttons);
         card.setStyle("-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16;");
@@ -547,6 +544,68 @@ public class GestionReclamationController implements Initializable {
         }
     }
 
+    private void handleGenerateQrCode(Reclamation reclamation) {
+        try {
+            // Gather data for QR code
+            Lampadaire lampadaire = serviceLampadaire.getById(reclamation.getLampadaireId());
+            if (lampadaire == null) {
+                showAlert("Erreur", "Lampadaire non trouvé pour l'ID: " + reclamation.getLampadaireId());
+                return;
+            }
+
+            Zone zone = serviceZone.getById(lampadaire.getIdZone());
+            if (zone == null) {
+                showAlert("Erreur", "Zone non trouvée pour l'ID: " + lampadaire.getIdZone());
+                return;
+            }
+
+            // Create QR code content
+            String qrContent = String.format(
+                    "Reclamation #%d\n" +
+                            "Description: %s\n" +
+                            "Statut: %s\n" +
+                            "Lampadaire ID: %d\n" +
+                            "Zone: %s\n" +
+                            "Description Zone: %s\n" +
+                            "Latitude: %.6f\n" +
+                            "Longitude: %.6f",
+                    reclamation.getID_reclamation(),
+                    reclamation.getDescription(),
+                    reclamation.getStatut(),
+                    reclamation.getLampadaireId(),
+                    zone.getNom(),
+                    zone.getDescription(),
+                    zone.getLatitude(),
+                    zone.getLongitude()
+            );
+
+            // Generate QR code
+            QRCodeWriter qrCodeWriter = new QRCodeWriter();
+            BitMatrix bitMatrix = qrCodeWriter.encode(qrContent, BarcodeFormat.QR_CODE, 200, 200);
+            ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
+            MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
+            Image qrCodeImage = new Image(new ByteArrayInputStream(pngOutputStream.toByteArray()));
+
+            // Show QR code in pop-up
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/QrCodePopup.fxml"));
+            Parent root = loader.load();
+            QrCodePopupController qrCodePopupController = loader.getController();
+            qrCodePopupController.setQrCodeImage(qrCodeImage);
+
+            Stage dialogStage = new Stage();
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(cardContainer.getScene().getWindow());
+            dialogStage.initStyle(StageStyle.UTILITY);
+            dialogStage.setTitle("QR Code Réclamation #" + reclamation.getID_reclamation());
+            dialogStage.setScene(new Scene(root));
+            dialogStage.setResizable(false);
+            dialogStage.showAndWait();
+
+        } catch (WriterException | IOException e) {
+            showAlert("Erreur QR Code", "Impossible de générer le QR Code : " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
     @FXML
     private void handleNavigateToInterventions(ActionEvent event) {
         loadView("GestionIntervention.fxml", event);
@@ -573,4 +632,13 @@ public class GestionReclamationController implements Initializable {
             showAlert("Erreur de navigation", "Impossible de charger la vue : " + fxmlFile);
         }
     }
+}
+
+// Assumed service interfaces (please provide actual implementations if different)
+interface ServiceLampadaire {
+    Lampadaire getById(int id);
+}
+
+interface ServiceZone {
+    Zone getById(int id);
 }

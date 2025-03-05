@@ -15,7 +15,14 @@
     <!-- Barre de navigation latérale -->
     <left>
         <VBox prefWidth="240" styleClass="nav-bar">
-            <Label text="Gestion Urbaine" styleClass="nav-title"/>
+            <HBox alignment="CENTER_LEFT" spacing="10" styleClass="nav-header">
+                <ImageView fitHeight="40" fitWidth="40">
+                    <image>
+                        <Image url="@logonavbar.png"/>
+                    </image>
+                </ImageView>
+                <Label text="NoorCity" styleClass="nav-title"/>
+            </HBox>
 
             <!-- Boutons de navigation -->
             <Button text="Accueil" styleClass="nav-button" onAction="#handleAccueil">
@@ -96,7 +103,7 @@
                 </graphic>
             </Button>
 
-            <Button text="Profil" styleClass="nav-button" onAction="#handleProfileInterface">
+            <Button text="Profil energetique" styleClass="nav-button" onAction="#handleProfileInterface">
                 <graphic>
                     <FontIcon iconLiteral="fas-user-circle" iconSize="16" iconColor="#ffffff"/>
                 </graphic>

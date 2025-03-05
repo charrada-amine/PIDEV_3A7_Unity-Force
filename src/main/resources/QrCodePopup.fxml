@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.esprit.controllers.QrCodePopupController"
+      spacing="15" alignment="CENTER" prefWidth="300" prefHeight="350"
+      style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10;"
+      stylesheets="@styles/style.css">
+
+    <Label text="QR Code de la Réclamation" styleClass="form-title" alignment="CENTER"/>
+    <ImageView fx:id="qrCodeImageView" fitWidth="200" fitHeight="200" preserveRatio="true"/>
+    <Label text="Scannez ce QR Code pour voir les détails" style="-fx-text-fill: #5f6368;" alignment="CENTER"/>
+    <Button text="Fermer" onAction="#handleClose" styleClass="action-button reset">
+        <graphic>
+            <org.kordamp.ikonli.javafx.FontIcon iconLiteral="fas-times" iconSize="16"/>
+        </graphic>
+    </Button>
+</VBox>
