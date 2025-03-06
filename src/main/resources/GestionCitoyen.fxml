@@ -42,11 +42,6 @@
                     <FontIcon iconLiteral="fas-tools" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-            <Button text="Lampadaires" styleClass="nav-button" onAction="#handleGestionLampadaire">
-                <graphic>
-                    <FontIcon iconLiteral="fas-lightbulb" iconSize="16" iconColor="#ffffff"/>
-                </graphic>
-            </Button>
             <Button text="Réclamations" styleClass="nav-button" onAction="#handleGestionReclamation">
                 <graphic>
                     <FontIcon iconLiteral="fas-exclamation-circle" iconSize="16" iconColor="#ffffff"/>
