@@ -126,7 +126,7 @@
                     <DatePicker fx:id="datePicker" promptText="Date d'installation" styleClass="modern-input"/>
                     <Label fx:id="lblDateError" styleClass="error-message" visible="false"/>
 
-                    <TextField fx:id="lampadaireIdField" promptText="ID Lampadaire" styleClass="modern-input"/>
+                    <ComboBox fx:id="lampadaireIdComboBox" promptText="Sélectionnez un lampadaire" styleClass="modern-input"/>
                     <Label fx:id="lblLampadaireError" styleClass="error-message" visible="false"/>
                 </VBox>
 
@@ -170,7 +170,7 @@
                 <HBox spacing="10" styleClass="search-container">
                     <ComboBox fx:id="searchCriteriaComboBox" promptText="Choisir un critère" styleClass="modern-input"/>
                     <ComboBox fx:id="searchValueComboBox" promptText="Choisir une valeur" styleClass="modern-input"/>
-                    <Button text="Chercher" onAction="#handleSearch" styleClass="action-button,search">
+                    <Button text="Chercher" onAction="#handleSearch" styleClass="action-button,btstl">
                         <graphic>
                             <FontIcon iconLiteral="fas-search" iconSize="16" iconColor="white"/>
                         </graphic>

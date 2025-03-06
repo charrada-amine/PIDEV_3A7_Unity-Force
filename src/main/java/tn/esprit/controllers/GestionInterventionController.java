@@ -33,6 +33,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.ResourceBundle;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -49,6 +50,8 @@ public class GestionInterventionController implements Initializable {
     @FXML private TextField tfReclamationId;
     @FXML private FlowPane cardContainer;
     @FXML private ScrollPane scrollPane;
+    @FXML private DatePicker dpFilterDate; // Filter by date
+    @FXML private ComboBox<String> cbSortOrder; // Sort by date
 
     private final ServiceIntervention serviceIntervention = new ServiceIntervention();
     private final ObservableList<Intervention> interventions = FXCollections.observableArrayList();
@@ -59,6 +62,9 @@ public class GestionInterventionController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         cbType.setItems(FXCollections.observableArrayList(TypeIntervention.values()));
+        cbEtat.setItems(FXCollections.observableArrayList("En attente", "En cours", "Terminée", "Annulée"));
+        cbSortOrder.setItems(FXCollections.observableArrayList("Aucun tri", "Date croissante", "Date décroissante"));
+        cbSortOrder.setValue("Aucun tri"); // Default value
         scrollPane.setFitToWidth(true);
         cardContainer.setHgap(20);
         cardContainer.setVgap(20);
@@ -66,6 +72,11 @@ public class GestionInterventionController implements Initializable {
         Font.loadFont(getClass().getResourceAsStream("/fonts/Roboto-Regular.ttf"), 14);
         tfReclamationId.setDisable(false); // Enabled by default
         tfLampadaireId.setDisable(false); // Enabled by default
+
+        // Add listeners for filter and sort
+        dpFilterDate.valueProperty().addListener((obs, oldValue, newValue) -> refreshDisplay());
+        cbSortOrder.setOnAction(e -> refreshDisplay());
+
         loadData();
     }
 
@@ -80,8 +91,34 @@ public class GestionInterventionController implements Initializable {
 
     private void loadData() {
         interventions.setAll(serviceIntervention.getAll());
+        refreshDisplay();
+    }
+
+    private void refreshDisplay() {
+        LocalDate filterDate = dpFilterDate.getValue();
+        ObservableList<Intervention> filteredInterventions = FXCollections.observableArrayList(
+                interventions.stream()
+                        .filter(intervention -> filterDate == null ||
+                                intervention.getDateIntervention().toLocalDate().equals(filterDate))
+                        .collect(java.util.stream.Collectors.toList())
+        );
+
+        String sortOrder = cbSortOrder.getValue();
+        if (sortOrder != null) {
+            switch (sortOrder) {
+                case "Date croissante":
+                    filteredInterventions.sort(Comparator.comparing(Intervention::getDateIntervention));
+                    break;
+                case "Date décroissante":
+                    filteredInterventions.sort(Comparator.comparing(Intervention::getDateIntervention).reversed());
+                    break;
+                default: // "Aucun tri"
+                    break;
+            }
+        }
+
         cardContainer.getChildren().clear();
-        interventions.forEach(intervention -> cardContainer.getChildren().add(createInterventionCard(intervention)));
+        filteredInterventions.forEach(intervention -> cardContainer.getChildren().add(createInterventionCard(intervention)));
     }
 
     private void handleDeleteIntervention(Intervention intervention) {

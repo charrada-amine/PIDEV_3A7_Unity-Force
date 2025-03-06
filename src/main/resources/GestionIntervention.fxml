@@ -108,6 +108,7 @@
         </VBox>
     </left>
 
+
     <center>
         <HBox spacing="30" style="-fx-padding: 25;">
             <VBox spacing="20" styleClass="form-card" prefWidth="380">
@@ -157,10 +158,17 @@
                 </VBox>
             </VBox>
 
-            <ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER"
-                        styleClass="card-scroll">
-                <FlowPane fx:id="cardContainer" hgap="25" vgap="25" style="-fx-padding: 20;"/>
-            </ScrollPane>
+            <VBox spacing="20" prefWidth="600">
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Filtrer par date :" styleClass="filter-label"/>
+                    <DatePicker fx:id="dpFilterDate" promptText="Choisir une date" styleClass="modern-input"/>
+                    <Label text="Trier par :" styleClass="filter-label"/>
+                    <ComboBox fx:id="cbSortOrder" promptText="Trier" styleClass="modern-input"/>
+                </HBox>
+                <ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER" styleClass="card-scroll">
+                    <FlowPane fx:id="cardContainer" hgap="25" vgap="25" style="-fx-padding: 20;"/>
+                </ScrollPane>
+            </VBox>
         </HBox>
     </center>
 </BorderPane>

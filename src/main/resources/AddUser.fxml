@@ -39,9 +39,9 @@
                             <ComboBox fx:id="roleComboBox" style="-fx-background-color: white; -fx-border-color: #007BFF;"/>
                         </HBox>
 
-                        <HBox fx:id="zoneIdBox" spacing="10" visible="false">
-                            <Label text="Zone ID :" style="-fx-text-fill: #007BFF;"/>
-                            <TextField fx:id="zoneIdField" style="-fx-background-color: white; -fx-border-color: #007BFF;"/>
+                        <HBox fx:id="zoneBox" spacing="10" visible="false">
+                            <Label text="Zone :" style="-fx-text-fill: #007BFF;"/>
+                            <ComboBox fx:id="zoneComboBox" style="-fx-background-color: white; -fx-border-color: #007BFF;" promptText="Sélectionnez une zone"/>
                         </HBox>
 
                         <HBox fx:id="specialiteBox" spacing="10" visible="false">
@@ -83,7 +83,6 @@
                                 <FontIcon iconLiteral="fas-arrow-left" iconSize="16" iconColor="white"/>
                             </graphic>
                         </Button>
-
                     </HBox>
                 </VBox>
             </VBox>

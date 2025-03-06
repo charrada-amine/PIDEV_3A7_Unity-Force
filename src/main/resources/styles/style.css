@@ -305,3 +305,54 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 2);
     -fx-cursor: hand;
 }
+/* Style général pour le conteneur principal */
+.root {
+    -fx-background-color: #f0f4f8; /* Fond gris-bleu clair pour la page */
+}
+
+/* Style pour le titre principal */
+.main-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #003087; /* Bleu foncé pour le titre principal */
+    -fx-alignment: center;
+    -fx-padding: 0 0 20 0;
+}
+
+/* Style pour les boîtes d'articles */
+.article-box {
+    -fx-alignment: center-left;
+    -fx-max-width: 850px;
+    -fx-background-color: #ffffff; /* Fond blanc pour les articles */
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 139, 0.2), 10, 0, 0, 5); /* Ombre bleue subtile */
+    -fx-border-color: #1e90ff; /* Bordure bleu clair */
+    -fx-border-width: 1;
+}
+
+/* Style pour les titres des articles */
+.article-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1e90ff; /* Bleu clair pour les titres des articles */
+}
+
+/* Style pour les lignes de texte */
+.article-text {
+    -fx-font-size: 16px;
+    -fx-text-fill: #0056b3; /* Bleu moyen pour le texte */
+}
+
+/* Style pour les images */
+.article-image {
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 139, 0.1), 5, 0, 0, 2); /* Ombre légère bleue */
+}
+
+/* Style pour le conteneur de texte à l'intérieur des articles */
+.text-container {
+    -fx-background-color: #e6f0fa; /* Fond bleu très clair pour le texte */
+    -fx-padding: 15;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
