@@ -31,7 +31,7 @@
 
             <!-- Champs de saisie (verticalement alignés, identiques en taille) -->
             <VBox alignment="CENTER" spacing="15.0">
-                <TextField fx:id="emailField" promptText="Email" prefWidth="320.0" prefHeight="50.0"
+                <TextField fx:id="emailField" promptText="Email" prefWidth="370.0"  maxWidth="370.0" prefHeight="50.0"
                            style="-fx-font-size: 16.0; -fx-font-family: 'Segoe UI';
                                   -fx-background-color: white; -fx-border-radius: 10;
                                   -fx-background-radius: 10;

@@ -70,11 +70,6 @@
                     <FontIcon iconLiteral="fas-user-cog" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
-            <Button text="Utilisateurs" styleClass="nav-button" onAction="#handleGestionUtilisateur">
-                <graphic>
-                    <FontIcon iconLiteral="fas-user" iconSize="16" iconColor="#ffffff"/>
-                </graphic>
-            </Button>
             <Button text="Zones" styleClass="nav-button" onAction="#handleGestionZone">
                 <graphic>
                     <FontIcon iconLiteral="fas-map-marked-alt" iconSize="16" iconColor="#ffffff"/>
@@ -85,11 +80,6 @@
             <Button text="Vue Citoyen" styleClass="nav-button" onAction="#handleNavigateToZoneCitoyen">
                 <graphic>
                     <FontIcon iconLiteral="fas-users" iconSize="16" iconColor="#ffffff"/>
-                </graphic>
-            </Button>
-            <Button text="Lampadaires" styleClass="nav-button" onAction="#handleNavigateToLampadaires">
-                <graphic>
-                    <FontIcon iconLiteral="fas-lightbulb" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
             <Button text="Carte Lampadaires" styleClass="nav-button" onAction="#handleNavigateToLampadaireMap">
@@ -111,11 +101,6 @@
             <Button text="Sources" styleClass="nav-button" onAction="#handleSourceInterface">
                 <graphic>
                     <FontIcon iconLiteral="fas-code-branch" iconSize="16" iconColor="#ffffff"/>
-                </graphic>
-            </Button>
-            <Button text="Retour" styleClass="nav-button" onAction="#handleBack">
-                <graphic>
-                    <FontIcon iconLiteral="fas-arrow-left" iconSize="16" iconColor="#ffffff"/>
                 </graphic>
             </Button>
         </VBox>
@@ -172,8 +157,6 @@
                     <Image url="@image3.png" />
                 </ImageView>
             </VBox>
-
-
         </HBox>
     </center>
 </BorderPane>

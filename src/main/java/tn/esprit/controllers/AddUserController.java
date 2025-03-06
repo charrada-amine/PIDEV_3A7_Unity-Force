@@ -37,7 +37,8 @@ public class AddUserController implements Initializable {
     private TextField  nameField, prenomField, emailField, passwordField, zoneIdField, modulesField;
     @FXML
     private TextField visiblePasswordField;
-
+    @FXML
+    private ComboBox<String> modulesComboBox;
     @FXML
     private ComboBox<String> roleComboBox, specialiteComboBox;
 
@@ -59,6 +60,7 @@ public class AddUserController implements Initializable {
         // Remplir les ComboBox avec des valeurs prédéfinies pour les rôles et spécialités
         roleComboBox.setItems(FXCollections.observableArrayList("Citoyen", "Responsable", "Technicien"));
         specialiteComboBox.setItems(FXCollections.observableArrayList("Maintenance", "Électricité", "Autre"));
+        modulesComboBox.getItems().addAll("Admin", "Infrastructure", "Profil Énergétique" , "Intervention" ,"Donnée");
 
         // Cacher les champs spécifiques selon le rôle sélectionné
         roleComboBox.setOnAction(e -> handleRoleChange());
@@ -145,8 +147,8 @@ public class AddUserController implements Initializable {
         specialiteComboBox.setVisible(role.equals("technicien"));
         specialiteComboBox.setManaged(role.equals("technicien"));
 
-        modulesField.setVisible(role.equals("responsable"));
-        modulesField.setManaged(role.equals("responsable"));
+        modulesComboBox.setVisible(role.equals("responsable"));
+        modulesComboBox.setManaged(role.equals("responsable"));
     }
 
     /**
@@ -257,11 +259,13 @@ public class AddUserController implements Initializable {
                     serviceUtilisateur.add(user, specialite, new ArrayList<>(), 0);
                     break;
                 case responsable:
-                    if (modulesField.getText().isEmpty()) {
-                        showAlert("Erreur", "Veuillez entrer des modules.");
+                    String selectedModule = modulesComboBox.getValue();
+                    if (selectedModule == null) {
+                        showAlert("Erreur", "Veuillez sélectionner un module.");
                         return;
                     }
-                    List<String> modules = List.of(modulesField.getText().split("\\s*,\\s*"));
+                    List<String> modules = List.of(selectedModule);
+
                     serviceUtilisateur.add(user, null, modules, 0);
                     break;
             }
@@ -322,7 +326,7 @@ public class AddUserController implements Initializable {
         roleComboBox.getSelectionModel().clearSelection();
         zoneIdField.clear();
         specialiteComboBox.getSelectionModel().clearSelection();
-        modulesField.clear();
+        modulesComboBox.getSelectionModel().clearSelection();
         updateFieldsVisibility(""); // Cacher tous les champs conditionnels
     }
 }

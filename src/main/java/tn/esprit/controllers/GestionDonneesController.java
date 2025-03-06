@@ -63,6 +63,9 @@ public class GestionDonneesController implements Initializable {
     @FXML
     private Label valeurIndicationLabel;
 
+
+    @FXML
+    private ComboBox<String> typecollectCapteurComboBox;
     @FXML
     private ComboBox<String> searchTypeComboBox; // Pour choisir le type de capteur
     @FXML
@@ -94,6 +97,7 @@ public class GestionDonneesController implements Initializable {
         searchTypeComboBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             updateSearchCapteurIds(newVal); // Mettre à jour les ID des capteurs en fonction du type choisi
         });
+        typecollectCapteurComboBox.getItems().addAll("MOUVEMENT", "TEMPERATURE", "LUMINOSITE", "CONSOMMATION_ENERGIE");
 
         // Ajouter l'option "Tous" dans le ComboBox des ID de capteur
         //searchCapteurIdComboBox.getItems().add(-1); // -1 représente "Tous"
@@ -377,77 +381,200 @@ public class GestionDonneesController implements Initializable {
     public void handleBack(ActionEvent actionEvent) {
     }
     @FXML
-    private void handleGestionCapteur(ActionEvent event) {
-        switchScene(event, "/GestionCapteur.fxml");
+    private Button btnNavigateToCameras; // Bouton pour l'interface Caméras
+
+    @FXML
+    private Button btnNavigateToLampadaireMap; // Bouton pour l'interface Carte Lampadaires
+
+    @FXML
+    private Button btnNavigateToZoneCitoyen; // Bouton pour l'interface Vue Citoyen
+
+    @FXML
+    private Button btnGestionCapteur;
+
+    @FXML
+    private Button btnGestionCitoyen;
+
+    @FXML
+    private Button btnGestionDonnee;
+
+    @FXML
+    private Button btnGestionIntervention;
+
+    @FXML
+    private Button btnGestionLampadaire;
+
+    @FXML
+    private Button btnGestionReclamation;
+
+    @FXML
+    private Button btnGestionResponsable;
+
+    @FXML
+    private Button btnGestionTechnicien;
+
+    @FXML
+    private Button btnGestionZone;
+
+    @FXML
+    private Button btnProfileInterface;
+
+    @FXML
+    private Button btnSourceInterface;
+
+    @FXML
+    private Button btnAccueil; // Bouton pour revenir à l'accueil
+
+    // Handler pour le bouton de navigation vers l'interface Caméras
+    @FXML
+    private void handleNavigateToCameras(ActionEvent event) {
+        if (hasPermission("Caméras")) {
+            switchScene(event, "/GestionCamera.fxml");
+        }
     }
 
+    // Handler pour le bouton de navigation vers l'interface Carte Lampadaires
+    @FXML
+    private void handleNavigateToLampadaireMap(ActionEvent event) {
+        if (hasPermission("Carte Lampadaires")) {
+            switchScene(event, "/LampadaireMapView.fxml");
+        }
+    }
+
+    // Handler pour le bouton de navigation vers l'interface Vue Citoyen
+    @FXML
+    private void handleNavigateToZoneCitoyen(ActionEvent event) {
+        if (hasPermission("Vue Citoyen")) {
+            switchScene(event, "/ZoneCitoyenView.fxml");
+        }
+    }
+
+    // Handler pour le bouton de gestion des capteurs
+    @FXML
+    private void handleGestionCapteur(ActionEvent event) {
+        if (hasPermission("Capteurs")) {
+            switchScene(event, "/GestionCapteur.fxml");
+        }
+    }
+
+    // Handler pour le bouton de gestion des citoyens
     @FXML
     private void handleGestionCitoyen(ActionEvent event) {
-        switchScene(event, "/GestionCitoyen.fxml");
+        if (hasPermission("Citoyens")) {
+            switchScene(event, "/GestionCitoyen.fxml");
+        }
     }
 
+    // Handler pour le bouton de gestion des données
     @FXML
     private void handleGestionDonnee(ActionEvent event) {
-        switchScene(event, "/GestionDonnee.fxml");
+        if (hasPermission("Données")) {
+            switchScene(event, "/GestionDonnee.fxml");
+        }
     }
 
+    // Handler pour le bouton de gestion des interventions
     @FXML
     private void handleGestionIntervention(ActionEvent event) {
-        switchScene(event, "/GestionIntervention.fxml");
+        if (hasPermission("Interventions")) {
+            switchScene(event, "/GestionIntervention.fxml");
+        }
     }
 
+    // Handler pour le bouton de gestion des lampadaires
     @FXML
     private void handleGestionLampadaire(ActionEvent event) {
-        switchScene(event, "/GestionLampadaire.fxml");
+        if (hasPermission("Lampadaires")) {
+            switchScene(event, "/GestionLampadaire.fxml");
+        }
     }
 
+    // Handler pour le bouton de gestion des réclamations
     @FXML
     private void handleGestionReclamation(ActionEvent event) {
-        switchScene(event, "/GestionReclamation.fxml");
+        if (hasPermission("Réclamations")) {
+            switchScene(event, "/GestionReclamation.fxml");
+        }
     }
 
+    // Handler pour le bouton de gestion des responsables
     @FXML
     private void handleGestionResponsable(ActionEvent event) {
-        switchScene(event, "/GestionResponsable.fxml");
+        if (hasPermission("Responsables")) {
+            switchScene(event, "/GestionResponsable.fxml");
+        }
     }
 
+    // Handler pour le bouton de gestion des techniciens
     @FXML
     private void handleGestionTechnicien(ActionEvent event) {
-        switchScene(event, "/GestionTechnicien.fxml");
+        if (hasPermission("Techniciens")) {
+            switchScene(event, "/GestionTechnicien.fxml");
+        }
     }
 
-    @FXML
-    private void handleGestionUtilisateur(ActionEvent event) {
-        switchScene(event, "/GestionUtilisateur.fxml");
-    }
-
+    // Handler pour le bouton de gestion des zones
     @FXML
     private void handleGestionZone(ActionEvent event) {
-        switchScene(event, "/GestionZone.fxml");
+        if (hasPermission("Zones")) {
+            switchScene(event, "/GestionZone.fxml");
+        }
     }
 
+    // Handler pour le bouton de gestion du profil
     @FXML
     private void handleProfileInterface(ActionEvent event) {
-        switchScene(event, "/ProfileInterface.fxml");
+        if (hasPermission("Profil énergétique")) {
+            switchScene(event, "/ProfileInterface.fxml");
+        }
     }
 
+    // Handler pour le bouton des sources
     @FXML
     private void handleSourceInterface(ActionEvent event) {
-        switchScene(event, "/SourceInterface.fxml");
+        if (hasPermission("Sources")) {
+            switchScene(event, "/SourceInterface.fxml");
+        }
     }
 
-    @FXML
-    private void handleBack() {
-        // Logique pour revenir à la page précédente
-        System.out.println("Retour à la page précédente");
-    }
-
-    // Nouveau handler pour le bouton Accueil
+    // Handler pour revenir à la page d'accueil (Menu)
     @FXML
     private void handleAccueil(ActionEvent event) {
         switchScene(event, "/Menu.fxml");
     }
 
+    // Méthode pour vérifier les permissions
+    private boolean hasPermission(String page) {
+        utilisateur user = Session.getCurrentUser();
+        if (user == null) {
+            showAlert("Accès refusé", "Vous devez être connecté pour accéder à cette page.");
+            return false;
+        }
+
+        switch (user.getRole()) {
+            case responsable:
+                // Le responsable a accès à tout
+                return true;
+
+            case citoyen:
+                // Le citoyen a accès à Lampadaires, Réclamations, Zones
+                return page.equals("Lampadaires") || page.equals("Réclamations") || page.equals("Zones");
+
+            case technicien:
+                // Le technicien a accès à Capteurs, Données, Interventions, Caméras, Profil énergétique, Sources
+                return page.equals("Capteurs") || page.equals("Données") || page.equals("Interventions")
+                        || page.equals("Caméras") || page.equals("Profil énergétique") || page.equals("Sources");
+
+            default:
+                // Par défaut, aucun accès
+                showAlert("Accès refusé", "Vous n'avez pas l'autorisation d'accéder à cette page.");
+                return false;
+        }
+    }
+
+
+
+    // Méthode de commutation de scène (load des FXML et mise à jour de la scène)
     private void switchScene(ActionEvent event, String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
@@ -702,13 +829,15 @@ public class GestionDonneesController implements Initializable {
 
             // Diviser la ligne en type et valeur
             String[] parts = lastLine.split(",");
-            if (parts.length == 6) { // Maintenant, il y a 6 parties : temperature, valeur, motion, valeur, energy, valeur
+            if (parts.length == 8) { // Maintenant, il y a 8 parties : temperature, valeur, motion, valeur, energy, valeur, light, valeur
                 String type1 = parts[0].trim().toUpperCase(); // "TEMPERATURE"
                 String valeur1 = parts[1].trim(); // Valeur de la température
                 String type2 = parts[2].trim().toUpperCase(); // "MOTION"
                 String valeur2 = parts[3].trim(); // Valeur du mouvement (true/false)
                 String type3 = parts[4].trim().toUpperCase(); // "ENERGY"
                 String valeur3 = parts[5].trim(); // Valeur de l'énergie (tension)
+                String type4 = parts[6].trim().toUpperCase(); // "LIGHT"
+                String valeur4 = parts[7].trim(); // Valeur de l'intensité lumineuse (lux)
 
                 // Afficher les données de mouvement
                 if (type2.equals("MOTION")) {
@@ -744,13 +873,15 @@ public class GestionDonneesController implements Initializable {
 
             // Diviser la ligne en type et valeur
             String[] parts = lastLine.split(",");
-            if (parts.length == 6) { // Maintenant, il y a 6 parties : temperature, valeur, motion, valeur, energy, valeur
+            if (parts.length == 8) { // Maintenant, il y a 8 parties : temperature, valeur, motion, valeur, energy, valeur, light, valeur
                 String type1 = parts[0].trim().toUpperCase(); // "TEMPERATURE"
                 String valeur1 = parts[1].trim(); // Valeur de la température
                 String type2 = parts[2].trim().toUpperCase(); // "MOTION"
                 String valeur2 = parts[3].trim(); // Valeur du mouvement (true/false)
                 String type3 = parts[4].trim().toUpperCase(); // "ENERGY"
                 String valeur3 = parts[5].trim(); // Valeur de l'énergie (tension)
+                String type4 = parts[6].trim().toUpperCase(); // "LIGHT"
+                String valeur4 = parts[7].trim(); // Valeur de l'intensité lumineuse (lux)
 
                 // Afficher les données de température
                 if (type1.equals("TEMPERATURE")) {
@@ -786,13 +917,15 @@ public class GestionDonneesController implements Initializable {
 
             // Diviser la ligne en type et valeur
             String[] parts = lastLine.split(",");
-            if (parts.length == 6) { // Maintenant, il y a 6 parties : temperature, valeur, motion, valeur, energy, valeur
+            if (parts.length == 8) { // Maintenant, il y a 8 parties : temperature, valeur, motion, valeur, energy, valeur, light, valeur
                 String type1 = parts[0].trim().toUpperCase(); // "TEMPERATURE"
                 String valeur1 = parts[1].trim(); // Valeur de la température
                 String type2 = parts[2].trim().toUpperCase(); // "MOTION"
                 String valeur2 = parts[3].trim(); // Valeur du mouvement (true/false)
                 String type3 = parts[4].trim().toUpperCase(); // "ENERGY"
                 String valeur3 = parts[5].trim(); // Valeur de l'énergie (tension)
+                String type4 = parts[6].trim().toUpperCase(); // "LIGHT"
+                String valeur4 = parts[7].trim(); // Valeur de l'intensité lumineuse (lux)
 
                 // Afficher les données d'énergie
                 if (type3.equals("ENERGY")) {
@@ -810,6 +943,77 @@ public class GestionDonneesController implements Initializable {
             }
         } else {
             showAlert("Erreur", "Aucune donnée valide reçue : " + receivedData);
+        }
+    }
+    @FXML
+    private void handleRecupererDonneeLumiere() {
+        DataReceiver dataReceiver = new DataReceiver();
+        String receivedData = dataReceiver.fetchDataFromServer();
+
+        // Afficher la réponse brute pour débogage
+        System.out.println("Données reçues : " + receivedData);
+
+        // Vérifier si les données contiennent une ligne valide
+        if (receivedData != null && receivedData.contains(",")) {
+            // Extraire la dernière ligne reçue
+            String[] lines = receivedData.split("\n");
+            String lastLine = lines[lines.length - 1].trim(); // Prendre la dernière ligne
+
+            // Diviser la ligne en type et valeur
+            String[] parts = lastLine.split(",");
+            if (parts.length == 8) { // Maintenant, il y a 8 parties : temperature, valeur, motion, valeur, energy, valeur, light, valeur
+                String type1 = parts[0].trim().toUpperCase(); // "TEMPERATURE"
+                String valeur1 = parts[1].trim(); // Valeur de la température
+                String type2 = parts[2].trim().toUpperCase(); // "MOTION"
+                String valeur2 = parts[3].trim(); // Valeur du mouvement (true/false)
+                String type3 = parts[4].trim().toUpperCase(); // "ENERGY"
+                String valeur3 = parts[5].trim(); // Valeur de l'énergie (tension)
+                String type4 = parts[6].trim().toUpperCase(); // "LIGHT"
+                String valeur4 = parts[7].trim(); // Valeur de l'intensité lumineuse (lux)
+
+                // Afficher les données d'intensité lumineuse
+                if (type4.equals("LIGHT")) {
+                    typeCapteurComboBox.setValue("LUMINOSITE"); // Sélectionner le type "LUMIERE" dans le ComboBox
+                    valeurField.setText(valeur4); // Remplir le champ de valeur avec l'intensité lumineuse
+                    dateCollectePicker.setValue(LocalDate.now()); // Remplir la date actuelle
+                    heureCollecteField.setText(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))); // Formater l'heure
+
+                    showSuccessAlert("Données d'intensité lumineuse récupérées avec succès : " + valeur4);
+                } else {
+                    showAlert("Erreur", "Type de capteur non reconnu : " + type4);
+                }
+            } else {
+                showAlert("Erreur", "Format de données incorrect : " + lastLine);
+            }
+        } else {
+            showAlert("Erreur", "Aucune donnée valide reçue : " + receivedData);
+        }
+    }
+    @FXML
+    private void handleRecupererDonnees() {
+        String selectedType = typecollectCapteurComboBox.getValue(); // Récupérer la valeur sélectionnée
+
+        if (selectedType == null) {
+            showAlert("Erreur", "Veuillez sélectionner un type de capteur.");
+            return;
+        }
+
+        switch (selectedType) {
+            case "MOUVEMENT":
+                handleRecupererDonneeMouvement();
+                break;
+            case "TEMPERATURE":
+                handleRecupererDonneeTemperature();
+                break;
+            case "LUMINOSITE":
+                handleRecupererDonneeLumiere();
+                break;
+            case "CONSOMMATION_ENERGIE":
+                handleRecupererDonneeEnergie();
+                break;
+            default:
+                showAlert("Erreur", "Type de capteur non reconnu : " + selectedType);
+                break;
         }
     }
 }

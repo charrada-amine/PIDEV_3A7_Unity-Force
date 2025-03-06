@@ -18,6 +18,7 @@ public class GestionLampadaireApp extends Application {
         primaryStage.show();
     }
 
+
     public static void main(String[] args) {
         launch(args); // Starts the JavaFX toolkit
     }
