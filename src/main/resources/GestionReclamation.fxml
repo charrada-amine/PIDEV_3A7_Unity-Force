@@ -25,7 +25,7 @@
             </HBox>
 
             <!-- Boutons de navigation -->
-            <Button text="Accueil" styleClass="nav-button" onAction="#handleAccueil">
+            <Button text="Accueil" styleClass="nav-button,btstl" onAction="#handleAccueil">
                 <graphic>
                     <FontIcon iconLiteral="fas-home" iconSize="16" iconColor="#ffffff"/>
                 </graphic>

@@ -18,7 +18,7 @@ public class ServiceLuminosite {
     }
 
     public void add(DonneeLuminosite donnee) {
-        String query = "INSERT INTO donneeluminosite (datecollecte, heurecollecte, capteurid, valeur) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO donneeluminosite (date_collecte, heure_collecte, capteur_id, valeur) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setDate(1, Date.valueOf(donnee.getDateCollecte()));
@@ -43,9 +43,9 @@ public class ServiceLuminosite {
             while (resultSet.next()) {
                 DonneeLuminosite donnee = new DonneeLuminosite(
                         resultSet.getInt("id_luminosite"),
-                        resultSet.getDate("datecollecte").toLocalDate(),
-                        resultSet.getTime("heurecollecte").toLocalTime(),
-                        resultSet.getInt("capteurid"),
+                        resultSet.getDate("date_collecte").toLocalDate(),
+                        resultSet.getTime("heure_collecte").toLocalTime(),
+                        resultSet.getInt("capteur_id"),
                         resultSet.getInt("valeur")
                 );
                 donnees.add(donnee);
@@ -74,7 +74,7 @@ public class ServiceLuminosite {
     }
 
     public void update(DonneeLuminosite donnee) {
-        String query = "UPDATE donneeluminosite SET datecollecte = ?, heurecollecte = ?, capteurid = ?, valeur = ? WHERE id_luminosite = ?";
+        String query = "UPDATE donneeluminosite SET date_collecte = ?, heure_collecte = ?, capteur_id = ?, valeur = ? WHERE id_luminosite = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setDate(1, Date.valueOf(donnee.getDateCollecte()));

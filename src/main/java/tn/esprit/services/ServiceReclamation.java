@@ -7,7 +7,6 @@ import tn.esprit.utils.MyDatabase;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-
 public class ServiceReclamation implements IService<Reclamation> {
     private Connection cnx;
 
@@ -17,7 +16,7 @@ public class ServiceReclamation implements IService<Reclamation> {
 
     @Override
     public void add(Reclamation reclamation) {
-        String qry = "INSERT INTO `reclamation`(`description`, `dateReclamation`, `heureReclamation`, `statut`, `lampadaireId`, `citoyenId`) VALUES (?,?,?,?,?,?)";
+        String qry = "INSERT INTO `reclamation`(`description`, `date_reclamation`, `heure_reclamation`, `statut`, `lampadaire_id`, `citoyen_id`) VALUES (?,?,?,?,?,?)";
         try {
             PreparedStatement pstm = cnx.prepareStatement(qry, Statement.RETURN_GENERATED_KEYS);
             pstm.setString(1, reclamation.getDescription());
@@ -29,13 +28,13 @@ public class ServiceReclamation implements IService<Reclamation> {
 
             pstm.executeUpdate();
 
-            // Mise à jour de l'ID généré
+            // Récupérer l'ID généré
             ResultSet generatedKeys = pstm.getGeneratedKeys();
             if (generatedKeys.next()) {
-                reclamation.setID_reclamation(generatedKeys.getInt(1)); // Correction ici
+                reclamation.setID_reclamation(generatedKeys.getInt(1));
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("❌ Erreur lors de l'ajout : " + e.getMessage());
         }
     }
 
@@ -50,19 +49,19 @@ public class ServiceReclamation implements IService<Reclamation> {
 
             while (rs.next()) {
                 Reclamation r = new Reclamation();
-                r.setID_reclamation(rs.getInt("ID_reclamation")); // Correction ici
+                r.setID_reclamation(rs.getInt("ID_reclamation"));
                 r.setDescription(rs.getString("description"));
-                r.setDateReclamation(rs.getDate("dateReclamation"));
-                r.setHeureReclamation(rs.getTime("heureReclamation"));
+                r.setDateReclamation(rs.getDate("date_reclamation"));
+                r.setHeureReclamation(rs.getTime("heure_reclamation"));
                 r.setStatut(rs.getString("statut"));
-                r.setLampadaireId(rs.getInt("lampadaireId"));
-                r.setCitoyenId(rs.getInt("citoyenId"));
+                r.setLampadaireId(rs.getInt("lampadaire_id"));
+                r.setCitoyenId(rs.getInt("citoyen_id"));
 
                 reclamations.add(r);
             }
 
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("❌ Erreur lors de la récupération : " + e.getMessage());
         }
 
         return reclamations;
@@ -71,7 +70,7 @@ public class ServiceReclamation implements IService<Reclamation> {
     @Override
     public void update(Reclamation reclamation) {
         try {
-            String qry = "UPDATE `reclamation` SET `description`=?, `dateReclamation`=?, `heureReclamation`=?, `statut`=?, `lampadaireId`=?, `citoyenId`=? WHERE `ID_reclamation`=?";
+            String qry = "UPDATE `reclamation` SET `description`=?, `date_reclamation`=?, `heure_reclamation`=?, `statut`=?, `lampadaire_id`=?, `citoyen_id`=? WHERE `ID_reclamation`=?";
             PreparedStatement pstm = cnx.prepareStatement(qry);
             pstm.setString(1, reclamation.getDescription());
             pstm.setDate(2, reclamation.getDateReclamation());
@@ -79,13 +78,13 @@ public class ServiceReclamation implements IService<Reclamation> {
             pstm.setString(4, reclamation.getStatut());
             pstm.setInt(5, reclamation.getLampadaireId());
             pstm.setInt(6, reclamation.getCitoyenId());
-            pstm.setInt(7, reclamation.getID_reclamation()); // Correction ici
+            pstm.setInt(7, reclamation.getID_reclamation());
 
             int rowsUpdated = pstm.executeUpdate();
             if (rowsUpdated > 0) {
-                System.out.println("✅ Reclamation mise à jour avec succès !");
+                System.out.println("✅ Réclamation mise à jour avec succès !");
             } else {
-                System.out.println("❌ Aucune reclamation trouvée avec cet ID !");
+                System.out.println("❌ Aucune réclamation trouvée avec cet ID !");
             }
         } catch (SQLException ex) {
             System.out.println("❌ Erreur lors de la mise à jour : " + ex.getMessage());
@@ -95,9 +94,8 @@ public class ServiceReclamation implements IService<Reclamation> {
     @Override
     public void delete(Reclamation reclamation) {
         try {
-            // Vérifier les dépendances avant suppression
             if (hasDependencies(reclamation.getID_reclamation())) {
-                throw new SQLException("Impossible de supprimer : existence d'interventions liées");
+                throw new SQLException("Impossible de supprimer : existence d'interventions liées.");
             }
 
             String qry = "DELETE FROM `reclamation` WHERE `ID_reclamation`=?";
@@ -107,6 +105,8 @@ public class ServiceReclamation implements IService<Reclamation> {
             int rowsDeleted = pstm.executeUpdate();
             if (rowsDeleted > 0) {
                 System.out.println("✅ Réclamation supprimée avec succès !");
+            } else {
+                System.out.println("❌ Aucune réclamation trouvée avec cet ID !");
             }
         } catch (SQLException ex) {
             System.out.println("❌ Erreur lors de la suppression : " + ex.getMessage());

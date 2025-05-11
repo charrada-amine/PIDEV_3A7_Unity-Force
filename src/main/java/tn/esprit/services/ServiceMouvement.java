@@ -18,7 +18,7 @@ public class ServiceMouvement {
     }
 
     public void add(DonneeMouvement donnee) {
-        String query = "INSERT INTO donneemouvement (datecollecte, heurecollecte, capteurid, valeur) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO donneemouvement (date_collecte, heure_collecte, capteur_id, valeur) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setDate(1, Date.valueOf(donnee.getDateCollecte()));
@@ -43,9 +43,9 @@ public class ServiceMouvement {
             while (resultSet.next()) {
                 DonneeMouvement donnee = new DonneeMouvement(
                         resultSet.getInt("id_mouvement"),
-                        resultSet.getDate("datecollecte").toLocalDate(),
-                        resultSet.getTime("heurecollecte").toLocalTime(),
-                        resultSet.getInt("capteurid"),
+                        resultSet.getDate("date_collecte").toLocalDate(),
+                        resultSet.getTime("heure_collecte").toLocalTime(),
+                        resultSet.getInt("capteur_id"),
                         resultSet.getBoolean("valeur")
                 );
                 donnees.add(donnee);
@@ -75,7 +75,7 @@ public class ServiceMouvement {
 
     // ✅ Mettre à jour une donnée par ID
     public void update(DonneeMouvement donnee) {
-        String query = "UPDATE donneemouvement SET datecollecte = ?, heurecollecte = ?, capteurid = ?, valeur = ? WHERE id_mouvement = ?";
+        String query = "UPDATE donneemouvement SET date_collecte = ?, heure_collecte = ?, capteur_id = ?, valeur = ? WHERE id_mouvement = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setDate(1, Date.valueOf(donnee.getDateCollecte()));

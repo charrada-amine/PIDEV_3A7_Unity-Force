@@ -18,7 +18,7 @@ public class ServiceTemperature {
     }
 
     public void add(DonneeTemperature donnee) {
-        String query = "INSERT INTO donneetemperature (datecollecte, heurecollecte, capteurid, valeur) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO donneetemperature (date_collecte, heure_collecte, capteur_id, valeur) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setDate(1, Date.valueOf(donnee.getDateCollecte()));
@@ -43,9 +43,9 @@ public class ServiceTemperature {
             while (resultSet.next()) {
                 DonneeTemperature donnee = new DonneeTemperature(
                         resultSet.getInt("id_temperature"),
-                        resultSet.getDate("datecollecte").toLocalDate(),
-                        resultSet.getTime("heurecollecte").toLocalTime(),
-                        resultSet.getInt("capteurid"),
+                        resultSet.getDate("date_collecte").toLocalDate(),
+                        resultSet.getTime("heure_collecte").toLocalTime(),
+                        resultSet.getInt("capteur_id"),
                         resultSet.getFloat("valeur")
                 );
                 donnees.add(donnee);
@@ -70,7 +70,7 @@ public class ServiceTemperature {
         }
     }
     public void update(DonneeTemperature donnee) {
-        String query = "UPDATE donneetemperature SET datecollecte = ?, heurecollecte = ?, capteurid = ?, valeur = ? WHERE id_temperature = ?";
+        String query = "UPDATE donneetemperature SET date_collecte = ?, heure_collecte = ?, capteur_id = ?, valeur = ? WHERE id_temperature = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setDate(1, Date.valueOf(donnee.getDateCollecte()));
             statement.setTime(2, Time.valueOf(donnee.getHeureCollecte()));

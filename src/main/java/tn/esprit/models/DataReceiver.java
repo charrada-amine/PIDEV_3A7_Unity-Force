@@ -7,7 +7,7 @@ import java.net.URL;
 
 public class DataReceiver {
 
-    private static final String SERVER_URL = "http://192.168.1.13:8000"; // URL de votre serveur
+    private static final String SERVER_URL = "http://192.168.19.104:8000"; // URL de votre serveur
 
     public String fetchDataFromServer() {
         StringBuilder response = new StringBuilder();

@@ -19,7 +19,7 @@ public class ServiceConsommation {
 
     // 🔹 Ajouter une donnée de consommation
     public void add(DonneeConsommation donnee) {
-        String query = "INSERT INTO donneeconsommation (datecollecte, heurecollecte, capteurid, valeur) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO donneeconsommation (date_collecte, heure_collecte, capteur_id, valeur) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setDate(1, Date.valueOf(donnee.getDateCollecte())); // Conversion LocalDate en Date SQL
@@ -45,9 +45,9 @@ public class ServiceConsommation {
             while (resultSet.next()) {
                 DonneeConsommation donnee = new DonneeConsommation(
                         resultSet.getInt("id_consommation"),
-                        resultSet.getDate("datecollecte").toLocalDate(), // Conversion en LocalDate
-                        resultSet.getTime("heurecollecte").toLocalTime(), // Conversion en LocalTime
-                        resultSet.getInt("capteurid"),
+                        resultSet.getDate("date_collecte").toLocalDate(), // Conversion en LocalDate
+                        resultSet.getTime("heure_collecte").toLocalTime(), // Conversion en LocalTime
+                        resultSet.getInt("capteur_id"),
                         resultSet.getFloat("valeur")
                 );
                 donnees.add(donnee);
@@ -78,7 +78,7 @@ public class ServiceConsommation {
 
     // 🔹 Mettre à jour une donnée de consommation
     public void update(DonneeConsommation donnee) {
-        String query = "UPDATE donneeconsommation SET datecollecte = ?, heurecollecte = ?, capteurid = ?, valeur = ? WHERE id_consommation = ?";
+        String query = "UPDATE donneeconsommation SET date_collecte = ?, heure_collecte = ?, capteur_id = ?, valeur = ? WHERE id_consommation = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setDate(1, Date.valueOf(donnee.getDateCollecte()));

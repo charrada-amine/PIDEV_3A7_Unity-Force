@@ -466,19 +466,19 @@ public class GestionReclamationController implements Initializable {
         );
 
         HBox buttons = new HBox(10);
-        Button btnModifier = createIconButton("Modifier", FontAwesomeSolid.PENCIL_ALT, "#4a90e2");
+        Button btnModifier = createIconButton("Modifier", FontAwesomeSolid.PENCIL_ALT, "#0056b3");
         btnModifier.setOnAction(e -> fillForm(reclamation));
 
         Button btnSupprimer = createIconButton("Supprimer", FontAwesomeSolid.TRASH, "#ff6b6b");
         btnSupprimer.setOnAction(e -> handleDeleteReclamation(reclamation));
 
-        Button btnGeneratePdf = createIconButton("Générer PDF", FontAwesomeSolid.FILE_PDF, "#28a745");
+        Button btnGeneratePdf = createIconButton("Générer PDF", FontAwesomeSolid.FILE_PDF, "#0056b3");
         btnGeneratePdf.setOnAction(e -> generatePdf(reclamation));
 
-        Button btnIntervenir = createIconButton("Intervenir", FontAwesomeSolid.TOOLS, "#ff9800");
+        Button btnIntervenir = createIconButton("Intervenir", FontAwesomeSolid.TOOLS, "#0056b3");
         btnIntervenir.setOnAction(e -> handleIntervenir(reclamation));
 
-        Button btnGenerateQrCode = createIconButton("Générer QR Code", FontAwesomeSolid.QRCODE, "#9c27b0");
+        Button btnGenerateQrCode = createIconButton("Générer QR Code", FontAwesomeSolid.QRCODE, "#0056b3");
         btnGenerateQrCode.setOnAction(e -> handleGenerateQrCode(reclamation));
 
         buttons.getChildren().addAll(btnModifier, btnSupprimer, btnGeneratePdf, btnIntervenir, btnGenerateQrCode);

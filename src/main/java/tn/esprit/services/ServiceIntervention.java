@@ -8,7 +8,6 @@ import tn.esprit.utils.MyDatabase;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-
 public class ServiceIntervention implements IService<Intervention> {
     private Connection cnx;
 
@@ -18,7 +17,7 @@ public class ServiceIntervention implements IService<Intervention> {
 
     @Override
     public void add(Intervention intervention) {
-        String qry = "INSERT INTO `intervention`(`typeIntervention`, `description`, `etat`, `dateIntervention`, `heureIntervention`, `lampadaireId`, `technicienId`, `ID_reclamation`) VALUES (?,?,?,?,?,?,?,?)";
+        String qry = "INSERT INTO `intervention`(`type_intervention`, `description`, `etat`, `date_intervention`, `heure_intervention`, `lampadaire_id`, `technicien_id`, `ID_reclamation`) VALUES (?,?,?,?,?,?,?,?)";
         try {
             PreparedStatement pstm = cnx.prepareStatement(qry, Statement.RETURN_GENERATED_KEYS);
             pstm.setString(1, intervention.getTypeIntervention().name());
@@ -29,8 +28,7 @@ public class ServiceIntervention implements IService<Intervention> {
             pstm.setInt(6, intervention.getLampadaireId());
             pstm.setInt(7, intervention.getTechnicienId());
 
-
-            if(intervention.getID_reclamation() != null) {
+            if (intervention.getID_reclamation() != null) {
                 pstm.setInt(8, intervention.getID_reclamation());
             } else {
                 pstm.setNull(8, Types.INTEGER);
@@ -38,13 +36,12 @@ public class ServiceIntervention implements IService<Intervention> {
 
             pstm.executeUpdate();
 
-
             ResultSet generatedKeys = pstm.getGeneratedKeys();
             if (generatedKeys.next()) {
                 intervention.setID_intervention(generatedKeys.getInt(1));
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("❌ Erreur lors de l'ajout : " + e.getMessage());
         }
     }
 
@@ -60,15 +57,14 @@ public class ServiceIntervention implements IService<Intervention> {
             while (rs.next()) {
                 Intervention i = new Intervention();
                 i.setID_intervention(rs.getInt("ID_intervention"));
-                i.setTypeIntervention(TypeIntervention.valueOf(rs.getString("typeIntervention")));
+                i.setTypeIntervention(TypeIntervention.valueOf(rs.getString("type_intervention")));
                 i.setDescription(rs.getString("description"));
                 i.setEtat(rs.getString("etat"));
-                i.setDateIntervention(rs.getDate("dateIntervention"));
-                i.setHeureIntervention(rs.getTime("heureIntervention"));
-                i.setLampadaireId(rs.getInt("lampadaireId"));
-                i.setTechnicienId(rs.getInt("technicienId"));
+                i.setDateIntervention(rs.getDate("date_intervention"));
+                i.setHeureIntervention(rs.getTime("heure_intervention"));
+                i.setLampadaireId(rs.getInt("lampadaire_id"));
+                i.setTechnicienId(rs.getInt("technicien_id"));
 
-                // Gestion correcte des valeurs NULL
                 Integer idReclamation = rs.getObject("ID_reclamation", Integer.class);
                 i.setID_reclamation(idReclamation);
 
@@ -76,7 +72,7 @@ public class ServiceIntervention implements IService<Intervention> {
             }
 
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("❌ Erreur lors de la récupération : " + e.getMessage());
         }
 
         return interventions;
@@ -84,8 +80,8 @@ public class ServiceIntervention implements IService<Intervention> {
 
     @Override
     public void update(Intervention intervention) {
+        String qry = "UPDATE `intervention` SET `type_intervention`=?, `description`=?, `etat`=?, `date_intervention`=?, `heure_intervention`=?, `lampadaire_id`=?, `technicien_id`=?, `ID_reclamation`=? WHERE `ID_intervention`=?";
         try {
-            String qry = "UPDATE `intervention` SET `typeIntervention`=?, `description`=?, `etat`=?, `dateIntervention`=?, `heureIntervention`=?, `lampadaireId`=?, `technicienId`=?, `ID_reclamation`=? WHERE `ID_intervention`=?";
             PreparedStatement pstm = cnx.prepareStatement(qry);
             pstm.setString(1, intervention.getTypeIntervention().name());
             pstm.setString(2, intervention.getDescription());
@@ -95,8 +91,7 @@ public class ServiceIntervention implements IService<Intervention> {
             pstm.setInt(6, intervention.getLampadaireId());
             pstm.setInt(7, intervention.getTechnicienId());
 
-            // Gestion de la valeur NULL
-            if(intervention.getID_reclamation() != null) {
+            if (intervention.getID_reclamation() != null) {
                 pstm.setInt(8, intervention.getID_reclamation());
             } else {
                 pstm.setNull(8, Types.INTEGER);
@@ -127,7 +122,7 @@ public class ServiceIntervention implements IService<Intervention> {
             pstm.setInt(1, id);
             pstm.executeUpdate();
         } catch (SQLException ex) {
-            System.out.println("Erreur suppression: " + ex.getMessage());
+            System.out.println("❌ Erreur suppression: " + ex.getMessage());
         }
     }
 }
